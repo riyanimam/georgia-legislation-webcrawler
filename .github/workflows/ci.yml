@@ -10,11 +10,9 @@ on:
         description: Maximum pages to scrape (leave empty for all pages)
         required: false
         default: ''
-  # Scheduled trigger (commented out by default)
-  # Uncomment below to run automatically on a schedule
-  # Example: run daily at 2 AM UTC
-  # schedule:
-  #   - cron: '0 2 * * *'
+  # Scheduled trigger
+  schedule:
+  - cron: 0 4 * * *
 
 jobs:
   scrape:
