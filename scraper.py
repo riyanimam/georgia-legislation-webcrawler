@@ -22,7 +22,6 @@ class GALegislationScraper:
     def __init__(self):
         self.base_url = "https://www.legis.ga.gov"
         self.session = requests.Session()
-
         # Configure retries
         retry_strategy = Retry(
             total=5,
@@ -164,7 +163,6 @@ class GALegislationScraper:
             print("3. Network connectivity issues")
             print("\nTry running this script from your local machine instead.")
             sys.exit(1)
-
         print("\nStarting to scrape Georgia legislation...")
         legislation_data = self.get_all_pages(max_pages)
 

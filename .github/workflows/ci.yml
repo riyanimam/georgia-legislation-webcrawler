@@ -21,7 +21,6 @@ jobs:
     # Code quality and format validation job
     # Mirrors pre-commit hooks to ensure code quality in CI
     runs-on: ubuntu-latest
-
     steps:
     # Step 1: Clone the repository
     - name: Checkout repository
