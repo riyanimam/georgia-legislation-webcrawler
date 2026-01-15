@@ -143,8 +143,10 @@ function generateBillTags(bill) {
  * Initialize the application by setting up event listeners and loading data
  */
 function initializeApp() {
+    console.log("Initializing app...");
     setupEventListeners();
     loadDataFromFile();
+    console.log("App initialized!");
 }
 
 /**
@@ -153,26 +155,40 @@ function initializeApp() {
 function setupEventListeners() {
     // File input handler
     const fileInput = document.getElementById("fileInput");
+    console.log("File input element:", fileInput);
+    
     if (fileInput) {
         fileInput.addEventListener("change", handleFileUpload);
+        console.log("File input event listener attached");
+    } else {
+        console.error("File input element not found!");
     }
 
     // Dropdown toggle handler
     const issueDropdownToggle = document.getElementById("issueDropdownToggle");
     const checkboxGroup = document.getElementById("issueFilter");
+    
     if (issueDropdownToggle && checkboxGroup) {
+        // Toggle dropdown on button click
         issueDropdownToggle.addEventListener("click", (e) => {
             e.preventDefault();
+            e.stopPropagation();
             checkboxGroup.classList.toggle("open");
             issueDropdownToggle.classList.toggle("active");
         });
 
         // Close dropdown when clicking outside
         document.addEventListener("click", (e) => {
-            if (!issueDropdownToggle.contains(e.target) && !checkboxGroup.contains(e.target)) {
+            const isClickInside = issueDropdownToggle.contains(e.target) || checkboxGroup.contains(e.target);
+            if (!isClickInside) {
                 checkboxGroup.classList.remove("open");
                 issueDropdownToggle.classList.remove("active");
             }
+        });
+        
+        // Allow clicking checkboxes without closing dropdown
+        checkboxGroup.addEventListener("click", (e) => {
+            e.stopPropagation();
         });
     }
 
@@ -185,7 +201,12 @@ function setupEventListeners() {
 
     if (searchInput) searchInput.addEventListener("input", filterBills);
     if (typeFilter) typeFilter.addEventListener("change", filterBills);
-    issueCheckboxes.forEach((checkbox) => checkbox.addEventListener("change", filterBills));
+    
+    // Add change listeners to issue checkboxes
+    issueCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", filterBills);
+    });
+    
     if (sortBy) sortBy.addEventListener("change", filterBills);
     if (resetBtn) resetBtn.addEventListener("click", resetFilters);
 
@@ -205,16 +226,28 @@ function setupEventListeners() {
  */
 function loadDataFromFile() {
     fetch("ga_legislation.json")
-        .then((response) => response.json())
-        .then((data) => {
-            allBills = data;
-            filteredBills = [...allBills];
-            updateStats();
-            renderBills();
-            document.getElementById("fileInput").parentElement.style.display = "none";
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error("File not found");
+            }
+            return response.json();
         })
-        .catch(() => {
-            // File not found, user must upload
+        .then((data) => {
+            if (Array.isArray(data) && data.length > 0) {
+                allBills = data;
+                filteredBills = [...allBills];
+                updateStats();
+                renderBills();
+                // Hide file input if data loaded successfully
+                const fileInputWrapper = document.querySelector(".file-input-wrapper");
+                if (fileInputWrapper) {
+                    fileInputWrapper.style.display = "none";
+                }
+            }
+        })
+        .catch((error) => {
+            // File not found or invalid - user must upload
+            console.log("Auto-load failed, waiting for file upload");
         });
 }
 
@@ -223,20 +256,49 @@ function loadDataFromFile() {
  */
 function handleFileUpload(e) {
     const file = e.target.files[0];
-    if (!file) return;
+    console.log("File upload triggered", file);
+    
+    if (!file) {
+        console.log("No file selected");
+        return;
+    }
 
     const reader = new FileReader();
     reader.onload = (event) => {
         try {
-            allBills = JSON.parse(event.target.result);
-            filteredBills = [...allBills];
-            updateStats();
-            renderBills();
-            document.getElementById("fileInput").style.display = "none";
+            console.log("File read successfully, parsing JSON...");
+            const data = JSON.parse(event.target.result);
+            console.log("Parsed data:", data);
+            
+            if (Array.isArray(data)) {
+                console.log("Data is an array with", data.length, "items");
+                allBills = data;
+                filteredBills = [...allBills];
+                updateStats();
+                renderBills();
+                
+                // Hide file input wrapper after successful load
+                const fileInputWrapper = document.querySelector(".file-input-wrapper");
+                if (fileInputWrapper) {
+                    fileInputWrapper.style.display = "none";
+                    console.log("File input hidden");
+                }
+                console.log("Data loaded successfully!");
+            } else {
+                console.error("Data is not an array");
+                alert("Invalid JSON format. Expected an array of bills.");
+            }
         } catch (error) {
+            console.error("Error parsing JSON:", error);
             alert(`Error loading JSON file: ${error.message}`);
         }
     };
+    
+    reader.onerror = () => {
+        console.error("FileReader error");
+        alert("Error reading file");
+    };
+    
     reader.readAsText(file);
 }
 
@@ -340,6 +402,8 @@ function updateStats() {
     const hb = allBills.filter((b) => b.doc_number.startsWith("HB")).length;
     const sb = allBills.filter((b) => b.doc_number.startsWith("SB")).length;
 
+    console.log("Updating stats:", { total, filtered, hb, sb });
+
     statsContainer.innerHTML = `
         <div class="stat-card">
             <div class="number">${total}</div>
@@ -365,6 +429,7 @@ function updateStats() {
  */
 function renderBills() {
     const container = document.getElementById("billsContainer");
+    console.log("Rendering", filteredBills.length, "bills");
 
     if (filteredBills.length === 0) {
         container.innerHTML =
@@ -401,6 +466,7 @@ function renderBills() {
         )
         .join("");
 
+    console.log("Bills rendered successfully");
     // Attach event listeners to dynamically created elements
     attachBillCardListeners();
 }
@@ -508,5 +574,3 @@ function truncate(text, length) {
 
 // Initialize the app when DOM is ready
 document.addEventListener("DOMContentLoaded", initializeApp);
-// Export functions for ES Module usage
-export { initializeApp, filterBills, resetFilters, openModal, closeModal };

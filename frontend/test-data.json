@@ -1,0 +1,84 @@
+[
+  {
+    "doc_number": "HB 1",
+    "caption": "Omnibus Education Reform Bill",
+    "sponsors": "Rep. John Smith",
+    "committees": "Education & Youth Committee",
+    "first_reader_summary": "This bill establishes comprehensive education standards for public schools throughout Georgia.",
+    "status_history": [
+      {
+        "date": "2024-01-15",
+        "status": "Introduced"
+      },
+      {
+        "date": "2024-01-20",
+        "status": "Assigned to Committee"
+      }
+    ],
+    "detail_url": "https://www.legis.ga.gov/legislation/1/1"
+  },
+  {
+    "doc_number": "SB 50",
+    "caption": "Healthcare Access and Medicaid Expansion",
+    "sponsors": "Sen. Jane Doe",
+    "committees": "Health & Human Services Committee",
+    "first_reader_summary": "Expands Medicaid coverage to additional low-income individuals and families in Georgia.",
+    "status_history": [
+      {
+        "date": "2024-01-10",
+        "status": "Introduced"
+      },
+      {
+        "date": "2024-01-25",
+        "status": "First Reading"
+      }
+    ],
+    "detail_url": "https://www.legis.ga.gov/legislation/1/50"
+  },
+  {
+    "doc_number": "HB 100",
+    "caption": "Gun Safety and Background Check Requirements",
+    "sponsors": "Rep. Michael Johnson, Rep. Sarah Williams",
+    "committees": "Public Safety Committee",
+    "first_reader_summary": "Establishes comprehensive background check requirements for all firearm purchases in Georgia.",
+    "status_history": [
+      {
+        "date": "2024-01-05",
+        "status": "Introduced"
+      }
+    ],
+    "detail_url": "https://www.legis.ga.gov/legislation/1/100"
+  },
+  {
+    "doc_number": "HB 75",
+    "caption": "Environmental Protection and Climate Action",
+    "sponsors": "Rep. Robert Green",
+    "committees": "Environment & Natural Resources Committee",
+    "first_reader_summary": "Implements climate action initiatives and establishes renewable energy targets for the state.",
+    "status_history": [
+      {
+        "date": "2024-01-12",
+        "status": "Introduced"
+      },
+      {
+        "date": "2024-02-01",
+        "status": "Committee Hearing Scheduled"
+      }
+    ],
+    "detail_url": "https://www.legis.ga.gov/legislation/1/75"
+  },
+  {
+    "doc_number": "SB 25",
+    "caption": "LGBTQIA+ Non-Discrimination Protections",
+    "sponsors": "Sen. Patricia Brown",
+    "committees": "Judiciary Committee",
+    "first_reader_summary": "Prohibits discrimination based on sexual orientation and gender identity in employment and public accommodations.",
+    "status_history": [
+      {
+        "date": "2024-01-08",
+        "status": "Introduced"
+      }
+    ],
+    "detail_url": "https://www.legis.ga.gov/legislation/1/25"
+  }
+]

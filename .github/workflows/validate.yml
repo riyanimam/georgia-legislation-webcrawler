@@ -35,27 +35,27 @@ jobs:
       run: |
         npm install -g markdownlint-cli @biomejs/biome
 
-      # Step 5a: Run Biome check
+      # Step 6: Run Biome check
     - name: Biome check
       run: biome ci --no-errors-on-unmatched
 
-      # Step 6: Run Python linting with Ruff
+      # Step 7: Run Python linting with Ruff
     - name: Ruff lint
       run: ruff check scraper.py --fix --exit-zero
 
-      # Step 7: Run Python formatting check
+      # Step 8: Run Python formatting check
     - name: Ruff format check
       run: ruff format scraper.py --line-length=100 --check
 
-      # Step 8: Check Markdown formatting
+      # Step 9: Check Markdown formatting
     - name: Markdown format check
       run: mdformat README.md --wrap=100 --number --check
 
-      # Step 9: Run Markdown linting
+      # Step 10: Run Markdown linting
     - name: Markdownlint check
       run: markdownlint README.md --disable=MD013 --disable=MD024
 
-      # Step 10: Validate YAML formatting
+      # Step 11: Validate YAML formatting
     - name: Yamllint check
       run: |
         yamllint .github/workflows/ --format=parsable --strict
