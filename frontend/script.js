@@ -7,6 +7,11 @@
 let allBills = [];
 let filteredBills = [];
 let currentModalBillIndex = -1;
+let currentPage = 1;
+const ITEMS_PER_PAGE = 20;
+
+// Keep track of which bills are being displayed for modal indexing across pages
+let displayedBillsForModal = [];
 
 /**
  * Keywords mapping for categorizing bills by key issues
@@ -239,6 +244,13 @@ function setupEventListeners() {
         }
     });
 
+    // Pagination handlers
+    const prevPageBtn = document.getElementById("prevPageBtn");
+    const nextPageBtn = document.getElementById("nextPageBtn");
+    
+    if (prevPageBtn) prevPageBtn.addEventListener("click", goToPreviousPage);
+    if (nextPageBtn) nextPageBtn.addEventListener("click", goToNextPage);
+
     // Modal backdrop click handler
     const modal = document.getElementById("detailModal");
     if (modal) {
@@ -457,10 +469,11 @@ function updateStats() {
 }
 
 /**
- * Render filtered bills to the page
+ * Render filtered bills to the page with pagination support
  */
 function renderBills() {
     const container = document.getElementById("billsContainer");
+    const paginationContainer = document.getElementById("paginationContainer");
 
     if (allBills.length === 0) {
         container.innerHTML = `
@@ -477,6 +490,7 @@ function renderBills() {
                 </div>
             </div>
         `;
+        paginationContainer.classList.add("hidden");
         return;
     }
 
@@ -496,14 +510,30 @@ function renderBills() {
                 </div>
             </div>
         `;
+        paginationContainer.classList.add("hidden");
         return;
     }
 
+    // Reset to page 1 after filtering
+    currentPage = 1;
+    
+    // Calculate pagination
+    const totalPages = Math.ceil(filteredBills.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const billsToDisplay = filteredBills.slice(startIndex, endIndex);
+    
+    // Store displayed bills for modal navigation
+    displayedBillsForModal = billsToDisplay;
+
     // Generate HTML for each bill
-    container.innerHTML = filteredBills
+    container.innerHTML = billsToDisplay
         .map(
-            (bill, index) => `
-            <div class="bill-card" data-bill-index="${index}">
+            (bill, displayIndex) => {
+                // Calculate actual index in filteredBills array
+                const actualIndex = startIndex + displayIndex;
+                return `
+            <div class="bill-card" data-bill-index="${actualIndex}">
                 <div class="bill-header">
                     <div class="bill-number">${bill.doc_number}</div>
                     <div class="bill-tags">${generateBillTags(bill)}</div>
@@ -528,13 +558,29 @@ function renderBills() {
                     <button class="btn-secondary btn-small copy-url-btn" data-url="${bill.detail_url}">🔗 Open Link</button>
                 </div>
             </div>
-        `
+        `;
+            }
         )
         .join("");
+
+    // Show/hide pagination controls
+    if (totalPages > 1) {
+        paginationContainer.classList.remove("hidden");
+        updatePaginationDisplay(currentPage, totalPages);
+        
+        // Update button states
+        const prevBtn = document.getElementById("prevPageBtn");
+        const nextBtn = document.getElementById("nextPageBtn");
+        if (prevBtn) prevBtn.disabled = currentPage === 1;
+        if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+    } else {
+        paginationContainer.classList.add("hidden");
+    }
 
     // Attach event listeners to dynamically created elements
     attachBillCardListeners();
 }
+
 
 /**
  * Attach event listeners to bill card buttons
@@ -727,6 +773,49 @@ function downloadFile(content, filename, type) {
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
+}
+
+/**
+ * Update pagination display with current page information
+ */
+function updatePaginationDisplay(currentPageNum, totalPages) {
+    const pageInfo = document.getElementById("pageInfo");
+    if (pageInfo) {
+        pageInfo.textContent = `Page ${currentPageNum} of ${totalPages}`;
+    }
+}
+
+/**
+ * Navigate to the next page of bills
+ */
+function goToNextPage() {
+    const totalPages = Math.ceil(filteredBills.length / ITEMS_PER_PAGE);
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderBills();
+        scrollToTop();
+    }
+}
+
+/**
+ * Navigate to the previous page of bills
+ */
+function goToPreviousPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        renderBills();
+        scrollToTop();
+    }
+}
+
+/**
+ * Scroll to top of bills container for better UX
+ */
+function scrollToTop() {
+    const container = document.getElementById("billsContainer");
+    if (container) {
+        container.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
 }
 
 // ============================================================================
