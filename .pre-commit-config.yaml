@@ -1,68 +1,24 @@
-# Pre-commit hooks configuration
-# Install hooks: pre-commit install
-# Run manually: pre-commit run --all-files
-# Skip: git commit --no-verify
-
+---
 repos:
-  # Ruff - Fast Python linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.14
     hooks:
-      # Ruff linter - checks for code quality issues
       - id: ruff
         name: ruff lint
-        args:
-          - --fix  # Auto-fix issues where possible
-          - --exit-zero  # Don't fail on errors (warnings only)
-      
-      # Ruff formatter - formats Python code consistently
+        args: [--fix, --exit-zero]
       - id: ruff-format
         name: ruff format
-        args:
-          - --line-length=100
-
-  # YAML linting and formatting
-  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.11.0
-    hooks:
-      # YAML formatter - formats YAML files
-      - id: pretty-format-yaml
-        name: yaml format
-        args:
-          - --autofix
-          - --preserve-quotes
-          - --unsafe  # Relaxed mode - allows non-standard YAML
-
-  # YAML linter - checks YAML syntax
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.33.0
-    hooks:
-      - id: yamllint
-        name: yamllint
-        args:
-          - --relaxed  # Use relaxed rules
-          - --config-data='{extends: relaxed}'
-
-  # Markdown linting and formatting
+        args: [--line-length=100]
   - repo: https://github.com/executablebooks/mdformat
     rev: 0.7.17
     hooks:
       - id: mdformat
         name: markdown format
-        additional_dependencies:
-          - mdformat-gfm  # GitHub Flavored Markdown support
-          - mdformat-tables  # Table support
-        args:
-          - --wrap=100
-          - --number  # Number lists
-
-  # Markdown linter
+        additional_dependencies: [mdformat-gfm, mdformat-tables]
+        args: [--wrap=100, --number]
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.37.0
     hooks:
       - id: markdownlint
         name: markdownlint
-        args:
-          - --fix
-          - --disable=MD013  # Disable line length rule (handled by mdformat)
-          - --disable=MD024  # Disable duplicate header rule
+        args: [--fix, --disable=MD013, --disable=MD024]

@@ -22,19 +22,19 @@ jobs:
     # 2-hour timeout for full session scrapes
     # Adjust if your scraping takes longer
     timeout-minutes: 120
-    
+
     steps:
     # Step 1: Clone the repository to get the latest code
     - name: Checkout repository
       uses: actions/checkout@v6
-    
+
     # Step 2: Set up Python 3.11 environment
     # Matches local development requirements
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
         python-version: '3.11'
-    
+
     # Step 3: Install Python dependencies and Playwright browser
     # - requests: HTTP library for making web requests
     # - beautifulsoup4: HTML parsing library
@@ -44,7 +44,7 @@ jobs:
       run: |
         pip install requests beautifulsoup4 playwright
         playwright install chromium
-    
+
     # Step 4: Run the scraper
     # - Conditionally passes max_pages parameter if provided
     # - continue-on-error: true allows workflow to continue even if scraper fails
@@ -59,7 +59,7 @@ jobs:
           echo "Scraping all available pages..."
           python scraper.py
         fi
-    
+
     # Step 5: Verify that output file was created
     # - Sets output variable 'exists' to true/false
     # - Used by subsequent steps to conditionally run
@@ -74,14 +74,14 @@ jobs:
           echo "exists=false" >> $GITHUB_OUTPUT
           echo "Warning: JSON file was not created"
         fi
-    
+
     # Step 6: Generate timestamp for artifact naming
     # - Used to create unique artifact names for each run
     # - Helps track when data was collected
     - name: Get current date
       id: date
       run: echo "date=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
-    
+
     # Step 7: Upload results as GitHub Artifact
     # - Only runs if output file was successfully created
     # - Artifacts are retained for 90 days
@@ -93,7 +93,7 @@ jobs:
         name: ga-legislation-${{ steps.date.outputs.date }}
         path: ga_legislation.json
         retention-days: 90
-    
+
     # Step 8: Optional - Commit and push results to repository
     # Uncomment below to automatically commit scraped data to the repository
     # This is disabled by default to avoid cluttering commit history

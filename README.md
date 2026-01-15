@@ -1,10 +1,12 @@
 # Georgia Legislation Web Scraper
 
-A Python web scraper for collecting detailed information about Georgia state legislation from the Georgia General Assembly website (www.legis.ga.gov).
+A Python web scraper for collecting detailed information about Georgia state legislation from the
+Georgia General Assembly website (\<www.legis.ga.gov>).
 
 ## Overview
 
 This project automatically scrapes Georgia House and Senate bills, capturing:
+
 - Bill numbers (HB/SB)
 - Captions/summaries
 - Assigned committees
@@ -68,7 +70,8 @@ playwright install chromium
 
 ### 5. Set Up Pre-commit Hooks (Recommended)
 
-This project includes pre-commit hooks for code quality and formatting. Install them after setting up dependencies:
+This project includes pre-commit hooks for code quality and formatting. Install them after setting
+up dependencies:
 
 ```bash
 pre-commit install
@@ -80,34 +83,44 @@ This will automatically run linting and formatting checks before each commit.
 
 ### Pre-commit Hooks
 
-Pre-commit hooks are automatically executed before commits to ensure code quality. The configuration includes:
+Pre-commit hooks are automatically executed before commits to ensure code quality. The configuration
+includes:
 
 **Python Code**:
+
 - **Ruff Linter**: Checks for code quality issues
+
   - Auto-fixes simple issues
   - Non-blocking (warnings only)
   - 100-character line length enforced
 
 - **Ruff Formatter**: Ensures consistent code style
+
   - Automatic formatting on commit
   - Respects 100-character line limit
 
 **YAML Files**:
+
 - **YAML Formatter**: Consistent YAML formatting
+
   - Preserves quotes
   - Relaxed mode for flexibility
-  
+
 - **YAML Linter**: Validates YAML syntax
+
   - Uses relaxed rule set
   - Catches configuration errors
 
 **Markdown Files**:
+
 - **mdformat**: Markdown formatter with GitHub Flavored Markdown (GFM) support
+
   - Consistent formatting
   - Table support
   - 100-character wrapping
 
 - **markdownlint**: Markdown linter
+
   - Auto-fixes issues where possible
   - Validates markdown structure
 
@@ -183,13 +196,16 @@ The core scraper module containing the `GALegislationScraper` class:
 
 ### Key Technical Details
 
-**JavaScript Rendering**: The Georgia legislature website uses Angular.js for dynamic content rendering. The scraper uses Playwright to:
+**JavaScript Rendering**: The Georgia legislature website uses Angular.js for dynamic content
+rendering. The scraper uses Playwright to:
+
 1. Launch a headless Chromium browser
 2. Navigate to each page
 3. Wait for JavaScript to render content
 4. Extract the fully-rendered HTML
 
 **Detail Page Scraping**: For each bill found on the list page, the scraper:
+
 1. Navigates to the bill's detail page
 2. Waits for Angular to render the detail content
 3. Extracts the First Reader Summary (h2 heading + card-text div)
@@ -203,16 +219,19 @@ The core scraper module containing the `GALegislationScraper` class:
 The `.github/workflows/ci.yml` file defines an automated scraping job that:
 
 **Trigger**: Manual dispatch with optional parameters
+
 - Run on demand via "Workflow Dispatch"
 - Optional: Specify max pages to scrape (leave empty for all)
 
 **Jobs**:
+
 1. **Connection Test**: Verifies website connectivity
 2. **Scraping**: Runs the Python scraper
 3. **Artifact Upload**: Stores results for 90 days
 4. **Optional**: Can be extended to commit and push results
 
 **Environment**:
+
 - Python 3.11 on Ubuntu latest
 - 2-hour timeout for long scraping sessions
 - Automatic Playwright browser installation
@@ -248,7 +267,7 @@ The `.github/workflows/ci.yml` file defines an automated scraping job that:
 
 Dependencies are specified in `requirements.txt`:
 
-```
+```txt
 # Core scraping tools
 requests>=2.31.0       # HTTP client
 beautifulsoup4>=4.12.0 # HTML parsing
@@ -269,6 +288,7 @@ markdownlint-cli>=0.37.0      # Markdown linter
 ### Issue: "ModuleNotFoundError: No module named 'playwright'"
 
 **Solution**: Ensure you've run both:
+
 ```bash
 pip install -r requirements.txt
 playwright install chromium
@@ -277,29 +297,32 @@ playwright install chromium
 ### Issue: Browser Launch Fails on GitHub Actions
 
 **Solution**: The workflow includes automatic Playwright installation. If it fails:
+
 - Check that `playwright install chromium` runs in the workflow
 - Ensure sufficient disk space on the runner
 
 ### Issue: Getting Empty Summaries/Status History
 
 **Solution**: This typically indicates:
+
 - Page structure changed (Georgia legislature updates site frequently)
 - JavaScript rendering incomplete
 - Check `debug_detail.html` for actual page structure if regenerated
 
 ### Issue: Connection Timeout from GitHub Actions
 
-**Solution**: 
+**Solution**:
+
 - Try running locally first to test functionality
 - Government servers often block cloud provider IPs
 - Use the manual workflow trigger to control timing
-- Check server status at www.legis.ga.gov
+- Check server status at \<www.legis.ga.gov>
 
 ## Development
 
 ### Project Structure
 
-```
+```txt
 georgia-legislation-webcrawler/
 ├── .github/
 │   └── workflows/
@@ -316,11 +339,13 @@ georgia-legislation-webcrawler/
 This project maintains code quality through:
 
 1. **Pre-commit Hooks**: Automatically validate code before commits
+
    - Python linting with Ruff
    - YAML validation and formatting
    - Markdown linting and formatting
 
 2. **Consistent Style**: All code adheres to:
+
    - 100-character line limit
    - Ruff's default configuration for Python
    - Standard markdown and YAML conventions
@@ -338,6 +363,7 @@ To improve the scraper:
 7. Commit and push changes
 
 **Note**: If pre-commit hooks block your commit:
+
 - Review the suggested changes
 - Most are auto-fixed; re-stage and commit again
 - For critical issues, use `git commit --no-verify` to skip (not recommended)
@@ -345,6 +371,7 @@ To improve the scraper:
 ### Common Maintenance Tasks
 
 **If page structure changes**:
+
 1. Run locally to generate debug files
 2. Update CSS selectors in `get_legislation_details()`
 3. Test with single page first
@@ -352,6 +379,7 @@ To improve the scraper:
 5. Commit changes with notes about what changed
 
 **Running code quality checks manually**:
+
 ```bash
 # Format all files
 ruff format .
@@ -372,6 +400,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Disclaimer
 
 This scraper is for educational and research purposes. Always:
+
 - Respect the website's terms of service
 - Include appropriate delays between requests
 - Use scraped data responsibly
@@ -380,6 +409,7 @@ This scraper is for educational and research purposes. Always:
 ## Support
 
 For issues or questions:
+
 1. Check the Troubleshooting section above
 2. Review GitHub Issues
 3. Examine debug output files if generated
