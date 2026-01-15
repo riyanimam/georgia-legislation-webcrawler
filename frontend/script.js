@@ -5,6 +5,102 @@
 let allBills = [];
 let filteredBills = [];
 
+/**
+ * Keywords mapping for categorizing bills by key issues
+ */
+const issueKeywords = {
+    "gun-control": [
+        "firearm",
+        "gun",
+        "weapon",
+        "ammunition",
+        "concealed carry",
+        "background check",
+        "safe storage",
+    ],
+    lgbtqia: [
+        "lgbtq",
+        "same-sex",
+        "transgender",
+        "gender identity",
+        "sexual orientation",
+        "drag",
+        "non-binary",
+    ],
+    healthcare: [
+        "healthcare",
+        "health",
+        "medicaid",
+        "medicare",
+        "insurance",
+        "prescription",
+        "mental health",
+        "welfare",
+        "disability",
+    ],
+    education: [
+        "school",
+        "education",
+        "university",
+        "college",
+        "student",
+        "teacher",
+        "curriculum",
+    ],
+    environment: [
+        "environment",
+        "climate",
+        "renewable",
+        "energy",
+        "pollution",
+        "conservation",
+        "wildlife",
+    ],
+    "criminal-justice": [
+        "crime",
+        "prison",
+        "jail",
+        "sentencing",
+        "parole",
+        "police",
+        "law enforcement",
+        "prosecution",
+    ],
+    taxes: ["tax", "revenue", "budget", "fiscal", "finance", "income"],
+    immigration: [
+        "immigration",
+        "immigrant",
+        "border",
+        "visa",
+        "citizenship",
+        "alien",
+    ],
+    "voting-rights": [
+        "vote",
+        "voting",
+        "election",
+        "registration",
+        "franchise",
+        "ballot",
+    ],
+};
+
+/**
+ * Determine the key issue category for a bill based on its content
+ */
+function getBillIssue(bill) {
+    const text =
+        `${bill.caption} ${bill.sponsors} ${bill.committees} ${bill.first_reader_summary || ""}`.toLowerCase();
+
+    for (const [issue, keywords] of Object.entries(issueKeywords)) {
+        if (keywords.some((keyword) => text.includes(keyword))) {
+            return issue;
+        }
+    }
+
+    return null;
+}
+
 // ============================================================================
 // Initialization
 // ============================================================================
@@ -30,11 +126,13 @@ function setupEventListeners() {
     // Filter and search handlers
     const searchInput = document.getElementById("searchInput");
     const typeFilter = document.getElementById("typeFilter");
+    const issueFilter = document.getElementById("issueFilter");
     const sortBy = document.getElementById("sortBy");
     const resetBtn = document.getElementById("resetBtn");
 
     if (searchInput) searchInput.addEventListener("input", filterBills);
     if (typeFilter) typeFilter.addEventListener("change", filterBills);
+    if (issueFilter) issueFilter.addEventListener("change", filterBills);
     if (sortBy) sortBy.addEventListener("change", filterBills);
     if (resetBtn) resetBtn.addEventListener("click", resetFilters);
 
@@ -95,16 +193,17 @@ function handleFileUpload(e) {
 // ============================================================================
 
 /**
- * Filter bills based on search term, type, and sort order
+ * Filter bills based on search term, type, issue, and sort order
  */
 function filterBills() {
     const searchTerm = document
         .getElementById("searchInput")
         .value.toLowerCase();
     const typeFilter = document.getElementById("typeFilter").value;
+    const issueFilter = document.getElementById("issueFilter").value;
     const sortBy = document.getElementById("sortBy").value;
 
-    // Apply search and type filters
+    // Apply search, type, and issue filters
     filteredBills = allBills.filter((bill) => {
         const matchesSearch =
             !searchTerm ||
@@ -119,7 +218,11 @@ function filterBills() {
             !typeFilter ||
             bill.doc_number.startsWith(typeFilter);
 
-        return matchesSearch && matchesType;
+        const matchesIssue =
+            !issueFilter ||
+            getBillIssue(bill) === issueFilter;
+
+        return matchesSearch && matchesType && matchesIssue;
     });
 
     // Apply sorting
@@ -157,6 +260,7 @@ function extractNumber(docNumber) {
 function resetFilters() {
     document.getElementById("searchInput").value = "";
     document.getElementById("typeFilter").value = "";
+    document.getElementById("issueFilter").value = "";
     document.getElementById("sortBy").value = "number";
     filterBills();
 }
