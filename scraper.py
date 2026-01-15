@@ -65,11 +65,13 @@ class GALegislationScraper:
             # Navigate to detail page
             page.goto(url, wait_until="networkidle", timeout=60000)
 
-            # Wait for content to load
+            # Wait for content to load - wait for h2 headers that contain detail sections
             try:
-                page.wait_for_selector("h3", timeout=5000)
+                page.wait_for_selector(
+                    "h2", timeout=5000
+                )  # h2 contains "First Reader Summary" and "Status History"
             except TimeoutError:
-                pass  # Content might load without explicit h3 wait
+                pass  # Content might load without explicit h2 wait
 
             # Get the rendered HTML
             html_content = page.content()
