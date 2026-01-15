@@ -10,3 +10,4 @@ mdformat>=0.7.17
 mdformat-gfm>=0.6.0
 mdformat-tables>=0.1.1
 markdownlint-cli>=0.37.0
+validate-pyproject>=0.18

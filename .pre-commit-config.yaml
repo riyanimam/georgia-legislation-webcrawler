@@ -33,3 +33,14 @@ repos:
   - id: yamllint
     name: yamllint
     args: [-c, .yamllint]
+- repo: https://github.com/abravalheri/validate-pyproject
+  rev: v0.18
+  hooks:
+  - id: validate-pyproject
+    name: validate pyproject.toml
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v2.13.0
+  hooks:
+  - id: pretty-format-toml
+    name: toml format
+    args: [--autofix]
