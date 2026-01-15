@@ -6,6 +6,12 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Generated data and debug files
+ga_legislation.json
+debug_page.html
+debug_detail.html
+*.debug.html
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
