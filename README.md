@@ -37,6 +37,7 @@ results.
 - **[Frontend Documentation](docs/FRONTEND.md)** - UI features and deployment
 - **[Data Schema](docs/DATA_SCHEMA.md)** - JSON structure and validation rules
 - **[Contributing Guide](docs/CONTRIBUTING.md)** - How to contribute
+- **[CI/CD Documentation](docs/CI_CD.md)** - Testing and validation pipeline
 - **[Refactoring Notes](docs/REFACTORING_NOTES.md)** - Code organization details
 
 ## Quick Start

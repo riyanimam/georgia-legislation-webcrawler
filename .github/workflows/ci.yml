@@ -43,7 +43,17 @@ jobs:
         pip install requests beautifulsoup4 playwright
         playwright install chromium
 
-    # Step 4: Run the scraper
+    # Step 4: Set up Node.js for validation scripts
+    - name: Set up Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '20'
+
+    # Step 5: Install Node.js validation tools
+    - name: Install Node.js tools
+      run: npm install
+
+    # Step 6: Run the scraper
     # - Conditionally passes max_pages parameter if provided
     # - continue-on-error: true allows workflow to continue even if scraper fails
     #   (useful if website is temporarily down)
@@ -58,7 +68,7 @@ jobs:
           python backend/scraper.py
         fi
 
-    # Step 5: Verify that output file was created
+    # Step 7: Verify that output file was created
     # - Sets output variable 'exists' to true/false
     # - Used by subsequent steps to conditionally run
     - name: Check if output file exists
@@ -73,14 +83,23 @@ jobs:
           echo "Warning: JSON file was not created"
         fi
 
-    # Step 6: Generate timestamp for artifact naming
+    # Step 8: Validate JSON schema
+    # - Validates structure and content against defined schema
+    # - Checks required fields, data types, and formats
+    # - Reports statistics on valid/invalid bills
+    - name: Validate JSON schema
+      if: steps.check_file.outputs.exists == 'true'
+      continue-on-error: false
+      run: node scripts/validate-schema.js ga_legislation.json
+
+    # Step 9: Generate timestamp for artifact naming
     # - Used to create unique artifact names for each run
     # - Helps track when data was collected
     - name: Get current date
       id: date
       run: echo "date=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
 
-    # Step 7: Upload results as GitHub Artifact
+    # Step 10: Upload results as GitHub Artifact
     # - Only runs if output file was successfully created
     # - Artifacts are retained for 90 days
     # - Can be downloaded from the Actions tab in GitHub
@@ -92,7 +111,7 @@ jobs:
         path: ga_legislation.json
         retention-days: 7
 
-    # Step 8: Optional - Commit and push results to repository
+    # Step 11: Optional - Commit and push results to repository
     # Uncomment below to automatically commit scraped data to the repository
     # This is disabled by default to avoid cluttering commit history
     # Enable if you want automatic data updates in your repo

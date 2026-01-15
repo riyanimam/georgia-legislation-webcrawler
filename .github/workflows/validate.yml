@@ -19,7 +19,7 @@ jobs:
       with:
         python-version: '3.11'
 
-      # Step 3: Set up Node.js for markdownlint
+      # Step 3: Set up Node.js for markdownlint and tests
     - name: Set up Node.js
       uses: actions/setup-node@v6
       with:
@@ -30,9 +30,10 @@ jobs:
       run: |
         pip install ruff mdformat mdformat-gfm mdformat-tables yamllint
 
-      # Step 5: Install Node.js validation tools
-    - name: Install Node.js validation tools
+      # Step 5: Install Node.js validation tools and dependencies
+    - name: Install Node.js dependencies
       run: |
+        npm install
         npm install -g markdownlint-cli @biomejs/biome
 
       # Step 6: Run Biome check
@@ -60,6 +61,21 @@ jobs:
       run: |
         yamllint .github/workflows/ --format=parsable --strict
         yamllint .pre-commit-config.yaml --format=parsable --strict
+
+      # Step 12: Run unit tests
+    - name: Run unit tests
+      run: npm test
+      continue-on-error: false
+
+      # Step 13: Validate JSON schema
+    - name: Validate JSON schema
+      run: node scripts/validate-schema.js ga_legislation.json
+      continue-on-error: true
+
+      # Step 14: Validate accessibility
+    - name: Validate accessibility
+      run: node scripts/validate-accessibility.js frontend/index.html
+      continue-on-error: true
 
   validate-pr-title:
     name: Validate PR Title Format
