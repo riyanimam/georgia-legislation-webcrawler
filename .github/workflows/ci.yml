@@ -1,0 +1,56 @@
+name: Scrape Georgia Legislation
+
+on:
+  # Run on manual trigger
+  workflow_dispatch:
+    inputs:
+      max_pages:
+        description: 'Maximum pages to scrape (leave empty for all pages)'
+        required: false
+        default: ''
+  # Run on schedule (every day at 2 AM UTC)
+  # schedule:
+  #   - cron: '0 2 * * *'
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install requests beautifulsoup4
+    
+    - name: Run scraper
+      run: |
+        if [ -n "${{ github.event.inputs.max_pages }}" ]; then
+          python scraper.py ${{ github.event.inputs.max_pages }}
+        else
+          python scraper.py
+        fi
+    
+    - name: Get current date
+      id: date
+      run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+    
+    - name: Upload JSON as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ga-legislation-${{ steps.date.outputs.date }}
+        path: ga_legislation.json
+        retention-days: 90
+    
+    - name: Commit and push if changes
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add ga_legislation.json
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update legislation data - ${{ steps.date.outputs.date }}" && git push)
