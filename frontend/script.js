@@ -1,6 +1,8 @@
 // ============================================================================
 // Data Management
 // ============================================================================
+// This file uses ES Modules (ECMAScript standard) - not CommonJS
+// Loaded as: <script type="module" src="script.js"></script>
 
 let allBills = [];
 let filteredBills = [];
@@ -557,3 +559,11 @@ function truncate(text, length) {
 
 // Initialize the app when DOM is ready
 document.addEventListener("DOMContentLoaded", initializeApp);
+// Export functions for ES Module usage
+export {
+    initializeApp,
+    filterBills,
+    resetFilters,
+    openModal,
+    closeModal,
+};
