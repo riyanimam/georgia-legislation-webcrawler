@@ -660,17 +660,8 @@
 
             container.innerHTML = filteredBills
                 .map(
-                    (bill) => `
-                <div class="bill-card" onclick="openModal('${bill.doc_number}', '${escapeSingleQuote(
-                        bill.caption
-                    )}', '${escapeSingleQuote(bill.sponsors)}', '${escapeSingleQuote(
-                        bill.committees
-                    )}', '${escapeSingleQuote(
-                        bill.first_reader_summary
-                    )}', '${JSON.stringify(bill.status_history).replace(
-                        /'/g,
-                        "&#39;"
-                    )}')">
+                    (bill, index) => `
+                <div class="bill-card" data-bill-index="${index}">
                     <div class="bill-number">${bill.doc_number}</div>
                     <div class="bill-caption">${bill.caption}</div>
                     <div class="bill-meta">
@@ -690,35 +681,50 @@
                         </div>
                     </div>
                     <div class="bill-actions">
-                        <button class="btn-primary btn-small">📖 View Details</button>
-                        <button class="btn-secondary btn-small" onclick="copyUrl(event, '${bill.detail_url}')">🔗 Open Link</button>
+                        <button class="btn-primary btn-small view-details-btn">📖 View Details</button>
+                        <button class="btn-secondary btn-small copy-url-btn" data-url="${bill.detail_url}">🔗 Open Link</button>
                     </div>
                 </div>
             `
                 )
                 .join("");
+
+            // Add event listeners to the newly created elements
+            document.querySelectorAll(".view-details-btn").forEach((btn) => {
+                btn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const billIndex = btn.closest(".bill-card").dataset.billIndex;
+                    const bill = filteredBills[billIndex];
+                    openModal(bill);
+                });
+            });
+
+            document.querySelectorAll(".copy-url-btn").forEach((btn) => {
+                btn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const url = btn.dataset.url;
+                    navigator.clipboard.writeText(url).then(() => {
+                        alert("Link copied to clipboard!");
+                    });
+                });
+            });
         }
 
-        function openModal(
-            docNumber,
-            caption,
-            sponsors,
-            committees,
-            summary,
-            statusHistory
-        ) {
-            document.getElementById("modalBillNumber").textContent = docNumber;
-            document.getElementById("modalCaption").textContent = caption;
+        function openModal(bill) {
+            document.getElementById("modalBillNumber").textContent = bill.doc_number;
+            document.getElementById("modalCaption").textContent = bill.caption;
             document.getElementById("modalSponsors").textContent =
-                sponsors || "Not available";
+                bill.sponsors || "Not available";
             document.getElementById("modalCommittees").textContent =
-                committees || "Not available";
+                bill.committees || "Not available";
             document.getElementById("modalSummary").textContent =
-                summary || "Not available";
+                bill.first_reader_summary || "Not available";
 
-            const statusData = JSON.parse(statusHistory);
-            if (statusData.length > 0) {
-                document.getElementById("modalStatusHistory").innerHTML = statusData
+            const statusHistory = bill.status_history || [];
+            const statusHistoryContainer = document.getElementById("modalStatusHistory");
+            
+            if (statusHistory.length > 0) {
+                statusHistoryContainer.innerHTML = statusHistory
                     .map(
                         (item) => `
                     <div class="status-item">
@@ -728,6 +734,7 @@
                 `
                     )
                     .join("");
+                document.getElementById("statusSection").style.display = "block";
             } else {
                 document.getElementById("statusSection").style.display = "none";
             }
@@ -740,19 +747,8 @@
             document.getElementById("statusSection").style.display = "block";
         }
 
-        function copyUrl(event, url) {
-            event.stopPropagation();
-            navigator.clipboard.writeText(url).then(() => {
-                alert("Link copied to clipboard!");
-            });
-        }
-
         function truncate(text, length) {
             return text.length > length ? text.substring(0, length) + "..." : text;
-        }
-
-        function escapeSingleQuote(text) {
-            return text.replace(/'/g, "\\'").replace(/"/g, "&quot;");
         }
 
         // Close modal when clicking outside
