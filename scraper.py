@@ -333,10 +333,10 @@ if __name__ == "__main__":
     data = scraper.scrape_and_save("ga_legislation.json", max_pages=max_pages)
 
     # Print summary
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print(f"Total bills scraped: {len(data)}")
     print("Output file: ga_legislation.json")
-    print(f"{'='*50}")
+    print(f"{'=' * 50}")
 
     # Print a sample of the first item
     if data:
