@@ -52,10 +52,8 @@ jobs:
     # Step 4: Run semantic-release
     # - Analyzes commits since last release
     # - Determines version bump (major.minor.patch)
-    # - Creates git tag and release notes
-    # - Updates CHANGELOG.md
-    # - Creates GitHub release
-    # - Commits changes back to main
+    # - Creates GitHub release with notes via API
+    # - Does NOT attempt git pushes (uses GitHub API only)
     - name: Run Semantic Release
       env:
         # GitHub token for authentication and API calls

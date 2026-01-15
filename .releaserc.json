@@ -1,5 +1,7 @@
 {
   "branches": ["main"],
+  "tagFormat": "${version}",
+  "ci": false,
   "plugins": [
     [
       "@semantic-release/commit-analyzer",
@@ -36,6 +38,16 @@
         "changelogFile": "CHANGELOG.md"
       }
     ],
-    "@semantic-release/github"
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "CHANGELOG.md",
+            "label": "Changelog"
+          }
+        ]
+      }
+    ]
   ]
 }
