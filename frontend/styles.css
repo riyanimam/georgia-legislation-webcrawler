@@ -215,6 +215,14 @@ button {
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
 }
 
+.bill-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
 .bill-number {
     display: inline-block;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -223,8 +231,33 @@ button {
     border-radius: 20px;
     font-weight: 700;
     font-size: 0.9em;
-    margin-bottom: 12px;
     width: fit-content;
+    flex-shrink: 0;
+}
+
+.bill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+.bill-tag {
+    display: inline-block;
+    background: #f0f0f0;
+    color: #555;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 500;
+    border: 1px solid #e0e0e0;
+    transition: all 0.2s ease;
+}
+
+.bill-tag:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
 }
 
 .bill-caption {

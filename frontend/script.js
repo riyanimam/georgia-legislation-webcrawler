@@ -101,6 +101,38 @@ function getBillIssue(bill) {
     return null;
 }
 
+/**
+ * Generate HTML tags for a bill based on relevant keywords found in its content
+ */
+function generateBillTags(bill) {
+    const text =
+        `${bill.caption} ${bill.sponsors} ${bill.committees} ${bill.first_reader_summary || ""}`.toLowerCase();
+    const tags = new Set();
+
+    // Find all matching keywords and their categories
+    for (const [issue, keywords] of Object.entries(issueKeywords)) {
+        for (const keyword of keywords) {
+            if (text.includes(keyword)) {
+                tags.add(keyword);
+            }
+        }
+    }
+
+    // Convert to array and limit to top 4 tags
+    const tagArray = Array.from(tags)
+        .slice(0, 4)
+        .map(
+            (tag) =>
+                `<span class="bill-tag">${tag
+                    .charAt(0)
+                    .toUpperCase() + tag.slice(1)}</span>`
+        )
+        .join("");
+
+    return tagArray || '<span class="bill-tag">General</span>';
+}
+
+
 // ============================================================================
 // Initialization
 // ============================================================================
@@ -316,7 +348,10 @@ function renderBills() {
         .map(
             (bill, index) => `
             <div class="bill-card" data-bill-index="${index}">
-                <div class="bill-number">${bill.doc_number}</div>
+                <div class="bill-header">
+                    <div class="bill-number">${bill.doc_number}</div>
+                    <div class="bill-tags">${generateBillTags(bill)}</div>
+                </div>
                 <div class="bill-caption">${bill.caption}</div>
                 <div class="bill-meta">
                     <div class="meta-item">
