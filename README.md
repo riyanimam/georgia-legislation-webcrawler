@@ -1,159 +1,71 @@
 # Georgia Legislation Web Scraper
 
-A Python web scraper for collecting detailed information about Georgia state legislation from the
-Georgia General Assembly website (\<www.legis.ga.gov>).
+A robust Python web scraper for collecting detailed information about Georgia state legislation from
+the [Georgia General Assembly](https://www.legis.ga.gov) website.
 
 ## Overview
 
-This project automatically scrapes Georgia House and Senate bills, capturing:
+This project automates the collection of Georgia House and Senate bills with comprehensive data
+extraction including bill numbers, captions, committee assignments, sponsors, summaries, and
+legislative status history.
 
-- Bill numbers (HB/SB)
-- Captions/summaries
+### What Gets Scraped
+
+- Bill identifiers (HB/SB)
+- Bill titles and captions
 - Assigned committees
-- Sponsors
-- First Reader Summary
-- Status history with dates
+- Bill sponsors
+- First Reader summaries
+- Complete status history with dates
 
 ## Features
 
-- **JavaScript Rendering**: Uses Playwright for full Angular.js page rendering
-- **Automated Scraping**: Efficiently processes multiple pages of legislation
-- **Detailed Extraction**: Captures both basic info and detailed summaries
-- **CI/CD Integration**: GitHub Actions workflow for automated scheduling
-- **Error Handling**: Robust retry logic and failure recovery
-- **Artifact Storage**: Saves results as JSON and uploads to GitHub
+- 🎯 **JavaScript-Ready**: Playwright-based rendering for dynamic Angular.js content
+- ⚙️ **Fully Automated**: CI/CD integration via GitHub Actions with scheduled runs
+- 📊 **Comprehensive Data**: Captures both overview and detailed bill information
+- 🛡️ **Resilient**: Built-in error handling and retry logic
+- 📦 **Accessible Output**: JSON-formatted results with GitHub artifact storage
+- 🎨 **Code Quality**: Pre-commit hooks for linting, formatting, and validation
 
-## Prerequisites
+## Quick Start
 
-### Local Development
+### Prerequisites
 
-- Python 3.11+
-- pip (Python package manager)
-- ~500MB disk space for Chromium browser
+- **Python 3.11+**
+- **pip** (Python package manager)
+- **~500MB disk space** (for Chromium browser)
 
-### GitHub Actions
-
-All dependencies are installed automatically during CI/CD runs.
-
-## Installation
-
-### 1. Clone the Repository
+### Installation
 
 ```bash
-git clone https://github.com/yourusername/georgia-legislation-webcrawler.git
+# Clone the repository
+git clone https://github.com/riyanimam/georgia-legislation-webcrawler.git
 cd georgia-legislation-webcrawler
-```
 
-### 2. Create Virtual Environment (Recommended)
-
-```bash
+# Create and activate virtual environment
 python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# Activate virtual environment
-# On Windows:
-.venv\Scripts\activate
-# On macOS/Linux:
-source .venv/bin/activate
-```
-
-### 3. Install Dependencies
-
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
-
-### 4. Install Playwright Browser
-
-```bash
 playwright install chromium
-```
 
-### 5. Set Up Pre-commit Hooks (Recommended)
-
-This project includes pre-commit hooks for code quality and formatting. Install them after setting
-up dependencies:
-
-```bash
+# Install pre-commit hooks (optional but recommended)
 pre-commit install
 ```
 
-This will automatically run linting and formatting checks before each commit.
-
-## Development Setup
-
-### Pre-commit Hooks
-
-Pre-commit hooks are automatically executed before commits to ensure code quality. The configuration
-includes:
-
-**Python Code**:
-
-- **Ruff Linter**: Checks for code quality issues
-
-  - Auto-fixes simple issues
-  - Non-blocking (warnings only)
-  - 100-character line length enforced
-
-- **Ruff Formatter**: Ensures consistent code style
-
-  - Automatic formatting on commit
-  - Respects 100-character line limit
-
-**YAML Files**:
-
-- **YAML Formatter**: Consistent YAML formatting
-
-  - Preserves quotes
-  - Relaxed mode for flexibility
-
-- **YAML Linter**: Validates YAML syntax
-
-  - Uses relaxed rule set
-  - Catches configuration errors
-
-**Markdown Files**:
-
-- **mdformat**: Markdown formatter with GitHub Flavored Markdown (GFM) support
-
-  - Consistent formatting
-  - Table support
-  - 100-character wrapping
-
-- **markdownlint**: Markdown linter
-
-  - Auto-fixes issues where possible
-  - Validates markdown structure
-
-### Running Pre-commit Checks
+### Running the Scraper
 
 ```bash
-# Run on all files
-pre-commit run --all-files
-
-# Run on staged files only
-pre-commit run
-
-# Run specific hook
-pre-commit run ruff --all-files
-
-# Skip hooks if needed
-git commit --no-verify
-```
-
-## Usage
-
-### Running Locally
-
-```bash
-# Scrape all pages (warning: takes several hours for full session)
+# Scrape all pages (several hours for complete session)
 python scraper.py
 
 # Scrape limited pages for testing
-python scraper.py 1          # Just 1 page
-python scraper.py 5          # First 5 pages
+python scraper.py 1  # Single page (~20-25 bills)
+python scraper.py 5  # First 5 pages
 ```
 
-### Output
+## Output Format
 
 The scraper generates `ga_legislation.json` with the following structure:
 
@@ -176,147 +88,134 @@ The scraper generates `ga_legislation.json` with the following structure:
         "status": "House First Readers"
       }
     ]
-  },
-  ...
+  }
 ]
 ```
 
 ## Architecture
 
-### Main Components
+### How It Works
 
-#### `scraper.py`
+The scraper uses Playwright to handle JavaScript rendering and extract data from dynamic pages:
 
-The core scraper module containing the `GALegislationScraper` class:
+1. **Page Navigation**: Launches a headless Chromium browser and navigates through bill listings
+2. **JavaScript Execution**: Waits for Angular.js to render the full page content
+3. **Data Extraction**: Parses HTML with BeautifulSoup to extract bill information
+4. **Detail Collection**: For each bill, navigates to the detail page to capture summaries and
+   status history
+5. **Graceful Handling**: Includes delays between requests and retry logic for reliability
 
-- **`test_connection()`**: Verifies connectivity to the website
-- **`scrape_and_save()`**: Main entry point for scraping and saving data
-- **`get_all_pages()`**: Iterates through pagination and collects bills
-- **`get_legislation_details()`**: Fetches detailed info from individual bill pages
+### Performance Expectations
 
-### Key Technical Details
+| Scope        | Time            | Notes                           |
+| ------------ | --------------- | ------------------------------- |
+| Single page  | 3-4 min         | ~20-25 bills per page           |
+| Full session | 30 min - 2+ hrs | Depends on bill count per year  |
+| Per bill     | ~8-10 sec       | Includes navigation & rendering |
 
-**JavaScript Rendering**: The Georgia legislature website uses Angular.js for dynamic content
-rendering. The scraper uses Playwright to:
+**Key optimizations:**
 
-1. Launch a headless Chromium browser
-2. Navigate to each page
-3. Wait for JavaScript to render content
-4. Extract the fully-rendered HTML
+- 0.5-1 second delays between requests
+- 2-3 second delays between pages
+- Intelligent retry logic for transient failures
 
-**Detail Page Scraping**: For each bill found on the list page, the scraper:
+## Code Quality
 
-1. Navigates to the bill's detail page
-2. Waits for Angular to render the detail content
-3. Extracts the First Reader Summary (h2 heading + card-text div)
-4. Extracts Status History from the rendered table
-5. Returns to the list page for the next bill
+### Pre-commit Hooks
 
-## CI/CD Pipeline
+This project uses pre-commit hooks to maintain code quality automatically. Hooks are configured for:
+
+#### Python Code
+
+- `ruff`: Linting and auto-formatting with 100-character line limit
+- Runs automatically before each commit
+
+#### YAML Files
+
+- `yamllint`: Validates configuration files
+- Detects syntax errors early
+
+#### Markdown Files
+
+- `mdformat`: Consistent formatting with GitHub Flavored Markdown support
+- `markdownlint`: Enforces markdown conventions
+- 100-character line wrapping
+
+### Running Code Quality Checks
+
+```bash
+# Install hooks (one-time setup)
+pre-commit install
+
+# Run checks on all files
+pre-commit run --all-files
+
+# Run checks on staged files only
+pre-commit run
+
+# Run specific tool
+pre-commit run ruff --all-files
+
+# Bypass hooks if necessary (not recommended)
+git commit --no-verify
+```
+
+Most issues are automatically fixed; re-stage and commit again after corrections.
+
+## Continuous Integration
 
 ### GitHub Actions Workflow
 
-The `.github/workflows/ci.yml` file defines an automated scraping job that:
+The project includes an automated CI/CD pipeline (`.github/workflows/ci.yml`) that:
 
-**Trigger**: Manual dispatch with optional parameters
-
-- Run on demand via "Workflow Dispatch"
-- Optional: Specify max pages to scrape (leave empty for all)
-
-**Jobs**:
-
-1. **Connection Test**: Verifies website connectivity
-2. **Scraping**: Runs the Python scraper
-3. **Artifact Upload**: Stores results for 90 days
-4. **Optional**: Can be extended to commit and push results
-
-**Environment**:
-
-- Python 3.11 on Ubuntu latest
-- 2-hour timeout for long scraping sessions
-- Automatic Playwright browser installation
+- Runs on manual trigger via "Workflow Dispatch"
+- Tests website connectivity before scraping
+- Executes the scraper with optional page limits
+- Uploads results as GitHub artifacts (90-day retention)
+- Can be extended to commit and push results
 
 ### Running the Workflow
 
 1. Go to the repository on GitHub
-2. Click **Actions** tab
+2. Click the **Actions** tab
 3. Select **Scrape Georgia Legislation** workflow
 4. Click **Run workflow**
-5. Optionally enter max pages parameter
-6. View results in the completed job
-
-## Performance
-
-### Expected Timing
-
-- **Single page**: ~3-4 minutes (20-25 bills)
-- **Full session**: 30 minutes - 2+ hours depending on bill count
-
-### Bottlenecks
-
-- Browser launch: ~5 seconds
-- Per bill detail fetch: ~8-10 seconds (includes page navigation and rendering)
-
-### Optimization Notes
-
-- The scraper includes 0.5-1 second delays between requests to avoid overloading the server
-- 2-3 second delays between pages for courtesy
-- Retry logic handles temporary failures gracefully
-
-## Requirements
-
-Dependencies are specified in `requirements.txt`:
-
-```txt
-# Core scraping tools
-requests>=2.31.0       # HTTP client
-beautifulsoup4>=4.12.0 # HTML parsing
-playwright>=1.40.0     # Browser automation
-
-# Development tools
-pre-commit>=3.5.0             # Pre-commit hook framework
-ruff>=0.1.0                   # Python linter & formatter
-yamllint>=1.33.0              # YAML linter
-mdformat>=0.7.17              # Markdown formatter
-mdformat-gfm>=0.6.0           # GitHub Flavored Markdown support
-mdformat-tables>=0.1.1        # Markdown table support
-markdownlint-cli>=0.37.0      # Markdown linter
-```
+5. Optionally specify maximum pages to scrape
+6. Monitor progress and download results when complete
 
 ## Troubleshooting
 
-### Issue: "ModuleNotFoundError: No module named 'playwright'"
+### ModuleNotFoundError: No module named 'playwright'
 
-**Solution**: Ensure you've run both:
+Ensure both installation steps are completed:
 
 ```bash
 pip install -r requirements.txt
 playwright install chromium
 ```
 
-### Issue: Browser Launch Fails on GitHub Actions
+### Browser Launch Fails on GitHub Actions
 
-**Solution**: The workflow includes automatic Playwright installation. If it fails:
+The workflow includes automatic Playwright setup. If it fails:
 
-- Check that `playwright install chromium` runs in the workflow
-- Ensure sufficient disk space on the runner
+- Verify sufficient disk space on runner
+- Check that `playwright install chromium` runs in workflow
+- Review GitHub Actions logs for specific error
 
-### Issue: Getting Empty Summaries/Status History
+### Empty Summaries or Status History
 
-**Solution**: This typically indicates:
+This typically indicates:
 
-- Page structure changed (Georgia legislature updates site frequently)
+- Georgia legislature website structure changed
 - JavaScript rendering incomplete
-- Check `debug_detail.html` for actual page structure if regenerated
+- Solution: Test locally first, then update CSS selectors if needed
 
-### Issue: Connection Timeout from GitHub Actions
+### Connection Timeout from GitHub Actions
 
-**Solution**:
-
-- Try running locally first to test functionality
 - Government servers often block cloud provider IPs
-- Use the manual workflow trigger to control timing
-- Check server status at \<www.legis.ga.gov>
+- Test functionality locally first
+- Try running workflow at different times
+- Check [Georgia General Assembly website](https://www.legis.ga.gov) status
 
 ## Development
 
@@ -326,91 +225,92 @@ playwright install chromium
 georgia-legislation-webcrawler/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                    # GitHub Actions workflow
-├── .pre-commit-config.yaml           # Pre-commit hooks configuration
-├── scraper.py                        # Main scraper module
-├── requirements.txt                  # Python & dev dependencies
-├── README.md                         # This file
-└── LICENSE                           # MIT License
+│       ├── ci.yml                      # Automated scraping workflow
+│       ├── semantic-release.yml        # Release automation
+│       └── validate-pr-title.yml       # PR title validation
+├── .pre-commit-config.yaml             # Pre-commit hooks configuration
+├── .releaserc.json                     # Semantic-release configuration
+├── scraper.py                          # Main scraper module
+├── requirements.txt                    # Python & development dependencies
+├── pyproject.toml                      # Project metadata
+├── README.md                           # This file
+└── LICENSE                             # MIT License
 ```
-
-### Code Quality Standards
-
-This project maintains code quality through:
-
-1. **Pre-commit Hooks**: Automatically validate code before commits
-
-   - Python linting with Ruff
-   - YAML validation and formatting
-   - Markdown linting and formatting
-
-2. **Consistent Style**: All code adheres to:
-
-   - 100-character line limit
-   - Ruff's default configuration for Python
-   - Standard markdown and YAML conventions
 
 ### Contributing
 
-To improve the scraper:
+To contribute improvements:
 
-1. Create a feature branch
-2. Set up pre-commit hooks: `pre-commit install`
-3. Test locally with `python scraper.py 1`
-4. Make improvements to selectors or data extraction
-5. Test with `python scraper.py 5` to verify performance
-6. Pre-commit hooks will automatically format your code
+1. Create a feature branch from `main`
+2. Install pre-commit hooks: `pre-commit install`
+3. Test locally: `python scraper.py 1` (single page test)
+4. Make your improvements
+5. Test with: `python scraper.py 5` (verify performance)
+6. Pre-commit hooks will automatically format code
 7. Commit and push changes
 
-**Note**: If pre-commit hooks block your commit:
+**PR Title Format**: Use semantic commit convention
 
-- Review the suggested changes
-- Most are auto-fixed; re-stage and commit again
-- For critical issues, use `git commit --no-verify` to skip (not recommended)
+- Examples: `feat: Add new scraper feature`, `fix(scraper): Handle edge case`
 
-### Common Maintenance Tasks
+### Maintenance Tasks
 
-**If page structure changes**:
+**If page structure changes:**
 
-1. Run locally to generate debug files
-2. Update CSS selectors in `get_legislation_details()`
+1. Generate debug files locally
+2. Update CSS selectors in scraper.py
 3. Test with single page first
-4. Let pre-commit hooks format your changes
-5. Commit changes with notes about what changed
+4. Verify with multiple pages
+5. Pre-commit hooks will format automatically
 
-**Running code quality checks manually**:
+**Code quality checks:**
 
 ```bash
-# Format all files
+# Format Python code
 ruff format .
 ruff check --fix .
 
-# Check markdown
+# Format markdown
 mdformat --wrap 100 README.md
 markdownlint --fix README.md
 
 # Validate YAML
-yamllint .github/workflows/ci.yml
+yamllint .github/workflows/
 ```
+
+## Dependencies
+
+| Package            | Purpose                                     |
+| ------------------ | ------------------------------------------- |
+| `requests`         | HTTP client for web requests                |
+| `beautifulsoup4`   | HTML parsing and data extraction            |
+| `playwright`       | Browser automation for JavaScript rendering |
+| `ruff`             | Python linting and formatting               |
+| `yamllint`         | YAML validation                             |
+| `mdformat`         | Markdown formatting with GFM support        |
+| `markdownlint-cli` | Markdown linting                            |
+| `pre-commit`       | Pre-commit hook framework                   |
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Disclaimer
 
-This scraper is for educational and research purposes. Always:
+This scraper is provided for educational and research purposes. When using it, please:
 
 - Respect the website's terms of service
 - Include appropriate delays between requests
-- Use scraped data responsibly
-- Check local laws regarding web scraping
+- Use scraped data responsibly and ethically
+- Review local laws regarding web scraping
+- Don't overload the government servers
 
-## Support
+## Support & Questions
 
 For issues or questions:
 
-1. Check the Troubleshooting section above
-2. Review GitHub Issues
-3. Examine debug output files if generated
-4. Test locally before assuming a production issue
+1. Check the [Troubleshooting](#troubleshooting) section
+2. Review [GitHub Issues](https://github.com/riyanimam/georgia-legislation-webcrawler/issues)
+3. Test functionality locally before assuming production issues
+4. Examine debug output files if generated
+5. Check if the Georgia General Assembly website is accessible
