@@ -272,8 +272,6 @@ function handleFileUpload(e) {
     const file = e.target.files[0];
     
     if (!file) {
-    
-    if (!file) {
         return;
     }
 
@@ -302,6 +300,8 @@ function handleFileUpload(e) {
     };
     
     reader.onerror = () => {
+        alert("Error reading file. Please try again.");
+    };
     reader.readAsText(file);
 }
 
@@ -416,6 +416,8 @@ function updateStats() {
         </div>
         <div class="stat-card">
             <div class="number">${hb}</div>
+            <div class="label">House Bills</div>
+        </div>
         <div class="stat-card">
             <div class="number">${sb}</div>
             <div class="label">Senate Bills</div>
@@ -440,6 +442,7 @@ function renderBills() {
         .map(
             (bill, index) => `
             <div class="bill-card" data-bill-index="${index}">
+                <div class="bill-header">
                     <div class="bill-number">${bill.doc_number}</div>
                     <div class="bill-tags">${generateBillTags(bill)}</div>
                 </div>
@@ -480,7 +483,7 @@ function attachBillCardListeners() {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
             const billIndex = btn.closest(".bill-card").dataset.billIndex;
-            openModal(bill);
+            openModal(filteredBills[billIndex]);
         });
     });
 
