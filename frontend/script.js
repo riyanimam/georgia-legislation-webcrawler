@@ -6,6 +6,7 @@
 
 let allBills = [];
 let filteredBills = [];
+let currentModalBillIndex = -1;
 
 /**
  * Keywords mapping for categorizing bills by key issues
@@ -219,6 +220,25 @@ function setupEventListeners() {
     if (sortBy) sortBy.addEventListener("change", filterBills);
     if (resetBtn) resetBtn.addEventListener("click", resetFilters);
 
+    // Modal navigation and export handlers
+    const prevBillBtn = document.getElementById("prevBillBtn");
+    const nextBillBtn = document.getElementById("nextBillBtn");
+    const exportCSVBtn = document.getElementById("exportCSVBtn");
+    const exportJSONBtn = document.getElementById("exportJSONBtn");
+    
+    if (prevBillBtn) prevBillBtn.addEventListener("click", goToPreviousBill);
+    if (nextBillBtn) nextBillBtn.addEventListener("click", goToNextBill);
+    if (exportCSVBtn) exportCSVBtn.addEventListener("click", () => {
+        if (currentModalBillIndex !== -1) {
+            exportToCSV(filteredBills[currentModalBillIndex]);
+        }
+    });
+    if (exportJSONBtn) exportJSONBtn.addEventListener("click", () => {
+        if (currentModalBillIndex !== -1) {
+            exportToJSON(filteredBills[currentModalBillIndex]);
+        }
+    });
+
     // Modal backdrop click handler
     const modal = document.getElementById("detailModal");
     if (modal) {
@@ -250,19 +270,25 @@ function loadDataFromFile() {
         })
         .then((data) => {
             if (Array.isArray(data) && data.length > 0) {
-                allBills = data;
-                filteredBills = [...allBills];
-                updateStats();
-                renderBills();
-                // Hide file input if data loaded successfully
-                const fileInputWrapper = document.querySelector(".file-input-wrapper");
-                if (fileInputWrapper) {
-                    fileInputWrapper.style.display = "none";
-                }
+                showLoadingSpinner(true);
+                // Simulate brief parsing time for UX feedback
+                setTimeout(() => {
+                    allBills = data;
+                    filteredBills = [...allBills];
+                    updateStats();
+                    renderBills();
+                    showLoadingSpinner(false);
+                    // Hide file input if data loaded successfully
+                    const fileInputWrapper = document.querySelector(".file-input-wrapper");
+                    if (fileInputWrapper) {
+                        fileInputWrapper.style.display = "none";
+                    }
+                }, 500);
             }
         })
         .catch((error) => {
             // File not found or invalid - user must upload
+            showLoadingSpinner(false);
         });
 }
 /**
@@ -275,6 +301,7 @@ function handleFileUpload(e) {
         return;
     }
 
+    showLoadingSpinner(true);
     const reader = new FileReader();
     reader.onload = (event) => {
         try {
@@ -285,6 +312,7 @@ function handleFileUpload(e) {
                 filteredBills = [...allBills];
                 updateStats();
                 renderBills();
+                showLoadingSpinner(false);
                 
                 // Hide file input wrapper after successful load
                 const fileInputWrapper = document.querySelector(".file-input-wrapper");
@@ -292,14 +320,17 @@ function handleFileUpload(e) {
                     fileInputWrapper.style.display = "none";
                 }
             } else {
+                showLoadingSpinner(false);
                 alert("Invalid JSON format. Expected an array of bills.");
             }
         } catch (error) {
+            showLoadingSpinner(false);
             alert(`Error loading JSON file: ${error.message}`);
         }
     };
     
     reader.onerror = () => {
+        showLoadingSpinner(false);
         alert("Error reading file. Please try again.");
     };
     reader.readAsText(file);
@@ -431,9 +462,40 @@ function updateStats() {
 function renderBills() {
     const container = document.getElementById("billsContainer");
 
+    if (allBills.length === 0) {
+        container.innerHTML = `
+            <div class="no-results">
+                <strong>📁 No Data Loaded</strong>
+                <p>Please upload a JSON file containing Georgia legislation data to get started.</p>
+                <div class="suggestions">
+                    <strong>How to load data:</strong>
+                    <ol>
+                        <li>Click "📁 Choose JSON File" above</li>
+                        <li>Select a JSON file with bill data</li>
+                        <li>The bills will appear here</li>
+                    </ol>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
     if (filteredBills.length === 0) {
-        container.innerHTML =
-            '<div class="no-results">No bills found. Try adjusting your filters.</div>';
+        container.innerHTML = `
+            <div class="no-results">
+                <strong>🔍 No Matching Bills</strong>
+                <p>Your search didn't return any results. Try adjusting your filters.</p>
+                <div class="suggestions">
+                    <strong>Tips to find bills:</strong>
+                    <ol>
+                        <li>Clear or broaden your search term</li>
+                        <li>Remove bill type filter (try all types)</li>
+                        <li>Deselect issue filters</li>
+                        <li>Check your spelling</li>
+                    </ol>
+                </div>
+            </div>
+        `;
         return;
     }
 
@@ -507,8 +569,13 @@ function attachBillCardListeners() {
  * Open detail modal for a specific bill
  */
 function openModal(bill) {
+    const billIndex = filteredBills.indexOf(bill);
+    if (billIndex !== -1) {
+        currentModalBillIndex = billIndex;
+    }
     populateModalContent(bill);
     document.getElementById("detailModal").classList.add("active");
+    updateBillCounter();
 }
 
 /**
@@ -568,6 +635,98 @@ function closeModal() {
  */
 function truncate(text, length) {
     return text.length > length ? `${text.substring(0, length)}...` : text;
+}
+
+/**
+ * Show or hide the loading spinner
+ */
+function showLoadingSpinner(show) {
+    const spinner = document.getElementById("loadingSpinner");
+    if (show) {
+        spinner.classList.remove("hidden");
+    } else {
+        spinner.classList.add("hidden");
+    }
+}
+
+/**
+ * Update the bill counter in the modal header
+ */
+function updateBillCounter() {
+    if (filteredBills.length === 0) {
+        document.getElementById("billCounter").textContent = "";
+        return;
+    }
+    const counter = document.getElementById("billCounter");
+    counter.textContent = `Bill ${currentModalBillIndex + 1} of ${filteredBills.length}`;
+}
+
+/**
+ * Navigate to next bill in modal
+ */
+function goToNextBill() {
+    if (currentModalBillIndex < filteredBills.length - 1) {
+        currentModalBillIndex++;
+        openModal(filteredBills[currentModalBillIndex]);
+    }
+}
+
+/**
+ * Navigate to previous bill in modal
+ */
+function goToPreviousBill() {
+    if (currentModalBillIndex > 0) {
+        currentModalBillIndex--;
+        openModal(filteredBills[currentModalBillIndex]);
+    }
+}
+
+/**
+ * Export current bill to CSV format
+ */
+function exportToCSV(bill) {
+    const headers = ["Doc Number", "Caption", "Sponsors", "Committees", "Detail URL", "Latest Status", "Summary"];
+    const values = [
+        bill.doc_number,
+        bill.caption,
+        bill.sponsors,
+        bill.committees || "",
+        bill.detail_url,
+        getLatestStatus(bill),
+        (bill.first_reader_summary || "").replace(/"/g, '""')  // Escape quotes
+    ];
+    
+    // Wrap values in quotes if they contain commas
+    const csvRow = values.map(v => {
+        const str = String(v);
+        return str.includes(",") ? `"${str}"` : str;
+    }).join(",");
+    
+    const csv = `${headers.join(",")}\n${csvRow}`;
+    downloadFile(csv, `${bill.doc_number}.csv`, "text/csv");
+}
+
+/**
+ * Export current bill to JSON format
+ */
+function exportToJSON(bill) {
+    const json = JSON.stringify(bill, null, 2);
+    downloadFile(json, `${bill.doc_number}.json`, "application/json");
+}
+
+/**
+ * Download file helper function
+ */
+function downloadFile(content, filename, type) {
+    const blob = new Blob([content], { type });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
 }
 
 // ============================================================================

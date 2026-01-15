@@ -137,6 +137,12 @@
             </div>
         </div>
 
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-spinner hidden">
+            <div class="spinner"></div>
+            <p>Loading and parsing data...</p>
+        </div>
+
         <div id="billsContainer" class="bills-container"></div>
     </div>
 
@@ -147,8 +153,9 @@
                 <div>
                     <div class="bill-number" id="modalBillNumber"></div>
                     <div class="modal-title" id="modalCaption"></div>
+                    <div class="bill-counter" id="billCounter" aria-live="polite"></div>
                 </div>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
+                <button class="modal-close" onclick="closeModal()" aria-label="Close details">&times;</button>
             </div>
 
             <div class="modal-section">
@@ -169,6 +176,13 @@
             <div class="modal-section" id="statusSection">
                 <h3>Status History</h3>
                 <div class="status-history" id="modalStatusHistory"></div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary btn-small" id="prevBillBtn" title="Previous bill">⬅️ Previous</button>
+                <button class="btn-primary btn-small" id="exportCSVBtn">📥 Export as CSV</button>
+                <button class="btn-primary btn-small" id="exportJSONBtn">📥 Export as JSON</button>
+                <button class="btn-secondary btn-small" id="nextBillBtn" title="Next bill">Next ➡️</button>
             </div>
         </div>
     </div>
