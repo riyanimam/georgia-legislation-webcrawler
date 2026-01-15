@@ -83,6 +83,34 @@ const issueKeywords = {
         "franchise",
         "ballot",
     ],
+    reproductive: [
+        "abortion",
+        "reproductive",
+        "pregnancy",
+        "contraception",
+        "planned parenthood",
+        "roe",
+        "fetal",
+    ],
+    "workers-rights": [
+        "labor",
+        "union",
+        "worker",
+        "wage",
+        "employment",
+        "overtime",
+        "minimum wage",
+        "workplace",
+    ],
+    "gun-violence": [
+        "gun violence",
+        "mass shooting",
+        "shooting",
+        "assault weapon",
+        "magazine",
+        "red flag",
+        "threat assessment",
+    ],
 };
 
 /**
@@ -158,13 +186,15 @@ function setupEventListeners() {
     // Filter and search handlers
     const searchInput = document.getElementById("searchInput");
     const typeFilter = document.getElementById("typeFilter");
-    const issueFilter = document.getElementById("issueFilter");
+    const issueCheckboxes = document.querySelectorAll(".issue-checkbox");
     const sortBy = document.getElementById("sortBy");
     const resetBtn = document.getElementById("resetBtn");
 
     if (searchInput) searchInput.addEventListener("input", filterBills);
     if (typeFilter) typeFilter.addEventListener("change", filterBills);
-    if (issueFilter) issueFilter.addEventListener("change", filterBills);
+    issueCheckboxes.forEach((checkbox) =>
+        checkbox.addEventListener("change", filterBills)
+    );
     if (sortBy) sortBy.addEventListener("change", filterBills);
     if (resetBtn) resetBtn.addEventListener("click", resetFilters);
 
@@ -232,7 +262,9 @@ function filterBills() {
         .getElementById("searchInput")
         .value.toLowerCase();
     const typeFilter = document.getElementById("typeFilter").value;
-    const issueFilter = document.getElementById("issueFilter").value;
+    const selectedIssues = Array.from(
+        document.querySelectorAll(".issue-checkbox:checked")
+    ).map((checkbox) => checkbox.value);
     const sortBy = document.getElementById("sortBy").value;
 
     // Apply search, type, and issue filters
@@ -250,9 +282,10 @@ function filterBills() {
             !typeFilter ||
             bill.doc_number.startsWith(typeFilter);
 
+        // If no issues selected, match all bills; otherwise match any selected issue
         const matchesIssue =
-            !issueFilter ||
-            getBillIssue(bill) === issueFilter;
+            selectedIssues.length === 0 ||
+            selectedIssues.includes(getBillIssue(bill));
 
         return matchesSearch && matchesType && matchesIssue;
     });
@@ -292,7 +325,9 @@ function extractNumber(docNumber) {
 function resetFilters() {
     document.getElementById("searchInput").value = "";
     document.getElementById("typeFilter").value = "";
-    document.getElementById("issueFilter").value = "";
+    document.querySelectorAll(".issue-checkbox").forEach((checkbox) => {
+        checkbox.checked = false;
+    });
     document.getElementById("sortBy").value = "number";
     filterBills();
 }
