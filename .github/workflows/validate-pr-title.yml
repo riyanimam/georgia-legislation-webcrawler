@@ -1,25 +1,16 @@
 name: Validate PR Title
 
-# Trigger on pull request events
 on:
   pull_request:
     types: [opened, edited, synchronize]
 
 jobs:
   validate-pr-title:
-    # Validate that PR titles follow semantic commit format
-    # Ensures proper changelog generation and semantic versioning
     runs-on: ubuntu-latest
-
     steps:
-    # Step 1: Validate PR title format
-    # - Checks that title follows semantic commit convention
-    # - Valid formats: feat:, fix:, docs:, style:, refactor:, perf:, test:, chore:, ci:
-    # - Allows optional scope: feat(scope):
     - name: Validate PR Title Format
       uses: amannn/action-semantic-pull-request@v5
       with:
-        # Define allowed commit types for semantic versioning
         types: |
           feat
           fix
@@ -30,9 +21,7 @@ jobs:
           test
           chore
           ci
-        # Require the pull request title to begin with a type
         requireScope: false
-        # Allow uppercase letters in PR titles
         subjectPattern: ^(?:[A-Z]|-).+$
         subjectPatternError: |
           The subject "{subject}" found in the pull request title "{title}" does not match the configured pattern.
