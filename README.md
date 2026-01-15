@@ -66,6 +66,67 @@ pip install -r requirements.txt
 playwright install chromium
 ```
 
+### 5. Set Up Pre-commit Hooks (Recommended)
+
+This project includes pre-commit hooks for code quality and formatting. Install them after setting up dependencies:
+
+```bash
+pre-commit install
+```
+
+This will automatically run linting and formatting checks before each commit.
+
+## Development Setup
+
+### Pre-commit Hooks
+
+Pre-commit hooks are automatically executed before commits to ensure code quality. The configuration includes:
+
+**Python Code**:
+- **Ruff Linter**: Checks for code quality issues
+  - Auto-fixes simple issues
+  - Non-blocking (warnings only)
+  - 100-character line length enforced
+
+- **Ruff Formatter**: Ensures consistent code style
+  - Automatic formatting on commit
+  - Respects 100-character line limit
+
+**YAML Files**:
+- **YAML Formatter**: Consistent YAML formatting
+  - Preserves quotes
+  - Relaxed mode for flexibility
+  
+- **YAML Linter**: Validates YAML syntax
+  - Uses relaxed rule set
+  - Catches configuration errors
+
+**Markdown Files**:
+- **mdformat**: Markdown formatter with GitHub Flavored Markdown (GFM) support
+  - Consistent formatting
+  - Table support
+  - 100-character wrapping
+
+- **markdownlint**: Markdown linter
+  - Auto-fixes issues where possible
+  - Validates markdown structure
+
+### Running Pre-commit Checks
+
+```bash
+# Run on all files
+pre-commit run --all-files
+
+# Run on staged files only
+pre-commit run
+
+# Run specific hook
+pre-commit run ruff --all-files
+
+# Skip hooks if needed
+git commit --no-verify
+```
+
 ## Usage
 
 ### Running Locally
@@ -188,9 +249,19 @@ The `.github/workflows/ci.yml` file defines an automated scraping job that:
 Dependencies are specified in `requirements.txt`:
 
 ```
+# Core scraping tools
 requests>=2.31.0       # HTTP client
 beautifulsoup4>=4.12.0 # HTML parsing
 playwright>=1.40.0     # Browser automation
+
+# Development tools
+pre-commit>=3.5.0             # Pre-commit hook framework
+ruff>=0.1.0                   # Python linter & formatter
+yamllint>=1.33.0              # YAML linter
+mdformat>=0.7.17              # Markdown formatter
+mdformat-gfm>=0.6.0           # GitHub Flavored Markdown support
+mdformat-tables>=0.1.1        # Markdown table support
+markdownlint-cli>=0.37.0      # Markdown linter
 ```
 
 ## Troubleshooting
@@ -232,22 +303,44 @@ playwright install chromium
 georgia-legislation-webcrawler/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml              # GitHub Actions workflow
-├── scraper.py                   # Main scraper module
-├── requirements.txt             # Python dependencies
-├── README.md                    # This file
-└── LICENSE                      # MIT License
+│       └── ci.yml                    # GitHub Actions workflow
+├── .pre-commit-config.yaml           # Pre-commit hooks configuration
+├── scraper.py                        # Main scraper module
+├── requirements.txt                  # Python & dev dependencies
+├── README.md                         # This file
+└── LICENSE                           # MIT License
 ```
+
+### Code Quality Standards
+
+This project maintains code quality through:
+
+1. **Pre-commit Hooks**: Automatically validate code before commits
+   - Python linting with Ruff
+   - YAML validation and formatting
+   - Markdown linting and formatting
+
+2. **Consistent Style**: All code adheres to:
+   - 100-character line limit
+   - Ruff's default configuration for Python
+   - Standard markdown and YAML conventions
 
 ### Contributing
 
 To improve the scraper:
 
 1. Create a feature branch
-2. Test locally with `python scraper.py 1`
-3. Make improvements to selectors or data extraction
-4. Test with `python scraper.py 5` to verify performance
-5. Commit and push changes
+2. Set up pre-commit hooks: `pre-commit install`
+3. Test locally with `python scraper.py 1`
+4. Make improvements to selectors or data extraction
+5. Test with `python scraper.py 5` to verify performance
+6. Pre-commit hooks will automatically format your code
+7. Commit and push changes
+
+**Note**: If pre-commit hooks block your commit:
+- Review the suggested changes
+- Most are auto-fixed; re-stage and commit again
+- For critical issues, use `git commit --no-verify` to skip (not recommended)
 
 ### Common Maintenance Tasks
 
@@ -255,7 +348,22 @@ To improve the scraper:
 1. Run locally to generate debug files
 2. Update CSS selectors in `get_legislation_details()`
 3. Test with single page first
-4. Commit changes with notes about what changed
+4. Let pre-commit hooks format your changes
+5. Commit changes with notes about what changed
+
+**Running code quality checks manually**:
+```bash
+# Format all files
+ruff format .
+ruff check --fix .
+
+# Check markdown
+mdformat --wrap 100 README.md
+markdownlint --fix README.md
+
+# Validate YAML
+yamllint .github/workflows/ci.yml
+```
 
 ## License
 
