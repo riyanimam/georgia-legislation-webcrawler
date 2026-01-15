@@ -22,7 +22,7 @@ jobs:
           chore
           ci
         requireScope: false
-        subjectPattern: ^(?:[A-Z]|-).+$
+        subjectPattern: ^\s*(?:[A-Z]|-).+$
         subjectPatternError: |
           The subject "{subject}" found in the pull request title "{title}" does not match the configured pattern.
 
