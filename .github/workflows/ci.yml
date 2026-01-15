@@ -10,76 +10,12 @@ on:
         description: Maximum pages to scrape (leave empty for all pages)
         required: false
         default: ''
-  # Scheduled trigger (commented out by default)
-  # Uncomment below to run automatically on a schedule
-  # Example: run daily at 2 AM UTC
-  # schedule:
-  #   - cron: '0 2 * * *'
+  # Scheduled trigger
+  schedule:
+  - cron: 0 4 * * *
 
 jobs:
-  validate:
-    # Code quality and format validation job
-    # Mirrors pre-commit hooks to ensure code quality in CI
-    runs-on: ubuntu-latest
-    steps:
-    # Step 1: Clone the repository
-    - name: Checkout repository
-      uses: actions/checkout@v6
-
-    # Step 2: Set up Python 3.11 environment
-    - name: Set up Python
-      uses: actions/setup-python@v6
-      with:
-        python-version: '3.11'
-
-    # Step 3: Install linting and formatting tools
-    # - ruff: Fast Python linter and formatter
-    # - mdformat: Markdown formatter with GFM support
-    # - markdownlint-cli: Markdown linter
-    - name: Install validation tools
-      run: |
-        pip install ruff mdformat mdformat-gfm mdformat-tables markdownlint-cli
-
-    # Step 4: Run ruff linting
-    # - Validates Python code against style and error rules
-    # - Uses --exit-zero to report issues without blocking
-    - name: Ruff lint
-      run: ruff check scraper.py --fix --exit-zero
-
-    # Step 5: Run ruff formatting check
-    # - Ensures Python code matches 100-character line limit
-    - name: Ruff format check
-      run: ruff format scraper.py --line-length=100 --check
-
-    # Step 6: Run markdown formatting
-    # - Validates markdown syntax and consistency
-    # - Uses GFM and table support extensions
-    - name: Markdown format check
-      run: mdformat README.md --wrap=100 --number --check
-
-    # Step 7: Run markdownlint validation
-    # - Checks markdown files for linting issues
-    # - Disabled rules: MD013 (line length), MD024 (duplicate headers)
-    - name: Markdownlint check
-      run: markdownlint README.md --disable=MD013 --disable=MD024
-
-    # Step 8: Install YAML validation tools
-    # - yamllint: YAML linting tool
-    - name: Install YAML validation tools
-      run: pip install yamllint
-
-    # Step 9: Run yamllint validation
-    # - Validates YAML syntax and formatting in GitHub Actions workflow
-    # - Uses strict mode to catch all issues
-    - name: Yamllint check
-      run: yamllint .github/workflows/ci.yml --format=parsable --strict
-
-    # Step 10: Validate YAML formatting in pre-commit config
-    - name: Yamllint pre-commit config
-      run: yamllint .pre-commit-config.yaml --format=parsable --strict
-
   scrape:
-    needs: validate
     runs-on: ubuntu-latest
     # 2-hour timeout for full session scrapes
     # Adjust if your scraping takes longer

@@ -1,0 +1,90 @@
+name: Validation
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  validate-code:
+    name: Validate Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Clone the repository
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+      # Step 2: Set up Python
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+
+      # Step 3: Set up Node.js for markdownlint
+    - name: Set up Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '20'
+
+      # Step 4: Install Python validation tools
+    - name: Install Python validation tools
+      run: |
+        pip install ruff mdformat mdformat-gfm mdformat-tables yamllint
+
+      # Step 5: Install Node.js validation tools
+    - name: Install Node.js validation tools
+      run: |
+        npm install -g markdownlint-cli
+
+      # Step 6: Run Python linting with Ruff
+    - name: Ruff lint
+      run: ruff check scraper.py --fix --exit-zero
+
+      # Step 7: Run Python formatting check
+    - name: Ruff format check
+      run: ruff format scraper.py --line-length=100 --check
+
+      # Step 8: Check Markdown formatting
+    - name: Markdown format check
+      run: mdformat README.md --wrap=100 --number --check
+
+      # Step 9: Run Markdown linting
+    - name: Markdownlint check
+      run: markdownlint README.md --disable=MD013 --disable=MD024
+
+      # Step 10: Validate YAML formatting
+    - name: Yamllint check
+      run: |
+        yamllint .github/workflows/ --format=parsable --strict
+        yamllint .pre-commit-config.yaml --format=parsable --strict
+
+  validate-pr-title:
+    name: Validate PR Title Format
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Validate PR Title Format
+      uses: amannn/action-semantic-pull-request@v6
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        types: |
+          feat
+          fix
+          docs
+          style
+          refactor
+          perf
+          test
+          chore
+          ci
+        requireScope: false
+        subjectPattern: ^\s*(?:[A-Z]|-).+$
+        subjectPatternError: |
+          The subject "{subject}" found in the pull request title "{title}" does not match the configured pattern.
+
+          Please ensure the PR title follows the semantic commit format:
+          - Type must be one of: feat, fix, docs, style, refactor, perf, test, chore, ci
+          - Optional scope in parentheses: feat(scope):
+          - Subject should start with uppercase or hyphen
+
+          Example: "feat: Add new feature" or "fix(scraper): Handle edge case"
