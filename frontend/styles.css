@@ -94,15 +94,56 @@ select:focus {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-/* Checkbox Group Styling */
-.checkbox-group {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
+/* Dropdown Filter Styling */
+.dropdown-filter {
+    position: relative;
+}
+
+.dropdown-toggle {
+    width: 100%;
     padding: 12px;
     border: 2px solid #e0e0e0;
     border-radius: 8px;
-    background: #fafafa;
+    background: white;
+    color: #333;
+    font-size: 1em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.dropdown-toggle:hover {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.dropdown-toggle.active {
+    border-color: #667eea;
+    background: #f9f9ff;
+}
+
+/* Checkbox Group Styling */
+.checkbox-group {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    padding: 12px;
+    border: 2px solid #667eea;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    background: white;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    margin-top: -2px;
+}
+
+.checkbox-group.open {
+    display: grid;
 }
 
 .checkbox-item {

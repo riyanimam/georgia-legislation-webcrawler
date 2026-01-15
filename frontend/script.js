@@ -183,6 +183,30 @@ function setupEventListeners() {
         fileInput.addEventListener("change", handleFileUpload);
     }
 
+    // Dropdown toggle handler
+    const issueDropdownToggle = document.getElementById(
+        "issueDropdownToggle"
+    );
+    const checkboxGroup = document.getElementById("issueFilter");
+    if (issueDropdownToggle && checkboxGroup) {
+        issueDropdownToggle.addEventListener("click", (e) => {
+            e.preventDefault();
+            checkboxGroup.classList.toggle("open");
+            issueDropdownToggle.classList.toggle("active");
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener("click", (e) => {
+            if (
+                !issueDropdownToggle.contains(e.target) &&
+                !checkboxGroup.contains(e.target)
+            ) {
+                checkboxGroup.classList.remove("open");
+                issueDropdownToggle.classList.remove("active");
+            }
+        });
+    }
+
     // Filter and search handlers
     const searchInput = document.getElementById("searchInput");
     const typeFilter = document.getElementById("typeFilter");
@@ -329,6 +353,17 @@ function resetFilters() {
         checkbox.checked = false;
     });
     document.getElementById("sortBy").value = "number";
+    
+    // Close the dropdown
+    const checkboxGroup = document.getElementById("issueFilter");
+    const issueDropdownToggle = document.getElementById(
+        "issueDropdownToggle"
+    );
+    if (checkboxGroup && issueDropdownToggle) {
+        checkboxGroup.classList.remove("open");
+        issueDropdownToggle.classList.remove("active");
+    }
+    
     filterBills();
 }
 
