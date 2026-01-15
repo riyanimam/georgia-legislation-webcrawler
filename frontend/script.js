@@ -116,14 +116,22 @@ function getBillIssue(bill) {
 }
 
 /**
- * Get the latest status from a bill's status history
+ * Get the latest status from a bill's status history, sorted by date
  */
 function getLatestStatus(bill) {
     if (!bill.status_history || bill.status_history.length === 0) {
         return "Unknown";
     }
-    // Return the last status in the array
-    return bill.status_history[bill.status_history.length - 1].status;
+    
+    // Sort by date to ensure we get the actual latest status
+    const sortedHistory = [...bill.status_history].sort((a, b) => {
+        const dateA = new Date(a.date || 0);
+        const dateB = new Date(b.date || 0);
+        return dateA - dateB;
+    });
+    
+    // Return the last status after sorting
+    return sortedHistory[sortedHistory.length - 1].status;
 }
 
 /**
