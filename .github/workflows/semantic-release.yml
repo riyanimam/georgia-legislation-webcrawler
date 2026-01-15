@@ -1,0 +1,64 @@
+name: Semantic Release
+
+# Trigger on push to main branch only
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  release:
+    # Automated semantic versioning and changelog generation
+    # Only runs on push to main (not on scheduled runs)
+    runs-on: ubuntu-latest
+
+    # Required permissions for semantic-release to create releases and push changes
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+    # Step 1: Clone the repository with full history
+    # - Fetch all commits needed for version detection and changelog generation
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        # Use a personal access token if available for push permissions
+        # Otherwise uses default GITHUB_TOKEN
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    # Step 2: Set up Node.js environment
+    # - semantic-release requires Node.js
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    # Step 3: Install semantic-release and plugins
+    # - @semantic-release/release-notes-generator: Generates release notes from commits
+    # - @semantic-release/changelog: Updates CHANGELOG.md from semantic commits
+    # - @semantic-release/git: Commits changelog and version bumps back to repo
+    # - @semantic-release/github: Creates GitHub releases with release notes
+    - name: Install dependencies
+      run: |
+        npm install -g semantic-release \
+          @semantic-release/release-notes-generator \
+          @semantic-release/changelog \
+          @semantic-release/git \
+          @semantic-release/github
+
+    # Step 4: Run semantic-release
+    # - Analyzes commits since last release
+    # - Determines version bump (major.minor.patch)
+    # - Creates git tag and release notes
+    # - Updates CHANGELOG.md
+    # - Creates GitHub release
+    # - Commits changes back to main
+    - name: Run Semantic Release
+      env:
+        # GitHub token for authentication and API calls
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: semantic-release

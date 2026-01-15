@@ -1,0 +1,46 @@
+repos:
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.1.14
+  hooks:
+  - id: ruff
+    name: ruff lint
+    args: [--fix, --exit-zero]
+  - id: ruff-format
+    name: ruff format
+    args: [--line-length=100]
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.17
+  hooks:
+  - id: mdformat
+    name: markdown format
+    additional_dependencies: [mdformat-gfm, mdformat-tables]
+    args: [--wrap=100, --number]
+- repo: https://github.com/igorshubovych/markdownlint-cli
+  rev: v0.37.0
+  hooks:
+  - id: markdownlint
+    name: markdownlint
+    args: [--fix, --disable=MD013, --disable=MD024]
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v2.13.0
+  hooks:
+  - id: pretty-format-yaml
+    name: yaml format
+    args: [--autofix, --indent=2]
+- repo: https://github.com/adrienverge/yamllint
+  rev: v1.35.1
+  hooks:
+  - id: yamllint
+    name: yamllint
+    args: [-c, .yamllint]
+- repo: https://github.com/abravalheri/validate-pyproject
+  rev: v0.18
+  hooks:
+  - id: validate-pyproject
+    name: validate pyproject.toml
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v2.13.0
+  hooks:
+  - id: pretty-format-toml
+    name: toml format
+    args: [--autofix]
