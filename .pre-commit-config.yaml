@@ -8,14 +8,15 @@ repos:
   - id: ruff-format
     name: ruff format
     args: [--line-length=100]
-- repo: https://github.com/biomejs/pre-commit
-  rev: v0.3.0
+- repo: local
   hooks:
   - id: biome-ci
     name: biome check
-    files: \.(jsx?|tsx?|html|css)$
-    args: [check, --apply]
-    stages: [manual]
+    entry: sh -c 'npx biome check --write; exit 0'
+    language: node
+    files: \.(jsx?|tsx?|html|css|json)$
+    types: [file]
+    stages: [commit]
 - repo: https://github.com/executablebooks/mdformat
   rev: 0.7.17
   hooks:

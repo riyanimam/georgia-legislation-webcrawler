@@ -40,15 +40,7 @@ const issueKeywords = {
         "welfare",
         "disability",
     ],
-    education: [
-        "school",
-        "education",
-        "university",
-        "college",
-        "student",
-        "teacher",
-        "curriculum",
-    ],
+    education: ["school", "education", "university", "college", "student", "teacher", "curriculum"],
     environment: [
         "environment",
         "climate",
@@ -69,22 +61,8 @@ const issueKeywords = {
         "prosecution",
     ],
     taxes: ["tax", "revenue", "budget", "fiscal", "finance", "income"],
-    immigration: [
-        "immigration",
-        "immigrant",
-        "border",
-        "visa",
-        "citizenship",
-        "alien",
-    ],
-    "voting-rights": [
-        "vote",
-        "voting",
-        "election",
-        "registration",
-        "franchise",
-        "ballot",
-    ],
+    immigration: ["immigration", "immigrant", "border", "visa", "citizenship", "alien"],
+    "voting-rights": ["vote", "voting", "election", "registration", "franchise", "ballot"],
     reproductive: [
         "abortion",
         "reproductive",
@@ -151,17 +129,11 @@ function generateBillTags(bill) {
     // Convert to array and limit to top 4 tags
     const tagArray = Array.from(tags)
         .slice(0, 4)
-        .map(
-            (tag) =>
-                `<span class="bill-tag">${tag
-                    .charAt(0)
-                    .toUpperCase() + tag.slice(1)}</span>`
-        )
+        .map((tag) => `<span class="bill-tag">${tag.charAt(0).toUpperCase() + tag.slice(1)}</span>`)
         .join("");
 
     return tagArray || '<span class="bill-tag">General</span>';
 }
-
 
 // ============================================================================
 // Initialization
@@ -186,9 +158,7 @@ function setupEventListeners() {
     }
 
     // Dropdown toggle handler
-    const issueDropdownToggle = document.getElementById(
-        "issueDropdownToggle"
-    );
+    const issueDropdownToggle = document.getElementById("issueDropdownToggle");
     const checkboxGroup = document.getElementById("issueFilter");
     if (issueDropdownToggle && checkboxGroup) {
         issueDropdownToggle.addEventListener("click", (e) => {
@@ -199,10 +169,7 @@ function setupEventListeners() {
 
         // Close dropdown when clicking outside
         document.addEventListener("click", (e) => {
-            if (
-                !issueDropdownToggle.contains(e.target) &&
-                !checkboxGroup.contains(e.target)
-            ) {
+            if (!issueDropdownToggle.contains(e.target) && !checkboxGroup.contains(e.target)) {
                 checkboxGroup.classList.remove("open");
                 issueDropdownToggle.classList.remove("active");
             }
@@ -218,9 +185,7 @@ function setupEventListeners() {
 
     if (searchInput) searchInput.addEventListener("input", filterBills);
     if (typeFilter) typeFilter.addEventListener("change", filterBills);
-    issueCheckboxes.forEach((checkbox) =>
-        checkbox.addEventListener("change", filterBills)
-    );
+    issueCheckboxes.forEach((checkbox) => checkbox.addEventListener("change", filterBills));
     if (sortBy) sortBy.addEventListener("change", filterBills);
     if (resetBtn) resetBtn.addEventListener("click", resetFilters);
 
@@ -246,8 +211,7 @@ function loadDataFromFile() {
             filteredBills = [...allBills];
             updateStats();
             renderBills();
-            document.getElementById("fileInput").parentElement.style.display =
-                "none";
+            document.getElementById("fileInput").parentElement.style.display = "none";
         })
         .catch(() => {
             // File not found, user must upload
@@ -270,7 +234,7 @@ function handleFileUpload(e) {
             renderBills();
             document.getElementById("fileInput").style.display = "none";
         } catch (error) {
-            alert("Error loading JSON file: " + error.message);
+            alert(`Error loading JSON file: ${error.message}`);
         }
     };
     reader.readAsText(file);
@@ -284,13 +248,11 @@ function handleFileUpload(e) {
  * Filter bills based on search term, type, issue, and sort order
  */
 function filterBills() {
-    const searchTerm = document
-        .getElementById("searchInput")
-        .value.toLowerCase();
+    const searchTerm = document.getElementById("searchInput").value.toLowerCase();
     const typeFilter = document.getElementById("typeFilter").value;
-    const selectedIssues = Array.from(
-        document.querySelectorAll(".issue-checkbox:checked")
-    ).map((checkbox) => checkbox.value);
+    const selectedIssues = Array.from(document.querySelectorAll(".issue-checkbox:checked")).map(
+        (checkbox) => checkbox.value
+    );
     const sortBy = document.getElementById("sortBy").value;
 
     // Apply search, type, and issue filters
@@ -301,17 +263,13 @@ function filterBills() {
             bill.caption.toLowerCase().includes(searchTerm) ||
             bill.sponsors.toLowerCase().includes(searchTerm) ||
             bill.committees.toLowerCase().includes(searchTerm) ||
-            (bill.first_reader_summary &&
-                bill.first_reader_summary.toLowerCase().includes(searchTerm));
+            bill.first_reader_summary?.toLowerCase().includes(searchTerm);
 
-        const matchesType =
-            !typeFilter ||
-            bill.doc_number.startsWith(typeFilter);
+        const matchesType = !typeFilter || bill.doc_number.startsWith(typeFilter);
 
         // If no issues selected, match all bills; otherwise match any selected issue
         const matchesIssue =
-            selectedIssues.length === 0 ||
-            selectedIssues.includes(getBillIssue(bill));
+            selectedIssues.length === 0 || selectedIssues.includes(getBillIssue(bill));
 
         return matchesSearch && matchesType && matchesIssue;
     });
@@ -330,7 +288,8 @@ function sortBills(bills, sortBy) {
     bills.sort((a, b) => {
         if (sortBy === "number") {
             return extractNumber(a.doc_number) - extractNumber(b.doc_number);
-        } else if (sortBy === "caption") {
+        }
+        if (sortBy === "caption") {
             return a.caption.localeCompare(b.caption);
         }
         return 0;
@@ -342,7 +301,7 @@ function sortBills(bills, sortBy) {
  */
 function extractNumber(docNumber) {
     const match = docNumber.match(/\d+/);
-    return match ? parseInt(match[0]) : 0;
+    return match ? Number.parseInt(match[0]) : 0;
 }
 
 /**
@@ -355,17 +314,15 @@ function resetFilters() {
         checkbox.checked = false;
     });
     document.getElementById("sortBy").value = "number";
-    
+
     // Close the dropdown
     const checkboxGroup = document.getElementById("issueFilter");
-    const issueDropdownToggle = document.getElementById(
-        "issueDropdownToggle"
-    );
+    const issueDropdownToggle = document.getElementById("issueDropdownToggle");
     if (checkboxGroup && issueDropdownToggle) {
         checkboxGroup.classList.remove("open");
         issueDropdownToggle.classList.remove("active");
     }
-    
+
     filterBills();
 }
 
@@ -428,17 +385,11 @@ function renderBills() {
                 <div class="bill-meta">
                     <div class="meta-item">
                         <span class="meta-label">Sponsors:</span>
-                        <span class="meta-value">${truncate(
-                            bill.sponsors,
-                            50
-                        )}</span>
+                        <span class="meta-value">${truncate(bill.sponsors, 50)}</span>
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">Committees:</span>
-                        <span class="meta-value">${truncate(
-                            bill.committees,
-                            50
-                        )}</span>
+                        <span class="meta-value">${truncate(bill.committees, 50)}</span>
                     </div>
                 </div>
                 <div class="bill-actions">
@@ -499,10 +450,8 @@ function populateModalContent(bill) {
     // Basic information
     document.getElementById("modalBillNumber").textContent = bill.doc_number;
     document.getElementById("modalCaption").textContent = bill.caption;
-    document.getElementById("modalSponsors").textContent =
-        bill.sponsors || "Not available";
-    document.getElementById("modalCommittees").textContent =
-        bill.committees || "Not available";
+    document.getElementById("modalSponsors").textContent = bill.sponsors || "Not available";
+    document.getElementById("modalCommittees").textContent = bill.committees || "Not available";
     document.getElementById("modalSummary").textContent =
         bill.first_reader_summary || "Not available";
 
@@ -550,7 +499,7 @@ function closeModal() {
  * Truncate text to specified length with ellipsis
  */
 function truncate(text, length) {
-    return text.length > length ? text.substring(0, length) + "..." : text;
+    return text.length > length ? `${text.substring(0, length)}...` : text;
 }
 
 // ============================================================================
@@ -560,10 +509,4 @@ function truncate(text, length) {
 // Initialize the app when DOM is ready
 document.addEventListener("DOMContentLoaded", initializeApp);
 // Export functions for ES Module usage
-export {
-    initializeApp,
-    filterBills,
-    resetFilters,
-    openModal,
-    closeModal,
-};
+export { initializeApp, filterBills, resetFilters, openModal, closeModal };

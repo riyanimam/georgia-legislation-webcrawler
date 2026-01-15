@@ -1,0 +1,10 @@
+{
+  "name": "georgia-legislation-webcrawler",
+  "version": "1.0.0",
+  "description": "Georgia state legislation explorer and web crawler",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.3"
+  }
+}
