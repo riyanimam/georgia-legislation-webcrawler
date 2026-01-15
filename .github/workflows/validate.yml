@@ -3,10 +3,6 @@ name: Validation
 on:
   pull_request:
     types: [opened, edited, synchronize]
-  push:
-    branches:
-    - main
-    - develop
 
 jobs:
   validate-code:
@@ -23,28 +19,39 @@ jobs:
       with:
         python-version: '3.11'
 
-      # Step 3: Install code quality tools
-    - name: Install validation tools
-      run: |
-        pip install ruff mdformat mdformat-gfm mdformat-tables markdownlint-cli yamllint
+      # Step 3: Set up Node.js for markdownlint
+    - name: Set up Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '20'
 
-      # Step 4: Run Python linting with Ruff
+      # Step 4: Install Python validation tools
+    - name: Install Python validation tools
+      run: |
+        pip install ruff mdformat mdformat-gfm mdformat-tables yamllint
+
+      # Step 5: Install Node.js validation tools
+    - name: Install Node.js validation tools
+      run: |
+        npm install -g markdownlint-cli
+
+      # Step 6: Run Python linting with Ruff
     - name: Ruff lint
       run: ruff check scraper.py --fix --exit-zero
 
-      # Step 5: Run Python formatting check
+      # Step 7: Run Python formatting check
     - name: Ruff format check
       run: ruff format scraper.py --line-length=100 --check
 
-      # Step 6: Check Markdown formatting
+      # Step 8: Check Markdown formatting
     - name: Markdown format check
       run: mdformat README.md --wrap=100 --number --check
 
-      # Step 7: Run Markdown linting
+      # Step 9: Run Markdown linting
     - name: Markdownlint check
       run: markdownlint README.md --disable=MD013 --disable=MD024
 
-      # Step 8: Validate YAML formatting
+      # Step 10: Validate YAML formatting
     - name: Yamllint check
       run: |
         yamllint .github/workflows/ --format=parsable --strict
