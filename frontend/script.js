@@ -227,7 +227,10 @@ function setupEventListeners() {
     
     // Add change listeners to issue checkboxes
     issueCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", filterBills);
+        checkbox.addEventListener("change", () => {
+            updateIssueFilterDisplay();
+            filterBills();
+        });
     });
     
     if (sortBy) sortBy.addEventListener("change", filterBills);
@@ -421,6 +424,23 @@ function extractNumber(docNumber) {
 }
 
 /**
+ * Update the issue filter dropdown button to show selected filters
+ */
+function updateIssueFilterDisplay() {
+    const issueDropdownToggle = document.getElementById("issueDropdownToggle");
+    const selectedCheckboxes = document.querySelectorAll(".issue-checkbox:checked");
+    
+    if (selectedCheckboxes.length === 0) {
+        issueDropdownToggle.textContent = "Select Issues ▼";
+    } else if (selectedCheckboxes.length === 1) {
+        const label = selectedCheckboxes[0].nextElementSibling.textContent;
+        issueDropdownToggle.textContent = label + " ▼";
+    } else {
+        issueDropdownToggle.textContent = `${selectedCheckboxes.length} Issues Selected ▼`;
+    }
+}
+
+/**
  * Reset all filters to default state
  */
 function resetFilters() {
@@ -437,6 +457,7 @@ function resetFilters() {
     if (checkboxGroup && issueDropdownToggle) {
         checkboxGroup.classList.remove("open");
         issueDropdownToggle.classList.remove("active");
+        updateIssueFilterDisplay();
     }
 
     filterBills();

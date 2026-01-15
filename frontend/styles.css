@@ -449,13 +449,17 @@ button {
 
 .modal-header {
     margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 1fr auto;
     gap: 15px;
+    align-items: start;
 }
 
 .modal-header > div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
     flex: 1;
 }
 
@@ -465,6 +469,8 @@ button {
     color: #222;
     line-height: 1.3;
     word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
 }
 
 .modal-close {
@@ -483,7 +489,7 @@ button {
     justify-content: center;
     flex-shrink: 0;
     line-height: 1;
-    margin-top: 2px;
+    align-self: center;
 }
 
 .modal-close:hover {
