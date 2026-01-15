@@ -111,7 +111,9 @@ function filterBills() {
             bill.doc_number.toLowerCase().includes(searchTerm) ||
             bill.caption.toLowerCase().includes(searchTerm) ||
             bill.sponsors.toLowerCase().includes(searchTerm) ||
-            bill.committees.toLowerCase().includes(searchTerm);
+            bill.committees.toLowerCase().includes(searchTerm) ||
+            (bill.first_reader_summary &&
+                bill.first_reader_summary.toLowerCase().includes(searchTerm));
 
         const matchesType =
             !typeFilter ||
