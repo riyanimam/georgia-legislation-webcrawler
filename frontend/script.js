@@ -161,6 +161,40 @@ function generateBillTags(bill) {
 }
 
 // ============================================================================
+// Dark Mode
+// ============================================================================
+
+/**
+ * Initialize dark mode from localStorage preference
+ */
+function initializeDarkMode() {
+    const isDarkMode = localStorage.getItem("darkMode") === "true";
+    if (isDarkMode) {
+        document.body.classList.add("dark-mode");
+        updateDarkModeToggle(true);
+    }
+}
+
+/**
+ * Toggle dark mode and save preference
+ */
+function toggleDarkMode() {
+    const isDarkMode = document.body.classList.toggle("dark-mode");
+    localStorage.setItem("darkMode", isDarkMode);
+    updateDarkModeToggle(isDarkMode);
+}
+
+/**
+ * Update the dark mode toggle button appearance
+ */
+function updateDarkModeToggle(isDarkMode) {
+    const toggle = document.getElementById("darkModeToggle");
+    if (toggle) {
+        toggle.textContent = isDarkMode ? "☀️" : "🌙";
+    }
+}
+
+// ============================================================================
 // Initialization
 // ============================================================================
 
@@ -168,6 +202,7 @@ function generateBillTags(bill) {
  * Initialize the application by setting up event listeners and loading data
  */
 function initializeApp() {
+    initializeDarkMode();
     setupEventListeners();
     loadDataFromFile();
 }
@@ -176,6 +211,12 @@ function initializeApp() {
  * Set up all event listeners for form controls and interactions
  */
 function setupEventListeners() {
+    // Dark mode toggle
+    const darkModeToggle = document.getElementById("darkModeToggle");
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener("click", toggleDarkMode);
+    }
+
     // File input handler
     const fileInput = document.getElementById("fileInput");
     
