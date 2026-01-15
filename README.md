@@ -26,6 +26,7 @@ legislative status history.
 - 🛡️ **Resilient**: Built-in error handling and retry logic
 - 📦 **Accessible Output**: JSON-formatted results with GitHub artifact storage
 - 🎨 **Code Quality**: Pre-commit hooks for linting, formatting, and validation
+- 🌐 **Beautiful UI**: Interactive web dashboard to explore and search legislation
 
 ## Quick Start
 
@@ -34,6 +35,7 @@ legislative status history.
 - **Python 3.11+**
 - **pip** (Python package manager)
 - **~500MB disk space** (for Chromium browser)
+- **Modern web browser** (for the interactive UI)
 
 ### Installation
 
@@ -53,6 +55,30 @@ playwright install chromium
 # Install pre-commit hooks (optional but recommended)
 pre-commit install
 ```
+
+### Viewing Results with the Interactive UI
+
+The project includes a beautiful, reactive web interface to explore the scraped legislation:
+
+1. **Run the scraper** to generate `ga_legislation.json`:
+
+   ```bash
+   python scraper.py
+   ```
+
+2. **Open the UI** in your browser:
+
+   - Simply open [index.html](index.html) in a web browser
+   - Or serve it locally: `python -m http.server 8000` then visit `http://localhost:8000`
+
+**UI Features:**
+
+- 🔍 **Search**: Find bills by number, caption, sponsor, or committee
+- 🏷️ **Filter**: Filter by bill type (House/Senate)
+- 📊 **Statistics**: View real-time counts and bill distribution
+- 🔄 **Sort**: Organize results by bill number or caption
+- 📖 **Details**: Click any bill to see full summary and status history
+- 📁 **File Upload**: Load custom JSON files directly in the browser
 
 ### Running the Scraper
 
