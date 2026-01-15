@@ -56,6 +56,41 @@ playwright install chromium
 pre-commit install
 ```
 
+## Project Structure
+
+This project is organized into two main components:
+
+```text
+georgia-legislation-webcrawler/
+├── backend/                     # Python web scraper
+│   ├── scraper.py              # Main scraping application
+│   └── README.md               # Backend documentation
+├── frontend/                    # Interactive web UI
+│   ├── index.html              # Main HTML markup
+│   ├── styles.css              # Styling and animations
+│   ├── script.js               # Application logic
+│   └── README.md               # Frontend documentation
+├── .github/
+│   └── workflows/              # CI/CD automation
+├── requirements.txt            # Python dependencies
+├── pyproject.toml              # Project metadata
+├── README.md                   # This file
+└── ga_legislation.json         # Generated data (created by scraper)
+```
+
+### Backend vs Frontend
+
+| Aspect       | Backend                                | Frontend                                 |
+| ------------ | -------------------------------------- | ---------------------------------------- |
+| **Location** | `backend/`                             | `frontend/`                              |
+| **Purpose**  | Collect data from website              | Display data interactively               |
+| **Tech**     | Python, Playwright, BeautifulSoup      | HTML5, CSS3, Vanilla JS                  |
+| **Runs**     | Scheduled via GitHub Actions           | In web browser                           |
+| **Output**   | JSON file                              | User interface                           |
+| **Docs**     | [backend/README.md](backend/README.md) | [frontend/README.md](frontend/README.md) |
+
+See individual README files for detailed documentation on each component.
+
 ### Viewing Results with the Interactive UI
 
 The project includes a beautiful, reactive web interface to explore the scraped legislation:
@@ -63,13 +98,13 @@ The project includes a beautiful, reactive web interface to explore the scraped 
 1. **Run the scraper** to generate `ga_legislation.json`:
 
    ```bash
-   python scraper.py
+   python backend/scraper.py
    ```
 
 2. **Open the UI** in your browser:
 
-   - Simply open [index.html](index.html) in a web browser
-   - Or serve it locally: `python -m http.server 8000` then visit `http://localhost:8000`
+   - Serve locally: `python -m http.server 8000` then visit `http://localhost:8000/frontend/`
+   - Or use VS Code Live Server: right-click `frontend/index.html` and "Open with Live Server"
 
 **UI Features:**
 
@@ -84,11 +119,10 @@ The project includes a beautiful, reactive web interface to explore the scraped 
 
 ```bash
 # Scrape all pages (several hours for complete session)
-python scraper.py
+python backend/scraper.py
 
-# Scrape limited pages for testing
-python scraper.py 1  # Single page (~20-25 bills)
-python scraper.py 5  # First 5 pages
+# Scrape limited pages for testing via environment variable
+MAX_PAGES=5 python backend/scraper.py
 ```
 
 ## Output Format
