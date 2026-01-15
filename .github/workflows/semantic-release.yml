@@ -23,7 +23,7 @@ jobs:
     # Step 1: Clone the repository with full history
     # - Fetch all commits needed for version detection and changelog generation
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
         # Use a personal access token if available for push permissions
@@ -33,7 +33,7 @@ jobs:
     # Step 2: Set up Node.js environment
     # - semantic-release requires Node.js
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: '20'
 
