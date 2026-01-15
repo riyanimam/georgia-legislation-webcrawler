@@ -321,7 +321,7 @@ The backend generates `ga_legislation.json` that the frontend (`frontend/`) cons
 2. Frontend loads it (auto-loads or via file picker)
 3. Users explore and filter results interactively
 
-See [../frontend/README.md](../frontend/README.md) for frontend information.
+See [FRONTEND.md](FRONTEND.md) for frontend information.
 
 ## Future Enhancements
 

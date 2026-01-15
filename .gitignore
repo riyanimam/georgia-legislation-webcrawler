@@ -6,6 +6,17 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Python cache and linting
+.ruff_cache/
+__pycache__/
+*.py[cod]
+*$py.class
+
 # Generated data and debug files
 ga_legislation.json
 debug_page.html

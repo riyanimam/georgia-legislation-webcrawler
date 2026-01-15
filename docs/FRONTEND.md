@@ -164,7 +164,7 @@ The backend (`backend/scraper.py`) generates JSON data that this frontend consum
 2. Frontend loads the JSON and displays it interactively
 3. Users can also upload custom JSON files via the file picker
 
-See [../README.md](../README.md) for backend information.
+See [BACKEND.md](BACKEND.md) for backend information.
 
 ## Troubleshooting
 

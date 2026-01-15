@@ -33,7 +33,11 @@ jobs:
       # Step 5: Install Node.js validation tools
     - name: Install Node.js validation tools
       run: |
-        npm install -g markdownlint-cli
+        npm install -g markdownlint-cli @biomejs/biome
+
+      # Step 5a: Run Biome check
+    - name: Biome check
+      run: biome ci --no-errors-on-unmatched
 
       # Step 6: Run Python linting with Ruff
     - name: Ruff lint
