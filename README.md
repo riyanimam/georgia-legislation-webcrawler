@@ -1,13 +1,15 @@
 # Georgia Legislation Web Scraper
 
-A robust Python web scraper for collecting detailed information about Georgia state legislation from
-the [Georgia General Assembly](https://www.legis.ga.gov) website.
+A robust Python web scraper and interactive web UI for collecting and exploring detailed information
+about Georgia state legislation from the [Georgia General Assembly](https://www.legis.ga.gov)
+website.
 
 ## Overview
 
 This project automates the collection of Georgia House and Senate bills with comprehensive data
 extraction including bill numbers, captions, committee assignments, sponsors, summaries, and
-legislative status history.
+legislative status history. Includes an interactive web dashboard for searching and filtering
+results.
 
 ### What Gets Scraped
 
@@ -23,10 +25,19 @@ legislative status history.
 - 🎯 **JavaScript-Ready**: Playwright-based rendering for dynamic Angular.js content
 - ⚙️ **Fully Automated**: CI/CD integration via GitHub Actions with scheduled runs
 - 📊 **Comprehensive Data**: Captures both overview and detailed bill information
-- 🛡️ **Resilient**: Built-in error handling and retry logic
+- 🛡️ **Resilient**: Built-in error handling and retry logic with data validation
 - 📦 **Accessible Output**: JSON-formatted results with GitHub artifact storage
 - 🎨 **Code Quality**: Pre-commit hooks for linting, formatting, and validation
 - 🌐 **Beautiful UI**: Interactive web dashboard to explore and search legislation
+- ♿ **Accessible**: ARIA labels and keyboard navigation support
+
+## Documentation
+
+- **[Backend Documentation](docs/BACKEND.md)** - Scraper setup and usage
+- **[Frontend Documentation](docs/FRONTEND.md)** - UI features and deployment
+- **[Data Schema](docs/DATA_SCHEMA.md)** - JSON structure and validation rules
+- **[Contributing Guide](docs/CONTRIBUTING.md)** - How to contribute
+- **[Refactoring Notes](docs/REFACTORING_NOTES.md)** - Code organization details
 
 ## Quick Start
 
@@ -350,6 +361,48 @@ yamllint .github/workflows/
 | `mdformat`         | Markdown formatting with GFM support        |
 | `markdownlint-cli` | Markdown linting                            |
 | `pre-commit`       | Pre-commit hook framework                   |
+
+## Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](docs/CONTRIBUTING.md) for:
+
+- Development setup
+- Code style guidelines
+- Testing procedures
+- PR submission process
+- Branch naming conventions
+
+### Reporting Issues
+
+Found a bug? Have a feature request?
+
+1. Check if the issue already exists
+2. Provide clear reproduction steps
+3. Include relevant error messages
+4. Specify your environment (OS, Python version, etc.)
+
+### Development Workflow
+
+```bash
+# Setup
+git clone https://github.com/riyanimam/georgia-legislation-webcrawler.git
+cd georgia-legislation-webcrawler
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+npm install
+
+# Make changes on a feature branch
+git checkout -b feat/your-feature
+
+# Run validation
+ruff check backend/
+biome check
+
+# Test thoroughly before committing
+git commit -am "feat: Description of changes"
+git push origin feat/your-feature
+```
 
 ## License
 

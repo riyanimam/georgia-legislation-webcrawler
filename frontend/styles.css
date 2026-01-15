@@ -367,6 +367,17 @@ button {
     word-break: break-word;
 }
 
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white !important;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: 500;
+    width: fit-content;
+}
+
 .bill-actions {
     display: flex;
     gap: 10px;
@@ -415,7 +426,8 @@ button {
     margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
-    align-items: start;
+    align-items: flex-start;
+    gap: 15px;
 }
 
 .modal-title {
@@ -431,11 +443,15 @@ button {
     cursor: pointer;
     color: #999;
     padding: 0;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    line-height: 1;
 }
 
 .modal-close:hover {

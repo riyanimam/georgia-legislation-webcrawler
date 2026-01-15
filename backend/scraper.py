@@ -18,6 +18,12 @@ except ImportError:
     print("Then run: playwright install")
 
 
+class ValidationError(Exception):
+    """Raised when bill data validation fails."""
+
+    pass
+
+
 class GALegislationScraper:
     def __init__(self):
         self.base_url = "https://www.legis.ga.gov"
@@ -44,6 +50,35 @@ class GALegislationScraper:
                 "Upgrade-Insecure-Requests": "1",
             }
         )
+
+    def validate_bill_data(self, bill: dict) -> None:
+        """Validate that bill data contains required fields and valid types.
+
+        Args:
+            bill (dict): Bill data to validate.
+
+        Raises:
+            ValidationError: If required fields are missing or invalid.
+        """
+        required_fields = ["doc_number", "caption", "sponsors", "committees", "detail_url"]
+
+        for field in required_fields:
+            if field not in bill:
+                raise ValidationError(f"Missing required field: {field}")
+            if not isinstance(bill[field], str):
+                raise ValidationError(f"Field '{field}' must be a string, got {type(bill[field])}")
+            if not bill[field].strip():
+                raise ValidationError(f"Field '{field}' cannot be empty")
+
+        # Validate status_history if present
+        if "status_history" in bill and bill["status_history"]:
+            if not isinstance(bill["status_history"], list):
+                raise ValidationError("Field 'status_history' must be a list")
+            for item in bill["status_history"]:
+                if not isinstance(item, dict) or "date" not in item or "status" not in item:
+                    raise ValidationError(
+                        "Status history items must have 'date' and 'status' fields"
+                    )
 
     def get_legislation_details(self, page, url: str) -> dict:
         """Scrape detailed information from individual legislation page using Playwright.
@@ -285,23 +320,26 @@ class GALegislationScraper:
                                 for sponsor in tds[3].select("a"):
                                     sponsors_list.append(sponsor.text.strip())
                                 sponsors = "; ".join(sponsors_list)
-
                                 print(f"  Found {doc_number}...")
                                 details = self.get_legislation_details(page, detail_url)
 
-                                all_legislation.append(
-                                    {
-                                        "doc_number": doc_number,
-                                        "caption": caption,
-                                        "committees": committees,
-                                        "sponsors": sponsors,
-                                        "detail_url": detail_url,
-                                        "first_reader_summary": details.get(
-                                            "first_reader_summary", ""
-                                        ),
-                                        "status_history": details.get("status_history", []),
-                                    }
-                                )
+                                bill_data = {
+                                    "doc_number": doc_number,
+                                    "caption": caption,
+                                    "committees": committees,
+                                    "sponsors": sponsors,
+                                    "detail_url": detail_url,
+                                    "first_reader_summary": details.get("first_reader_summary", ""),
+                                    "status_history": details.get("status_history", []),
+                                }
+
+                                # Validate bill data before adding
+                                try:
+                                    self.validate_bill_data(bill_data)
+                                    all_legislation.append(bill_data)
+                                except ValidationError as e:
+                                    print(f"  Validation error for {doc_number}: {e}")
+                                    continue
 
                                 # Delay between requests
                                 time.sleep(0.5)

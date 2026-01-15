@@ -110,6 +110,17 @@ function getBillIssue(bill) {
 }
 
 /**
+ * Get the latest status from a bill's status history
+ */
+function getLatestStatus(bill) {
+    if (!bill.status_history || bill.status_history.length === 0) {
+        return "Unknown";
+    }
+    // Return the last status in the array
+    return bill.status_history[bill.status_history.length - 1].status;
+}
+
+/**
  * Generate HTML tags for a bill based on relevant keywords found in its content
  */
 function generateBillTags(bill) {
@@ -143,10 +154,8 @@ function generateBillTags(bill) {
  * Initialize the application by setting up event listeners and loading data
  */
 function initializeApp() {
-    console.log("Initializing app...");
     setupEventListeners();
     loadDataFromFile();
-    console.log("App initialized!");
 }
 
 /**
@@ -155,11 +164,9 @@ function initializeApp() {
 function setupEventListeners() {
     // File input handler
     const fileInput = document.getElementById("fileInput");
-    console.log("File input element:", fileInput);
     
     if (fileInput) {
         fileInput.addEventListener("change", handleFileUpload);
-        console.log("File input event listener attached");
     } else {
         console.error("File input element not found!");
     }
@@ -173,8 +180,9 @@ function setupEventListeners() {
         issueDropdownToggle.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            checkboxGroup.classList.toggle("open");
+            const isOpen = checkboxGroup.classList.toggle("open");
             issueDropdownToggle.classList.toggle("active");
+            issueDropdownToggle.setAttribute("aria-expanded", isOpen);
         });
 
         // Close dropdown when clicking outside
@@ -183,6 +191,7 @@ function setupEventListeners() {
             if (!isClickInside) {
                 checkboxGroup.classList.remove("open");
                 issueDropdownToggle.classList.remove("active");
+                issueDropdownToggle.setAttribute("aria-expanded", "false");
             }
         });
         
@@ -219,6 +228,13 @@ function setupEventListeners() {
             }
         });
     }
+
+    // Keyboard navigation: ESC to close modal
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            closeModal();
+        }
+    });
 }
 
 /**
@@ -247,31 +263,26 @@ function loadDataFromFile() {
         })
         .catch((error) => {
             // File not found or invalid - user must upload
-            console.log("Auto-load failed, waiting for file upload");
         });
 }
-
 /**
  * Handle file upload from user
  */
 function handleFileUpload(e) {
     const file = e.target.files[0];
-    console.log("File upload triggered", file);
     
     if (!file) {
-        console.log("No file selected");
+    
+    if (!file) {
         return;
     }
 
     const reader = new FileReader();
     reader.onload = (event) => {
         try {
-            console.log("File read successfully, parsing JSON...");
             const data = JSON.parse(event.target.result);
-            console.log("Parsed data:", data);
             
             if (Array.isArray(data)) {
-                console.log("Data is an array with", data.length, "items");
                 allBills = data;
                 filteredBills = [...allBills];
                 updateStats();
@@ -281,24 +292,16 @@ function handleFileUpload(e) {
                 const fileInputWrapper = document.querySelector(".file-input-wrapper");
                 if (fileInputWrapper) {
                     fileInputWrapper.style.display = "none";
-                    console.log("File input hidden");
                 }
-                console.log("Data loaded successfully!");
             } else {
-                console.error("Data is not an array");
                 alert("Invalid JSON format. Expected an array of bills.");
             }
         } catch (error) {
-            console.error("Error parsing JSON:", error);
             alert(`Error loading JSON file: ${error.message}`);
         }
     };
     
     reader.onerror = () => {
-        console.error("FileReader error");
-        alert("Error reading file");
-    };
-    
     reader.readAsText(file);
 }
 
@@ -402,8 +405,6 @@ function updateStats() {
     const hb = allBills.filter((b) => b.doc_number.startsWith("HB")).length;
     const sb = allBills.filter((b) => b.doc_number.startsWith("SB")).length;
 
-    console.log("Updating stats:", { total, filtered, hb, sb });
-
     statsContainer.innerHTML = `
         <div class="stat-card">
             <div class="number">${total}</div>
@@ -415,8 +416,6 @@ function updateStats() {
         </div>
         <div class="stat-card">
             <div class="number">${hb}</div>
-            <div class="label">House Bills</div>
-        </div>
         <div class="stat-card">
             <div class="number">${sb}</div>
             <div class="label">Senate Bills</div>
@@ -429,7 +428,6 @@ function updateStats() {
  */
 function renderBills() {
     const container = document.getElementById("billsContainer");
-    console.log("Rendering", filteredBills.length, "bills");
 
     if (filteredBills.length === 0) {
         container.innerHTML =
@@ -442,12 +440,15 @@ function renderBills() {
         .map(
             (bill, index) => `
             <div class="bill-card" data-bill-index="${index}">
-                <div class="bill-header">
                     <div class="bill-number">${bill.doc_number}</div>
                     <div class="bill-tags">${generateBillTags(bill)}</div>
                 </div>
                 <div class="bill-caption">${bill.caption}</div>
                 <div class="bill-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Status:</span>
+                        <span class="meta-value status-badge">${getLatestStatus(bill)}</span>
+                    </div>
                     <div class="meta-item">
                         <span class="meta-label">Sponsors:</span>
                         <span class="meta-value">${truncate(bill.sponsors, 50)}</span>
@@ -466,7 +467,6 @@ function renderBills() {
         )
         .join("");
 
-    console.log("Bills rendered successfully");
     // Attach event listeners to dynamically created elements
     attachBillCardListeners();
 }
@@ -480,7 +480,6 @@ function attachBillCardListeners() {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
             const billIndex = btn.closest(".bill-card").dataset.billIndex;
-            const bill = filteredBills[billIndex];
             openModal(bill);
         });
     });
