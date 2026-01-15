@@ -40,14 +40,13 @@ jobs:
     # Step 3: Install semantic-release and plugins
     # - @semantic-release/release-notes-generator: Generates release notes from commits
     # - @semantic-release/changelog: Updates CHANGELOG.md from semantic commits
-    # - @semantic-release/git: Commits changelog and version bumps back to repo
     # - @semantic-release/github: Creates GitHub releases with release notes
+    # Note: @semantic-release/git removed to avoid conflicts with branch protection rules
     - name: Install dependencies
       run: |
         npm install -g semantic-release \
           @semantic-release/release-notes-generator \
           @semantic-release/changelog \
-          @semantic-release/git \
           @semantic-release/github
 
     # Step 4: Run semantic-release
