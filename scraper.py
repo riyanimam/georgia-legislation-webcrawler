@@ -7,6 +7,15 @@ from typing import List, Dict
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+# Try to import playwright, with fallback to requests-only mode
+try:
+    from playwright.sync_api import sync_playwright
+    PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    PLAYWRIGHT_AVAILABLE = False
+    print("Warning: Playwright not installed. Install with: pip install playwright")
+    print("Then run: playwright install")
+
 class GALegislationScraper:
     def __init__(self):
         self.base_url = "https://www.legis.ga.gov"
@@ -124,101 +133,129 @@ class GALegislationScraper:
         return legislation_data
     
     def get_all_pages(self, max_pages: int = None) -> List[Dict]:
-        """Scrape all pages of legislation."""
-        all_legislation = []
-        page = 1
-        consecutive_failures = 0
-        max_consecutive_failures = 3
+        """Scrape all pages of legislation using Playwright for JavaScript rendering."""
+        if not PLAYWRIGHT_AVAILABLE:
+            print("Error: Playwright is required to scrape this website (it uses JavaScript).")
+            print("Install it with: pip install playwright")
+            print("Then run: playwright install")
+            return []
         
-        while True:
-            if max_pages and page > max_pages:
-                break
-            
-            if consecutive_failures >= max_consecutive_failures:
-                print(f"\nStopping after {max_consecutive_failures} consecutive failed pages")
-                break
-                
-            print(f"\nScraping page {page}...")
-            url = f"{self.base_url}/legislation/all?page={page}"
+        all_legislation = []
+        
+        with sync_playwright() as p:
+            # Launch browser with headless mode
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            )
+            page = context.new_page()
             
             try:
-                response = self.session.get(url, timeout=30)
-                response.raise_for_status()
-                soup = BeautifulSoup(response.content, 'html.parser')
+                page_num = 1
+                consecutive_failures = 0
+                max_consecutive_failures = 3
                 
-                # Find all legislation rows
-                rows = soup.select('table.table-striped tbody tr')
-                
-                if not rows:
-                    print("No more results found.")
-                    break
-                
-                consecutive_failures = 0  # Reset on success
-                
-                for row in rows:
+                while True:
+                    if max_pages and page_num > max_pages:
+                        break
+                    
+                    if consecutive_failures >= max_consecutive_failures:
+                        print(f"\nStopping after {max_consecutive_failures} consecutive failed pages")
+                        break
+                    
+                    print(f"\nScraping page {page_num}...")
+                    url = f"{self.base_url}/legislation/all?page={page_num}"
+                    
                     try:
-                        # Extract basic info
-                        doc_number_elem = row.select_one('td:first-child a')
-                        if not doc_number_elem:
-                            continue
+                        # Navigate to the page and wait for content to load
+                        page.goto(url, wait_until='networkidle', timeout=60000)
                         
-                        doc_number = doc_number_elem.text.strip()
-                        detail_url = self.base_url + doc_number_elem['href']
+                        # Wait for table to load
+                        try:
+                            page.wait_for_selector('table tbody tr', timeout=10000)
+                        except:
+                            # Try alternative selectors
+                            print(f"  Waiting for alternative selectors...")
+                            try:
+                                page.wait_for_selector('table tr', timeout=10000)
+                            except:
+                                print("  No table rows found on page")
+                                break
                         
-                        caption_td = row.select('td')[1]
-                        caption_elem = caption_td.select_one('a')
-                        caption = caption_elem.text.strip() if caption_elem else ""
+                        # Get the HTML after JavaScript has rendered
+                        html_content = page.content()
+                        soup = BeautifulSoup(html_content, 'html.parser')
                         
-                        committees_td = row.select('td')[2]
-                        committees_list = []
-                        for dd in committees_td.select('dd a'):
-                            committees_list.append(dd.text.strip())
-                        committees = '; '.join(committees_list)
+                        # Find all legislation rows
+                        rows = soup.select('table tbody tr')
+                        if not rows:
+                            rows = soup.select('table tr')[1:]  # Skip header row if it exists
                         
-                        sponsors_td = row.select('td')[3]
-                        sponsors_list = []
-                        for sponsor in sponsors_td.select('ol.sponsorList li a'):
-                            sponsors_list.append(sponsor.text.strip())
-                        sponsors = '; '.join(sponsors_list)
+                        if not rows:
+                            print("No more results found.")
+                            break
                         
-                        print(f"  Scraping details for {doc_number}...")
-                        details = self.get_legislation_details(detail_url)
+                        consecutive_failures = 0  # Reset on success
                         
-                        all_legislation.append({
-                            'doc_number': doc_number,
-                            'caption': caption,
-                            'committees': committees,
-                            'sponsors': sponsors,
-                            'detail_url': detail_url,
-                            'first_reader_summary': details.get('first_reader_summary', ''),
-                            'status_history': details.get('status_history', [])
-                        })
+                        for row in rows:
+                            try:
+                                # Extract basic info
+                                doc_number_elem = row.select_one('td:first-child a')
+                                if not doc_number_elem:
+                                    continue
+                                
+                                doc_number = doc_number_elem.text.strip()
+                                detail_url = self.base_url + doc_number_elem['href']
+                                
+                                tds = row.select('td')
+                                if len(tds) < 4:
+                                    continue
+                                
+                                caption_elem = tds[1].select_one('a')
+                                caption = caption_elem.text.strip() if caption_elem else ""
+                                
+                                committees_list = []
+                                for dd in tds[2].select('a'):
+                                    committees_list.append(dd.text.strip())
+                                committees = '; '.join(committees_list)
+                                
+                                sponsors_list = []
+                                for sponsor in tds[3].select('a'):
+                                    sponsors_list.append(sponsor.text.strip())
+                                sponsors = '; '.join(sponsors_list)
+                                
+                                print(f"  Found {doc_number}...")
+                                details = self.get_legislation_details(detail_url)
+                                
+                                all_legislation.append({
+                                    'doc_number': doc_number,
+                                    'caption': caption,
+                                    'committees': committees,
+                                    'sponsors': sponsors,
+                                    'detail_url': detail_url,
+                                    'first_reader_summary': details.get('first_reader_summary', ''),
+                                    'status_history': details.get('status_history', [])
+                                })
+                                
+                                # Delay between requests
+                                time.sleep(0.5)
+                                
+                            except Exception as e:
+                                print(f"  Error processing row: {e}")
+                                continue
                         
-                        # Longer delay between requests to avoid rate limiting
-                        time.sleep(1.5)
+                        page_num += 1
+                        # Delay between pages
+                        time.sleep(1)
                         
                     except Exception as e:
-                        print(f"  Error processing row: {e}")
-                        continue
-                
-                page += 1
-                # Extra delay between pages
-                time.sleep(2)
-                
-            except requests.exceptions.Timeout:
-                consecutive_failures += 1
-                print(f"  Timeout on page {page} (attempt {consecutive_failures}/{max_consecutive_failures})")
-                time.sleep(10)  # Wait longer before retrying
-                
-            except requests.exceptions.RequestException as e:
-                consecutive_failures += 1
-                print(f"  Request error on page {page}: {e}")
-                time.sleep(10)
-                
-            except Exception as e:
-                consecutive_failures += 1
-                print(f"  Unexpected error on page {page}: {e}")
-                time.sleep(10)
+                        consecutive_failures += 1
+                        print(f"  Error on page {page_num}: {e}")
+                        time.sleep(5)
+            
+            finally:
+                context.close()
+                browser.close()
         
         return all_legislation
 
