@@ -1,8 +1,8 @@
 {
-    "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+    "$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
     "files": {
-        "include": ["frontend", "backend"],
-        "ignore": [".venv", ".git", "node_modules"]
+        "includes": ["frontend", "backend"],
+        "ignoreUnknown": true
     },
     "javascript": {
         "formatter": {
