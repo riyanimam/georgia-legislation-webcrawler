@@ -42,7 +42,7 @@ jobs:
       run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
     
     - name: Upload JSON as artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v6
       with:
         name: ga-legislation-${{ steps.date.outputs.date }}
         path: ga_legislation.json
