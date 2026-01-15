@@ -8,13 +8,14 @@ on:
         description: 'Maximum pages to scrape (leave empty for all pages)'
         required: false
         default: ''
-  # Run on schedule (every day at 2 AM UTC)
+  # Run on schedule (every day at 2 AM UTC) - commented out by default
   # schedule:
   #   - cron: '0 2 * * *'
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    timeout-minutes: 120  # 2 hour timeout
     
     steps:
     - name: Checkout repository
@@ -30,6 +31,7 @@ jobs:
         pip install requests beautifulsoup4
     
     - name: Run scraper
+      continue-on-error: true  # Don't fail the whole job if scraper has issues
       run: |
         if [ -n "${{ github.event.inputs.max_pages }}" ]; then
           python scraper.py ${{ github.event.inputs.max_pages }}
@@ -37,20 +39,34 @@ jobs:
           python scraper.py
         fi
     
+    - name: Check if output file exists
+      id: check_file
+      run: |
+        if [ -f ga_legislation.json ]; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+          echo "JSON file created successfully"
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+          echo "Warning: JSON file was not created"
+        fi
+    
     - name: Get current date
       id: date
-      run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      run: echo "date=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
     
     - name: Upload JSON as artifact
+      if: steps.check_file.outputs.exists == 'true'
       uses: actions/upload-artifact@v6
       with:
         name: ga-legislation-${{ steps.date.outputs.date }}
         path: ga_legislation.json
         retention-days: 90
     
-    - name: Commit and push if changes
-      run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "github-actions[bot]"
-        git add ga_legislation.json
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update legislation data - ${{ steps.date.outputs.date }}" && git push)
+    # Optional: Commit and push if changes (commented out by default)
+    # - name: Commit and push if changes
+    #   if: steps.check_file.outputs.exists == 'true'
+    #   run: |
+    #     git config --local user.email "github-actions[bot]@users.noreply.github.com"
+    #     git config --local user.name "github-actions[bot]"
+    #     git add ga_legislation.json
+    #     git diff --quiet && git diff --staged --quiet || (git commit -m "Update legislation data - ${{ steps.date.outputs.date }}" && git push)
