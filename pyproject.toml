@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "georgia-legislation-webcrawler"
+version = "0.1.0"
+description = "Web scraper for Georgia legislation bills with Playwright-based JavaScript rendering and detail extraction"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Ben Go", email = "bengo@example.com"}
+]
+keywords = ["georgia", "legislation", "scraper", "bills", "web-automation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP",
+]
+dependencies = [
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.0",
+    "playwright>=1.40.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit>=3.5.0",
+    "ruff>=0.1.0",
+    "mdformat>=0.7.17",
+    "mdformat-gfm>=0.6.0",
+    "mdformat-tables>=1.0.0",
+    "markdownlint-cli>=0.37.0",
+    "yamllint>=1.35.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/riyanimam/georgia-legislation-webcrawler"
+Repository = "https://github.com/riyanimam/georgia-legislation-webcrawler.git"
+Issues = "https://github.com/riyanimam/georgia-legislation-webcrawler/issues"
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # Pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+]
+ignore = [
+    "E501",  # line-length (handled by formatter)
+    "W505",  # doc-line-too-long
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["scraper"]
+
+[tool.mdformat]
+number = true
+wrap = 100
+
+[tool.mdformat.plugins.tables]
+tables = true
+
+[tool.mdformat.plugins.gfm]
+strikethrough = true
