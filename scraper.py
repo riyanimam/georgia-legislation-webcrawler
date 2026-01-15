@@ -1,9 +1,9 @@
+import json
+import sys
+import time
+
 import requests
 from bs4 import BeautifulSoup
-import json
-import time
-import sys
-from typing import List, Dict
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
@@ -46,7 +46,7 @@ class GALegislationScraper:
             }
         )
 
-    def get_legislation_details(self, page, url: str) -> Dict:
+    def get_legislation_details(self, page, url: str) -> dict:
         """Scrape detailed information from individual legislation page using Playwright.
 
         Navigates to a bill's detail page, waits for JavaScript rendering, and
@@ -175,7 +175,7 @@ class GALegislationScraper:
         print(f"\nScraping complete! Saved {len(legislation_data)} items to {output_file}")
         return legislation_data
 
-    def get_all_pages(self, max_pages: int = None) -> List[Dict]:
+    def get_all_pages(self, max_pages: int = None) -> list[dict]:
         """Scrape all pages of legislation using Playwright for JavaScript rendering.
 
         Iterates through paginated legislation listings, extracting bill information
