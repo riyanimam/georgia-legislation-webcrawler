@@ -42,53 +42,65 @@ class GALegislationScraper:
             'Upgrade-Insecure-Requests': '1'
         })
     
-    def get_legislation_details(self, url: str) -> Dict:
-        """Scrape detailed information from individual legislation page."""
-        max_retries = 3
-        for attempt in range(max_retries):
+    def get_legislation_details(self, page, url: str) -> Dict:
+        """Scrape detailed information from individual legislation page using Playwright."""
+        try:
+            # Navigate to detail page
+            page.goto(url, wait_until='networkidle', timeout=60000)
+            
+            # Wait for content to load
             try:
-                response = self.session.get(url, timeout=30)
-                response.raise_for_status()
-                soup = BeautifulSoup(response.content, 'html.parser')
-                
-                details = {
-                    'first_reader_summary': '',
-                    'status_history': []
-                }
-                
-                # Get First Reader Summary
-                summary_section = soup.find('h3', string='First Reader Summary')
-                if summary_section:
-                    summary_content = summary_section.find_next('div', class_='summary-content')
-                    if summary_content:
-                        details['first_reader_summary'] = summary_content.text.strip()
-                
-                # Get Status History
-                history_section = soup.find('h3', string='Status History')
-                if history_section:
-                    history_table = history_section.find_next('table')
-                    if history_table:
-                        history_rows = history_table.select('tbody tr')
-                        for row in history_rows:
-                            cols = row.find_all('td')
-                            if len(cols) >= 2:
-                                details['status_history'].append({
-                                    'date': cols[0].text.strip(),
-                                    'status': cols[1].text.strip()
-                                })
-                
-                return details
-                
-            except requests.exceptions.Timeout:
-                print(f"  Timeout on attempt {attempt + 1}/{max_retries} for {url}")
-                if attempt < max_retries - 1:
-                    time.sleep(5 * (attempt + 1))  # Exponential backoff
+                page.wait_for_selector('h3', timeout=5000)
+            except:
+                pass  # Content might load without explicit h3 wait
+            
+            # Get the rendered HTML
+            html_content = page.content()
+            
+            # Debug: save a sample detail page
+            if url.endswith('69281'):
+                with open('debug_detail.html', 'w', encoding='utf-8') as f:
+                    f.write(html_content)
+            
+            soup = BeautifulSoup(html_content, 'html.parser')
+            
+            details = {
+                'first_reader_summary': '',
+                'status_history': []
+            }
+            
+            # Get First Reader Summary - look for h2 instead of h3
+            summary_section = soup.find('h2', string=lambda x: x and 'First Reader Summary' in x)
+            if summary_section:
+                # Get the content after the h2
+                summary_card = summary_section.find_next('div', class_='card-text-sm')
+                if summary_card:
+                    details['first_reader_summary'] = summary_card.text.strip()
                 else:
-                    print(f"  Failed to get details after {max_retries} attempts")
-                    return {'first_reader_summary': '', 'status_history': []}
-            except Exception as e:
-                print(f"  Error getting details from {url}: {e}")
-                return {'first_reader_summary': '', 'status_history': []}
+                    # Try a more general approach
+                    content_div = summary_section.find_next('div')
+                    if content_div and 'card-text' in str(content_div.get('class', '')):
+                        details['first_reader_summary'] = content_div.text.strip()
+            
+            # Get Status History - look for h2 instead of h3
+            history_section = soup.find('h2', string=lambda x: x and 'Status History' in x)
+            if history_section:
+                history_table = history_section.find_next('table')
+                if history_table:
+                    history_rows = history_table.select('tbody tr')
+                    for row in history_rows:
+                        cols = row.find_all('td')
+                        if len(cols) >= 2:
+                            details['status_history'].append({
+                                'date': cols[0].text.strip(),
+                                'status': cols[1].text.strip()
+                            })
+            
+            return details
+            
+        except Exception as e:
+            print(f"  Warning: Could not get details from {url}: {e}")
+            return {'first_reader_summary': '', 'status_history': []}
     
     def test_connection(self) -> bool:
         """Test if we can connect to the website."""
@@ -96,14 +108,14 @@ class GALegislationScraper:
         try:
             response = self.session.get(self.base_url, timeout=30)
             response.raise_for_status()
-            print("✓ Connection successful!")
+            print("[OK] Connection successful!")
             return True
         except requests.exceptions.Timeout:
-            print("✗ Connection timed out. The server may be blocking automated requests.")
+            print("[ERROR] Connection timed out. The server may be blocking automated requests.")
             print("  This is common with government websites when accessed from cloud IPs.")
             return False
         except requests.exceptions.RequestException as e:
-            print(f"✗ Connection failed: {e}")
+            print(f"[ERROR] Connection failed: {e}")
             return False
     
     def scrape_and_save(self, output_file: str = 'ga_legislation.json', max_pages: int = None):
@@ -225,7 +237,7 @@ class GALegislationScraper:
                                 sponsors = '; '.join(sponsors_list)
                                 
                                 print(f"  Found {doc_number}...")
-                                details = self.get_legislation_details(detail_url)
+                                details = self.get_legislation_details(page, detail_url)
                                 
                                 all_legislation.append({
                                     'doc_number': doc_number,
