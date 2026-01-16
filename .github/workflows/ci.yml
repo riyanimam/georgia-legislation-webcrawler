@@ -10,11 +10,6 @@ on:
         description: Maximum pages to scrape (leave empty for all pages)
         required: false
         default: ''
-      commit_data:
-        description: Commit and push scraped data to repository
-        type: boolean
-        required: false
-        default: false
   # Scheduled trigger
   schedule:
   - cron: 0 4 * * *
@@ -129,17 +124,16 @@ jobs:
     # Uses semantic versioning for commit messages
     # Note: Using -f flag to force-add ga_legislation.json even though it's in .gitignore
     # This allows CI to commit generated data while keeping local copies ignored
-    # Only runs on scheduled runs (daily) or if explicitly enabled in manual dispatch
+    # Only runs on scheduled runs (daily) which execute on main branch
     - name: Commit and push if changes
       if: |
         steps.check_file.outputs.exists == 'true' &&
-        (github.event_name == 'schedule' ||
-        github.event.inputs.commit_data == 'true')
+        github.event_name == 'schedule'
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git add -f ga_legislation.json
         git diff --quiet && git diff --staged --quiet || (
           git commit -m "chore: update legislation data - ${{ steps.date.outputs.date }}"
-          git push origin ${{ github.ref }}
+          git push origin main
         )
