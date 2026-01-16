@@ -55,12 +55,10 @@ jobs:
       run: npm install
 
     # Step 6: Run the scraper
-    # - Conditionally passes max_pages parameter if provided
-    #   (useful if website is temporarily down)
-    # Step 6: Run the scraper
     # - Respectfully scrapes with configurable delays to respect server
     # - Uses environment variables to control request rate
     # - continue-on-error: true allows workflow to continue if server blocks IPs
+    # - Outputs ga_legislation.json to repository root
     - name: Run scraper
       continue-on-error: true
       env:
@@ -75,6 +73,15 @@ jobs:
           echo "Scraping all available pages..."
           echo "Using respectful settings: 2s delay, 2 concurrent requests"
           python backend/scraper.py
+        fi
+        
+        # Verify output file location
+        if [ -f ga_legislation.json ]; then
+          echo "✓ Output file created at repository root"
+        else
+          echo "⚠ Output file not found at repository root"
+          # Check if it was created elsewhere
+          find . -name "ga_legislation.json" -type f
         fi
 
     # Step 7: Verify that output file was created
@@ -119,21 +126,55 @@ jobs:
         path: ga_legislation.json
         retention-days: 7
 
-    # Step 11: Commit and push results to repository
-    # Automatically commits scraped data to the repository
-    # Uses semantic versioning for commit messages
-    # Note: Using -f flag to force-add ga_legislation.json even though it's in .gitignore
-    # This allows CI to commit generated data while keeping local copies ignored
-    # Only runs on scheduled runs (daily) which execute on main branch
-    - name: Commit and push if changes
+    # Step 11: Create GitHub App token for bypass branch protection
+    # Uses the GitHub App credentials to get a token that can bypass
+    # branch protection rules and create pull requests
+    - name: Generate GitHub App token
+      id: app-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ secrets.APP_ID }}
+        private-key: ${{ secrets.PRIVATE_KEY }}
       if: |
         steps.check_file.outputs.exists == 'true' &&
         github.event_name == 'schedule'
+
+    # Step 12: Create feature branch and commit changes
+    # Creates a new branch for the data update, commits the changes,
+    # and pushes to remote. Uses the GitHub App token for authentication.
+    - name: Create pull request with updated data
+      if: |
+        steps.check_file.outputs.exists == 'true' &&
+        github.event_name == 'schedule'
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
+
+        # Create a feature branch with timestamp
+        BRANCH_NAME="update-legislation-${{ steps.date.outputs.date }}"
+        git checkout -b "$BRANCH_NAME"
+
+        # Add the generated file (force add since it's in .gitignore)
         git add -f ga_legislation.json
-        git diff --quiet && git diff --staged --quiet || (
+
+        # Only commit if there are changes
+        if ! git diff --cached --quiet; then
           git commit -m "chore: update legislation data - ${{ steps.date.outputs.date }}"
-          git push origin main
-        )
+          git push origin "$BRANCH_NAME"
+
+          # Create pull request using GitHub CLI
+          gh pr create \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --title "chore: update legislation data - ${{ steps.date.outputs.date }}" \
+            --body "Automated legislation data update from web scraper
+
+Date: ${{ steps.date.outputs.date }}
+Triggered by: Daily schedule (4 AM UTC)
+
+This PR contains the latest Georgia legislation data scraped from the state legislature website."
+        else
+          echo "No changes detected in ga_legislation.json"
+        fi
