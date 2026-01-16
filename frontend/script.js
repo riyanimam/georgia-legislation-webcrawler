@@ -1,6 +1,8 @@
 // ============================================================================
 // Data Management
 // ============================================================================
+console.log("script.js loaded successfully!");
+
 // This file uses ES Modules (ECMAScript standard) - not CommonJS
 // Loaded as: <script type="module" src="script.js"></script>
 
@@ -243,7 +245,8 @@ function initializeApp() {
     loadFavorites();
     initializeDarkMode();
     setupEventListeners();
-    loadDataFromFile();
+    // Note: loadDataFromFile() triggers CORS errors on file:// protocol
+    // Use manual file upload via the file input instead
 }
 
 /**
@@ -1326,3 +1329,12 @@ function matchesAdvancedQuery(text, terms) {
 }
 
 // ============================================================================
+// App Startup
+// ============================================================================
+
+console.log("Script fully loaded - attaching DOMContentLoaded listener");
+
+document.addEventListener("DOMContentLoaded", function() {
+    console.log("DOMContentLoaded event fired - initializing app");
+    initializeApp();
+});

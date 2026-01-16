@@ -37,10 +37,11 @@ jobs:
     # - requests: HTTP library for making web requests
     # - beautifulsoup4: HTML parsing library
     # - playwright: Browser automation for JavaScript rendering
+    # - aiohttp: Async HTTP client for concurrent requests
     # - chromium: Headless browser for rendering JavaScript-heavy pages
     - name: Install dependencies
       run: |
-        pip install requests beautifulsoup4 playwright
+        pip install requests beautifulsoup4 playwright aiohttp
         playwright install chromium
 
     # Step 4: Set up Node.js for validation scripts
