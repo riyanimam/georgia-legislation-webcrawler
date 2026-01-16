@@ -69,8 +69,8 @@ jobs:
 
       # Step 13: Validate JSON schema
     - name: Validate JSON schema
+      if: ${{ hashFiles('ga_legislation.json') != '' }}
       run: node scripts/validate-schema.js ga_legislation.json
-      continue-on-error: true
 
       # Step 14: Validate accessibility
     - name: Validate accessibility

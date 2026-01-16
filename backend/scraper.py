@@ -336,10 +336,10 @@ class GALegislationScraper:
 
         Returns:
             List[Dict]: List of legislation records containing:
-                - doc_number (str): Bill identifier (e.g., 'HB 1')
+                - doc_number (str): Bill identifier (e.g., 'HB1', 'SB42')
                 - caption (str): Bill title/summary
-                - committees (str): Assigned committees
-                - sponsors (str): List of sponsors
+                - committees (List[str]): Assigned committees
+                - sponsors (List[str]): List of sponsors
                 - detail_url (str): URL to bill detail page
                 - first_reader_summary (str): Full bill summary
                 - status_history (List[Dict]): Historical status changes
@@ -425,7 +425,7 @@ class GALegislationScraper:
                                     if not doc_number_elem:
                                         continue
 
-                                    doc_number = doc_number_elem.text.strip()
+                                    doc_number = doc_number_elem.text.strip().replace(" ", "")
                                     detail_url = self.base_url + doc_number_elem["href"]
 
                                     tds = row.select("td")
@@ -438,19 +438,17 @@ class GALegislationScraper:
                                     committees_list = []
                                     for dd in tds[2].select("a"):
                                         committees_list.append(dd.text.strip())
-                                    committees = "; ".join(committees_list)
 
                                     sponsors_list = []
                                     for sponsor in tds[3].select("a"):
                                         sponsors_list.append(sponsor.text.strip())
-                                    sponsors = "; ".join(sponsors_list)
                                     print(f"  Found {doc_number}...")
 
                                     bill_data = {
                                         "doc_number": doc_number,
                                         "caption": caption,
-                                        "committees": committees,
-                                        "sponsors": sponsors,
+                                        "committees": committees_list,
+                                        "sponsors": sponsors_list,
                                         "detail_url": detail_url,
                                     }
                                     page_bills.append(bill_data)

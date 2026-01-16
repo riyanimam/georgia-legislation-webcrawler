@@ -112,15 +112,16 @@ jobs:
         path: ga_legislation.json
         retention-days: 7
 
-    # Step 11: Optional - Commit and push results to repository
-    # Uncomment below to automatically commit scraped data to the repository
-    # This is disabled by default to avoid cluttering commit history
-    # Enable if you want automatic data updates in your repo
-    # - name: Commit and push if changes
-    #   if: steps.check_file.outputs.exists == 'true'
-    #   run: |
-    #     git config --local user.email "github-actions[bot]@users.noreply.github.com"
-    #     git config --local user.name "github-actions[bot]"
-    #     git add ga_legislation.json
-    #     git diff --quiet && git diff --staged --quiet || \
-    #       (git commit -m "Update legislation data - ${{ steps.date.outputs.date }}" && git push)
+    # Step 11: Commit and push results to repository
+    # Automatically commits scraped data to the repository
+    # Uses semantic versioning for commit messages
+    - name: Commit and push if changes
+      if: steps.check_file.outputs.exists == 'true'
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add ga_legislation.json
+        git diff --quiet && git diff --staged --quiet || (
+          git commit -m "chore: update legislation data - ${{ steps.date.outputs.date }}"
+          git push origin ${{ github.ref }}
+        )
