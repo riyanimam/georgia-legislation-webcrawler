@@ -159,7 +159,7 @@ jobs:
         # Add the generated file (force add since it's in .gitignore)
         git add -f ga_legislation.json
 
-        # Only commit if there are changes
+        # Check if there are changes to commit
         if ! git diff --cached --quiet; then
           git commit -m "chore: update legislation data - ${{ steps.date.outputs.date }}"
           git push origin "$BRANCH_NAME"
@@ -169,12 +169,7 @@ jobs:
             --base main \
             --head "$BRANCH_NAME" \
             --title "chore: update legislation data - ${{ steps.date.outputs.date }}" \
-            --body "Automated legislation data update from web scraper
-
-Date: ${{ steps.date.outputs.date }}
-Triggered by: Daily schedule (4 AM UTC)
-
-This PR contains the latest Georgia legislation data scraped from the state legislature website."
+            --body "Automated legislation data update from web scraper. $(echo 'Date:') ${{ steps.date.outputs.date }}"
         else
           echo "No changes detected in ga_legislation.json"
         fi

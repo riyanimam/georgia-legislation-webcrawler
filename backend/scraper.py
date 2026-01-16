@@ -599,10 +599,19 @@ class GALegislationScraper:
 
 # Usage
 if __name__ == "__main__":
+    import os
+
+    # Read environment variables for CI/CD configuration
+    max_concurrent = int(os.getenv("SCRAPER_CONCURRENCY", "5"))
+    request_delay = float(os.getenv("SCRAPER_DELAY", "0.1"))
+
     # Allow command line argument for max pages (useful for testing)
     max_pages = int(sys.argv[1]) if len(sys.argv) > 1 else None
 
-    scraper = GALegislationScraper()
+    print(f"Starting scraper with concurrency={max_concurrent}, delay={request_delay}s")
+    scraper = GALegislationScraper(
+        max_concurrent=max_concurrent, request_delay=request_delay
+    )
     data = scraper.scrape_and_save("ga_legislation.json", max_pages=max_pages)
 
     # Print summary
