@@ -223,7 +223,7 @@ class GALegislationScraper:
                 await page.wait_for_selector(
                     "h2", timeout=5000
                 )  # h2 contains "First Reader Summary" and "Status History"
-            except:
+            except Exception:
                 pass  # Content might load without explicit h2 wait
 
             # Get the rendered HTML
@@ -233,31 +233,46 @@ class GALegislationScraper:
 
             details = {"first_reader_summary": "", "status_history": []}
 
-            # Get First Reader Summary - look for h2 instead of h3
+            # Get First Reader Summary - find h2, then get next div sibling
             summary_section = soup.find("h2", string=lambda x: x and "First Reader Summary" in x)
             if summary_section:
-                # Get the content after the h2
-                summary_card = summary_section.find_next("div", class_="card-text-sm")
-                if summary_card:
-                    details["first_reader_summary"] = summary_card.text.strip()
-                else:
-                    # Try a more general approach
-                    content_div = summary_section.find_next("div")
-                    if content_div and "card-text" in str(content_div.get("class", "")):
-                        details["first_reader_summary"] = content_div.text.strip()
+                # The content is in the next sibling div
+                content_div = summary_section.find_next_sibling("div")
+                if content_div:
+                    # Get all text from the div
+                    summary_text = content_div.get_text(strip=True)
+                    if summary_text:
+                        details["first_reader_summary"] = summary_text
 
-            # Get Status History - look for h2 instead of h3
+            # Get Status History - find h2, then find table inside next div
             history_section = soup.find("h2", string=lambda x: x and "Status History" in x)
             if history_section:
-                history_table = history_section.find_next("table")
-                if history_table:
-                    history_rows = history_table.select("tbody tr")
-                    for row in history_rows:
-                        cols = row.find_all("td")
-                        if len(cols) >= 2:
-                            details["status_history"].append(
-                                {"date": cols[0].text.strip(), "status": cols[1].text.strip()}
-                            )
+                # The table is in the next sibling div
+                history_div = history_section.find_next_sibling("div")
+                if history_div:
+                    history_table = history_div.find("table")
+                    if history_table:
+                        # Skip header row (tr with th elements)
+                        history_rows = history_table.select("tbody tr")
+                        for row in history_rows:
+                            cols = row.find_all("td")
+                            if len(cols) >= 2:
+                                date_str = cols[0].get_text(strip=True)
+                                # Convert MM/DD/YYYY to YYYY-MM-DD
+                                try:
+                                    from datetime import datetime
+
+                                    date_obj = datetime.strptime(date_str, "%m/%d/%Y")
+                                    formatted_date = date_obj.strftime("%Y-%m-%d")
+                                except ValueError:
+                                    formatted_date = date_str
+
+                                details["status_history"].append(
+                                    {
+                                        "date": formatted_date,
+                                        "status": cols[1].get_text(strip=True),
+                                    }
+                                )
 
             return details
 
@@ -382,7 +397,6 @@ class GALegislationScraper:
                     page_num = 1
                     consecutive_failures = 0
                     max_consecutive_failures = 3
-                    pending_details = []
 
                     while True:
                         if max_pages and page_num > max_pages:
@@ -404,14 +418,13 @@ class GALegislationScraper:
                             # Wait for table to load
                             try:
                                 await page.wait_for_selector("table tbody tr", timeout=10000)
-                            except:
+                            except Exception:
                                 # Try alternative selectors
                                 print("  Waiting for alternative selectors...")
                                 try:
                                     await page.wait_for_selector("table tr", timeout=10000)
-                                except:
-                                    print("  No table rows found on page")
-                                    break
+                                except Exception:
+                                    pass
 
                             # Get the HTML after JavaScript has rendered
                             html_content = await page.content()

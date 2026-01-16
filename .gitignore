@@ -19,6 +19,7 @@ __pycache__/
 
 # Generated data and debug files
 ga_legislation.json
+bill_details_cache.json
 debug_page.html
 debug_detail.html
 *.debug.html
