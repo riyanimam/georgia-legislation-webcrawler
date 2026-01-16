@@ -339,13 +339,25 @@ class GALegislationScraper:
         # Run async scraper
         legislation_data = asyncio.run(self.get_all_pages(max_pages))
 
+        # Deduplicate by doc_number (website may have pagination duplicates)
+        seen_doc_numbers = set()
+        unique_legislation = []
+        for bill in legislation_data:
+            doc_num = bill.get("doc_number")
+            if doc_num and doc_num not in seen_doc_numbers:
+                seen_doc_numbers.add(doc_num)
+                unique_legislation.append(bill)
+
         # Save to JSON file
         with open(output_file, "w", encoding="utf-8") as f:
-            json.dump(legislation_data, f, indent=2, ensure_ascii=False)
+            json.dump(unique_legislation, f, indent=2, ensure_ascii=False)
 
         # Print statistics
         print("\nScraping complete!")
-        print(f"  Saved {len(legislation_data)} items to {output_file}")
+        print(f"  Saved {len(unique_legislation)} unique items to {output_file}")
+        if len(legislation_data) > len(unique_legislation):
+            duplicates_removed = len(legislation_data) - len(unique_legislation)
+            print(f"  Removed {duplicates_removed} duplicate entries")
         print(
             f"  Stats: {self.stats['fetched']} fetched, {self.stats['cached']} cached, {self.stats['failed']} failed"
         )
