@@ -609,9 +609,7 @@ if __name__ == "__main__":
     max_pages = int(sys.argv[1]) if len(sys.argv) > 1 else None
 
     print(f"Starting scraper with concurrency={max_concurrent}, delay={request_delay}s")
-    scraper = GALegislationScraper(
-        max_concurrent=max_concurrent, request_delay=request_delay
-    )
+    scraper = GALegislationScraper(max_concurrent=max_concurrent, request_delay=request_delay)
     data = scraper.scrape_and_save("ga_legislation.json", max_pages=max_pages)
 
     # Print summary

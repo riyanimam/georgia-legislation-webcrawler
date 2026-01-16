@@ -74,7 +74,7 @@ jobs:
           echo "Using respectful settings: 2s delay, 2 concurrent requests"
           python backend/scraper.py
         fi
-        
+
         # Verify output file location
         if [ -f ga_legislation.json ]; then
           echo "✓ Output file created at repository root"
@@ -152,7 +152,7 @@ jobs:
 
         # Check if there are changes to commit
         if ! git diff --cached --quiet; then
-          git commit -m "chore: update legislation data - ${{ steps.date.outputs.date }}"
+          git commit -m "chore: update legislation data"
           git push origin "$BRANCH_NAME"
 
           # Create pull request using GitHub CLI
