@@ -99,15 +99,39 @@ class GALegislationScraper:
         Raises:
             ValidationError: If required fields are missing or invalid.
         """
-        required_fields = ["doc_number", "caption", "sponsors", "committees", "detail_url"]
+        required_fields = ["doc_number", "caption", "sponsors", "detail_url"]
 
         for field in required_fields:
             if field not in bill:
                 raise ValidationError(f"Missing required field: {field}")
+
+        # Validate string fields
+        string_fields = ["doc_number", "caption", "detail_url"]
+        for field in string_fields:
             if not isinstance(bill[field], str):
                 raise ValidationError(f"Field '{field}' must be a string, got {type(bill[field])}")
             if not bill[field].strip():
                 raise ValidationError(f"Field '{field}' cannot be empty")
+
+        # Validate array fields
+        array_fields = ["sponsors"]
+        for field in array_fields:
+            if field in bill:
+                if not isinstance(bill[field], list):
+                    raise ValidationError(
+                        f"Field '{field}' must be an array, got {type(bill[field])}"
+                    )
+                if len(bill[field]) == 0:
+                    raise ValidationError(f"Field '{field}' cannot be empty")
+            else:
+                raise ValidationError(f"Missing required field: {field}")
+
+        # Optional fields
+        if "committees" in bill:
+            if not isinstance(bill["committees"], list):
+                raise ValidationError(
+                    f"Field 'committees' must be an array, got {type(bill['committees'])}"
+                )
 
         # Validate status_history if present
         if "status_history" in bill and bill["status_history"]:
@@ -161,9 +185,8 @@ class GALegislationScraper:
         """
         for attempt in range(max_retries):
             try:
-                # Use Playwright for JavaScript rendering
-                await asyncio.to_thread(self._get_legislation_details_sync, page, url)
-                return await asyncio.to_thread(self._get_legislation_details_sync, page, url)
+                # Use async Playwright for detail fetching
+                return await self._get_legislation_details_async(page, url)
             except asyncio.TimeoutError:
                 if attempt < max_retries - 1:
                     wait_time = 2**attempt
@@ -181,22 +204,11 @@ class GALegislationScraper:
         self.stats["failed"] += 1
         return {"first_reader_summary": "", "status_history": []}
 
-    def _get_legislation_details_sync(self, page, url: str) -> dict:
-        """Synchronous wrapper for getting legislation details using Playwright.
+    async def _get_legislation_details_async(self, page, url: str) -> dict:
+        """Async wrapper for getting legislation details using Playwright.
 
         Args:
-            page: Playwright page object for browser automation.
-            url (str): URL of the bill's detail page.
-
-        Returns:
-            Dict: Dictionary containing first_reader_summary and status_history.
-        """
-
-    def _get_legislation_details_sync(self, page, url: str) -> dict:
-        """Synchronous wrapper for getting legislation details using Playwright.
-
-        Args:
-            page: Playwright page object for browser automation.
+            page: Playwright async page object for browser automation.
             url (str): URL of the bill's detail page.
 
         Returns:
@@ -204,18 +216,18 @@ class GALegislationScraper:
         """
         try:
             # Navigate to detail page
-            page.goto(url, wait_until="networkidle", timeout=60000)
+            await page.goto(url, wait_until="networkidle", timeout=60000)
 
             # Wait for content to load - wait for h2 headers that contain detail sections
             try:
-                page.wait_for_selector(
+                await page.wait_for_selector(
                     "h2", timeout=5000
                 )  # h2 contains "First Reader Summary" and "Status History"
-            except TimeoutError:
+            except:
                 pass  # Content might load without explicit h2 wait
 
             # Get the rendered HTML
-            html_content = page.content()
+            html_content = await page.content()
 
             soup = BeautifulSoup(html_content, "html.parser")
 

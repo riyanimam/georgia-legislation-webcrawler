@@ -56,16 +56,24 @@ jobs:
 
     # Step 6: Run the scraper
     # - Conditionally passes max_pages parameter if provided
-    # - continue-on-error: true allows workflow to continue even if scraper fails
     #   (useful if website is temporarily down)
+    # Step 6: Run the scraper
+    # - Respectfully scrapes with configurable delays to respect server
+    # - Uses environment variables to control request rate
+    # - continue-on-error: true allows workflow to continue if server blocks IPs
     - name: Run scraper
       continue-on-error: true
+      env:
+        SCRAPER_DELAY: '2'
+        SCRAPER_CONCURRENCY: '2'
       run: |
         if [ -n "${{ github.event.inputs.max_pages }}" ]; then
           echo "Scraping maximum ${{ github.event.inputs.max_pages }} pages..."
+          echo "Using respectful settings: 2s delay, 2 concurrent requests"
           python backend/scraper.py ${{ github.event.inputs.max_pages }}
         else
           echo "Scraping all available pages..."
+          echo "Using respectful settings: 2s delay, 2 concurrent requests"
           python backend/scraper.py
         fi
 
@@ -90,7 +98,6 @@ jobs:
     # - Reports statistics on valid/invalid bills
     - name: Validate JSON schema
       if: steps.check_file.outputs.exists == 'true'
-      continue-on-error: false
       run: node scripts/validate-schema.js ga_legislation.json
 
     # Step 9: Generate timestamp for artifact naming

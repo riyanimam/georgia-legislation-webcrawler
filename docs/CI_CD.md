@@ -206,7 +206,6 @@ Validate accessibility: PASSED
 ```yaml
 - name: Validate JSON schema
   if: steps.check_file.outputs.exists == 'true'
-  continue-on-error: false
   run: node scripts/validate-schema.js ga_legislation.json
 ```
 
