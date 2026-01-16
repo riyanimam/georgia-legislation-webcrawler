@@ -179,8 +179,10 @@ function getLatestStatus(bill) {
  * Generate HTML tags for a bill based on relevant keywords found in its content
  */
 function generateBillTags(bill) {
+    const sponsorsStr = Array.isArray(bill.sponsors) ? bill.sponsors.join(" ") : bill.sponsors;
+    const committeesStr = Array.isArray(bill.committees) ? bill.committees.join(" ") : bill.committees;
     const text =
-        `${bill.caption} ${bill.sponsors} ${bill.committees} ${bill.first_reader_summary || ""}`.toLowerCase();
+        `${bill.caption} ${sponsorsStr} ${committeesStr} ${bill.first_reader_summary || ""}`.toLowerCase();
     const tags = new Set();
 
     // Find all matching keywords and their categories
