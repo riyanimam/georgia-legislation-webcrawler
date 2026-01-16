@@ -6,11 +6,27 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Python cache and linting
+.ruff_cache/
+__pycache__/
+*.py[cod]
+*$py.class
+
 # Generated data and debug files
 ga_legislation.json
+bill_details_cache.json
 debug_page.html
 debug_detail.html
 *.debug.html
+
+# Frontend test and debug files
+frontend/test-data.json
+frontend/debug-upload.html
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

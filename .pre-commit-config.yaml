@@ -8,6 +8,12 @@ repos:
   - id: ruff-format
     name: ruff format
     args: [--line-length=100]
+- repo: https://github.com/biomejs/pre-commit
+  rev: v0.3.0
+  hooks:
+  - id: biome-ci
+    name: biome check
+    additional_dependencies: ['@biomejs/biome']
 - repo: https://github.com/executablebooks/mdformat
   rev: 0.7.17
   hooks:

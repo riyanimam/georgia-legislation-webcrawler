@@ -1,13 +1,15 @@
 # Georgia Legislation Web Scraper
 
-A robust Python web scraper for collecting detailed information about Georgia state legislation from
-the [Georgia General Assembly](https://www.legis.ga.gov) website.
+A robust Python web scraper and interactive web UI for collecting and exploring detailed information
+about Georgia state legislation from the [Georgia General Assembly](https://www.legis.ga.gov)
+website.
 
 ## Overview
 
 This project automates the collection of Georgia House and Senate bills with comprehensive data
 extraction including bill numbers, captions, committee assignments, sponsors, summaries, and
-legislative status history.
+legislative status history. Includes an interactive web dashboard for searching and filtering
+results.
 
 ### What Gets Scraped
 
@@ -23,9 +25,20 @@ legislative status history.
 - 🎯 **JavaScript-Ready**: Playwright-based rendering for dynamic Angular.js content
 - ⚙️ **Fully Automated**: CI/CD integration via GitHub Actions with scheduled runs
 - 📊 **Comprehensive Data**: Captures both overview and detailed bill information
-- 🛡️ **Resilient**: Built-in error handling and retry logic
+- 🛡️ **Resilient**: Built-in error handling and retry logic with data validation
 - 📦 **Accessible Output**: JSON-formatted results with GitHub artifact storage
 - 🎨 **Code Quality**: Pre-commit hooks for linting, formatting, and validation
+- 🌐 **Beautiful UI**: Interactive web dashboard to explore and search legislation
+- ♿ **Accessible**: ARIA labels and keyboard navigation support
+
+## Documentation
+
+- **[Backend Documentation](docs/BACKEND.md)** - Scraper setup and usage
+- **[Frontend Documentation](docs/FRONTEND.md)** - UI features and deployment
+- **[Data Schema](docs/DATA_SCHEMA.md)** - JSON structure and validation rules
+- **[Contributing Guide](docs/CONTRIBUTING.md)** - How to contribute
+- **[CI/CD Documentation](docs/CI_CD.md)** - Testing and validation pipeline
+- **[Refactoring Notes](docs/REFACTORING_NOTES.md)** - Code organization details
 
 ## Quick Start
 
@@ -34,6 +47,7 @@ legislative status history.
 - **Python 3.11+**
 - **pip** (Python package manager)
 - **~500MB disk space** (for Chromium browser)
+- **Modern web browser** (for the interactive UI)
 
 ### Installation
 
@@ -54,15 +68,73 @@ playwright install chromium
 pre-commit install
 ```
 
+## Project Structure
+
+This project is organized into two main components:
+
+```text
+georgia-legislation-webcrawler/
+├── backend/                     # Python web scraper
+│   ├── scraper.py              # Main scraping application
+│   └── README.md               # Backend documentation
+├── frontend/                    # Interactive web UI
+│   ├── index.html              # Main HTML markup
+│   ├── styles.css              # Styling and animations
+│   ├── script.js               # Application logic
+│   └── README.md               # Frontend documentation
+├── .github/
+│   └── workflows/              # CI/CD automation
+├── requirements.txt            # Python dependencies
+├── pyproject.toml              # Project metadata
+├── README.md                   # This file
+└── ga_legislation.json         # Generated data (created by scraper)
+```
+
+### Backend vs Frontend
+
+| Aspect       | Backend                                | Frontend                                 |
+| ------------ | -------------------------------------- | ---------------------------------------- |
+| **Location** | `backend/`                             | `frontend/`                              |
+| **Purpose**  | Collect data from website              | Display data interactively               |
+| **Tech**     | Python, Playwright, BeautifulSoup      | HTML5, CSS3, Vanilla JS                  |
+| **Runs**     | Scheduled via GitHub Actions           | In web browser                           |
+| **Output**   | JSON file                              | User interface                           |
+| **Docs**     | [backend/README.md](backend/README.md) | [frontend/README.md](frontend/README.md) |
+
+See individual README files for detailed documentation on each component.
+
+### Viewing Results with the Interactive UI
+
+The project includes a beautiful, reactive web interface to explore the scraped legislation:
+
+1. **Run the scraper** to generate `ga_legislation.json`:
+
+   ```bash
+   python backend/scraper.py
+   ```
+
+2. **Open the UI** in your browser:
+
+   - Serve locally: `python -m http.server 8000` then visit `http://localhost:8000/frontend/`
+   - Or use VS Code Live Server: right-click `frontend/index.html` and "Open with Live Server"
+
+**UI Features:**
+
+- 🔍 **Search**: Find bills by number, caption, sponsor, or committee
+- 🏷️ **Filter**: Filter by bill type (House/Senate)
+- 📊 **Statistics**: View real-time counts and bill distribution
+- 🔄 **Sort**: Organize results by bill number or caption
+- 📖 **Details**: Click any bill to see full summary and status history
+- 📁 **File Upload**: Load custom JSON files directly in the browser
+
 ### Running the Scraper
 
 ```bash
 # Scrape all pages (several hours for complete session)
-python scraper.py
+python backend/scraper.py
 
-# Scrape limited pages for testing
-python scraper.py 1  # Single page (~20-25 bills)
-python scraper.py 5  # First 5 pages
+# Scrape limited pages for testing via environment variable
+MAX_PAGES=5 python backend/scraper.py
 ```
 
 ## Output Format
@@ -290,6 +362,48 @@ yamllint .github/workflows/
 | `mdformat`         | Markdown formatting with GFM support        |
 | `markdownlint-cli` | Markdown linting                            |
 | `pre-commit`       | Pre-commit hook framework                   |
+
+## Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](docs/CONTRIBUTING.md) for:
+
+- Development setup
+- Code style guidelines
+- Testing procedures
+- PR submission process
+- Branch naming conventions
+
+### Reporting Issues
+
+Found a bug? Have a feature request?
+
+1. Check if the issue already exists
+2. Provide clear reproduction steps
+3. Include relevant error messages
+4. Specify your environment (OS, Python version, etc.)
+
+### Development Workflow
+
+```bash
+# Setup
+git clone https://github.com/riyanimam/georgia-legislation-webcrawler.git
+cd georgia-legislation-webcrawler
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+npm install
+
+# Make changes on a feature branch
+git checkout -b feat/your-feature
+
+# Run validation
+ruff check backend/
+biome check
+
+# Test thoroughly before committing
+git commit -am "feat: Description of changes"
+git push origin feat/your-feature
+```
 
 ## License
 

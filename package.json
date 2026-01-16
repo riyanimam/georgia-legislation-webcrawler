@@ -1,0 +1,22 @@
+{
+  "name": "georgia-legislation-webcrawler",
+  "version": "1.0.0",
+  "description": "Georgia state legislation explorer and web crawler",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "validate:schema": "node scripts/validate-schema.js",
+    "validate:a11y": "node scripts/validate-accessibility.js",
+    "validate:all": "npm run test && npm run validate:schema && npm run validate:a11y"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
+    "@vitest/coverage-v8": "^1.0.0",
+    "axe-core": "^4.8.0",
+    "jsdom": "^23.0.0",
+    "vitest": "^1.0.0"
+  }
+}

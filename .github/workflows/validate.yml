@@ -19,7 +19,7 @@ jobs:
       with:
         python-version: '3.11'
 
-      # Step 3: Set up Node.js for markdownlint
+      # Step 3: Set up Node.js for markdownlint and tests
     - name: Set up Node.js
       uses: actions/setup-node@v6
       with:
@@ -30,32 +30,48 @@ jobs:
       run: |
         pip install ruff mdformat mdformat-gfm mdformat-tables yamllint
 
-      # Step 5: Install Node.js validation tools
-    - name: Install Node.js validation tools
+      # Step 5: Install Node.js validation tools and dependencies
+    - name: Install Node.js dependencies
       run: |
-        npm install -g markdownlint-cli
+        npm install
+        npm install -g markdownlint-cli @biomejs/biome
 
-      # Step 6: Run Python linting with Ruff
+      # Step 6: Run Biome check
+    - name: Biome check
+      run: biome ci --no-errors-on-unmatched
+
     - name: Ruff lint
-      run: ruff check scraper.py --fix --exit-zero
+      run: ruff check backend/scraper.py --fix --exit-zero
 
-      # Step 7: Run Python formatting check
     - name: Ruff format check
-      run: ruff format scraper.py --line-length=100 --check
+      run: ruff format backend/scraper.py --line-length=100 --check
 
-      # Step 8: Check Markdown formatting
+      # Step 9: Check Markdown formatting
     - name: Markdown format check
       run: mdformat README.md --wrap=100 --number --check
 
-      # Step 9: Run Markdown linting
+      # Step 10: Run Markdown linting
     - name: Markdownlint check
       run: markdownlint README.md --disable=MD013 --disable=MD024
 
-      # Step 10: Validate YAML formatting
+      # Step 11: Validate YAML formatting
     - name: Yamllint check
       run: |
         yamllint .github/workflows/ --format=parsable --strict
         yamllint .pre-commit-config.yaml --format=parsable --strict
+
+      # Step 12: Run unit tests
+    - name: Run unit tests
+      run: npm test
+
+      # Step 13: Validate JSON schema
+    - name: Validate JSON schema
+      if: ${{ hashFiles('ga_legislation.json') != '' }}
+      run: node scripts/validate-schema.js ga_legislation.json
+
+      # Step 14: Validate accessibility
+    - name: Validate accessibility
+      run: node scripts/validate-accessibility.js frontend/index.html
 
   validate-pr-title:
     name: Validate PR Title Format

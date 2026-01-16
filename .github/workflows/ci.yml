@@ -37,28 +37,47 @@ jobs:
     # - requests: HTTP library for making web requests
     # - beautifulsoup4: HTML parsing library
     # - playwright: Browser automation for JavaScript rendering
+    # - aiohttp: Async HTTP client for concurrent requests
     # - chromium: Headless browser for rendering JavaScript-heavy pages
     - name: Install dependencies
       run: |
-        pip install requests beautifulsoup4 playwright
+        pip install requests beautifulsoup4 playwright aiohttp
         playwright install chromium
 
-    # Step 4: Run the scraper
+    # Step 4: Set up Node.js for validation scripts
+    - name: Set up Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '20'
+
+    # Step 5: Install Node.js validation tools
+    - name: Install Node.js tools
+      run: npm install
+
+    # Step 6: Run the scraper
     # - Conditionally passes max_pages parameter if provided
-    # - continue-on-error: true allows workflow to continue even if scraper fails
     #   (useful if website is temporarily down)
+    # Step 6: Run the scraper
+    # - Respectfully scrapes with configurable delays to respect server
+    # - Uses environment variables to control request rate
+    # - continue-on-error: true allows workflow to continue if server blocks IPs
     - name: Run scraper
       continue-on-error: true
+      env:
+        SCRAPER_DELAY: '2'
+        SCRAPER_CONCURRENCY: '2'
       run: |
         if [ -n "${{ github.event.inputs.max_pages }}" ]; then
           echo "Scraping maximum ${{ github.event.inputs.max_pages }} pages..."
-          python scraper.py ${{ github.event.inputs.max_pages }}
+          echo "Using respectful settings: 2s delay, 2 concurrent requests"
+          python backend/scraper.py ${{ github.event.inputs.max_pages }}
         else
           echo "Scraping all available pages..."
-          python scraper.py
+          echo "Using respectful settings: 2s delay, 2 concurrent requests"
+          python backend/scraper.py
         fi
 
-    # Step 5: Verify that output file was created
+    # Step 7: Verify that output file was created
     # - Sets output variable 'exists' to true/false
     # - Used by subsequent steps to conditionally run
     - name: Check if output file exists
@@ -73,14 +92,22 @@ jobs:
           echo "Warning: JSON file was not created"
         fi
 
-    # Step 6: Generate timestamp for artifact naming
+    # Step 8: Validate JSON schema
+    # - Validates structure and content against defined schema
+    # - Checks required fields, data types, and formats
+    # - Reports statistics on valid/invalid bills
+    - name: Validate JSON schema
+      if: steps.check_file.outputs.exists == 'true'
+      run: node scripts/validate-schema.js ga_legislation.json
+
+    # Step 9: Generate timestamp for artifact naming
     # - Used to create unique artifact names for each run
     # - Helps track when data was collected
     - name: Get current date
       id: date
       run: echo "date=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
 
-    # Step 7: Upload results as GitHub Artifact
+    # Step 10: Upload results as GitHub Artifact
     # - Only runs if output file was successfully created
     # - Artifacts are retained for 90 days
     # - Can be downloaded from the Actions tab in GitHub
@@ -90,17 +117,23 @@ jobs:
       with:
         name: ga-legislation-${{ steps.date.outputs.date }}
         path: ga_legislation.json
-        retention-days: 90
+        retention-days: 7
 
-    # Step 8: Optional - Commit and push results to repository
-    # Uncomment below to automatically commit scraped data to the repository
-    # This is disabled by default to avoid cluttering commit history
-    # Enable if you want automatic data updates in your repo
-    # - name: Commit and push if changes
-    #   if: steps.check_file.outputs.exists == 'true'
-    #   run: |
-    #     git config --local user.email "github-actions[bot]@users.noreply.github.com"
-    #     git config --local user.name "github-actions[bot]"
-    #     git add ga_legislation.json
-    #     git diff --quiet && git diff --staged --quiet || \
-    #       (git commit -m "Update legislation data - ${{ steps.date.outputs.date }}" && git push)
+    # Step 11: Commit and push results to repository
+    # Automatically commits scraped data to the repository
+    # Uses semantic versioning for commit messages
+    # Note: Using -f flag to force-add ga_legislation.json even though it's in .gitignore
+    # This allows CI to commit generated data while keeping local copies ignored
+    # Only runs on scheduled runs (daily) which execute on main branch
+    - name: Commit and push if changes
+      if: |
+        steps.check_file.outputs.exists == 'true' &&
+        github.event_name == 'schedule'
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add -f ga_legislation.json
+        git diff --quiet && git diff --staged --quiet || (
+          git commit -m "chore: update legislation data - ${{ steps.date.outputs.date }}"
+          git push origin main
+        )
