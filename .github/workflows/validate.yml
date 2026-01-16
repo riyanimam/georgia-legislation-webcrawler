@@ -94,13 +94,13 @@ jobs:
           chore
           ci
         requireScope: false
-        subjectPattern: ^\s*(?:[A-Z]|-).+$
+        subjectPattern: ^\s*(?:[A-Za-z]|-).+$
         subjectPatternError: |
           The subject "{subject}" found in the pull request title "{title}" does not match the configured pattern.
 
           Please ensure the PR title follows the semantic commit format:
           - Type must be one of: feat, fix, docs, style, refactor, perf, test, chore, ci
           - Optional scope in parentheses: feat(scope):
-          - Subject should start with uppercase or hyphen
+          - Subject can start with uppercase or lowercase letter, or hyphen
 
-          Example: "feat: Add new feature" or "fix(scraper): Handle edge case"
+          Example: "feat: Add new feature" or "fix(scraper): handle edge case"
