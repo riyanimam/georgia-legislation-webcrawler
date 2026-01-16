@@ -122,12 +122,14 @@ jobs:
     # Step 11: Commit and push results to repository
     # Automatically commits scraped data to the repository
     # Uses semantic versioning for commit messages
+    # Note: Using -f flag to force-add ga_legislation.json even though it's in .gitignore
+    # This allows CI to commit generated data while keeping local copies ignored
     - name: Commit and push if changes
       if: steps.check_file.outputs.exists == 'true'
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add ga_legislation.json
+        git add -f ga_legislation.json
         git diff --quiet && git diff --staged --quiet || (
           git commit -m "chore: update legislation data - ${{ steps.date.outputs.date }}"
           git push origin ${{ github.ref }}
