@@ -542,7 +542,7 @@ function filterBills() {
 
     updateStats();
     updateSelectedFiltersDisplay();
-    renderBills();
+    renderBills(true); // Reset to page 1 when filtering
 }
 
 /**
@@ -654,8 +654,9 @@ function updateStats() {
 
 /**
  * Render filtered bills to the page with pagination support
+ * @param {boolean} resetPage - Whether to reset to page 1 (true when filtering, false when paginating)
  */
-function renderBills() {
+function renderBills(resetPage = false) {
     const container = document.getElementById("billsContainer");
     const paginationContainer = document.getElementById("paginationContainer");
 
@@ -702,8 +703,10 @@ function renderBills() {
         return;
     }
 
-    // Reset to page 1 after filtering
-    currentPage = 1;
+    // Reset to page 1 only when filtering, not when navigating pages
+    if (resetPage) {
+        currentPage = 1;
+    }
     
     // Calculate pagination
     const totalPages = Math.ceil(filteredBills.length / ITEMS_PER_PAGE);
@@ -1006,7 +1009,7 @@ function goToNextPage() {
     const totalPages = Math.ceil(filteredBills.length / ITEMS_PER_PAGE);
     if (currentPage < totalPages) {
         currentPage++;
-        renderBills();
+        renderBills(); // Don't reset page when paginating
         scrollToTop();
     }
 }
@@ -1017,7 +1020,7 @@ function goToNextPage() {
 function goToPreviousPage() {
     if (currentPage > 1) {
         currentPage--;
-        renderBills();
+        renderBills(); // Don't reset page when paginating
         scrollToTop();
     }
 }
