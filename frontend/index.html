@@ -16,6 +16,22 @@
         </header>
 
         <div class="controls" role="region" aria-label="Search and filter controls">
+            <div class="control-group full">
+                <div class="input-group" style="grid-column: 1 / -1">
+                    <label>📄 Load Data</label>
+                    <div class="file-input-wrapper">
+                        <input
+                            type="file"
+                            id="fileInput"
+                            accept=".json"
+                        />
+                        <label for="fileInput" class="btn-primary file-label">
+                            📁 Choose JSON File
+                        </label>
+                    </div>
+                </div>
+            </div>
+
             <div id="statsContainer" class="stats"></div>
 
             <div class="control-group">

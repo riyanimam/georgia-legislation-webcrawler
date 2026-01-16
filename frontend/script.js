@@ -256,6 +256,12 @@ function setupEventListeners() {
         darkModeToggle.addEventListener("click", toggleDarkMode);
     }
 
+    // File input handler
+    const fileInput = document.getElementById("fileInput");
+    if (fileInput) {
+        fileInput.addEventListener("change", handleFileUpload);
+    }
+
     // Dropdown toggle handler
     const issueDropdownToggle = document.getElementById("issueDropdownToggle");
     const checkboxGroup = document.getElementById("issueFilter");
@@ -401,6 +407,51 @@ function loadDataFromFile() {
             showLoadingSpinner(false);
         });
 }
+/**
+ * Handle file upload from user
+ */
+function handleFileUpload(e) {
+    const file = e.target.files[0];
+    
+    if (!file) {
+        return;
+    }
+
+    showLoadingSpinner(true);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        try {
+            const data = JSON.parse(event.target.result);
+            
+            if (Array.isArray(data)) {
+                allBills = data;
+                filteredBills = [...allBills];
+                updateStats();
+                renderBills();
+                showLoadingSpinner(false);
+                
+                // Hide file input wrapper after successful load
+                const fileInputWrapper = document.querySelector(".file-input-wrapper");
+                if (fileInputWrapper) {
+                    fileInputWrapper.style.display = "none";
+                }
+            } else {
+                showLoadingSpinner(false);
+                alert("Invalid JSON format. Expected an array of bills.");
+            }
+        } catch (error) {
+            showLoadingSpinner(false);
+            alert(`Error loading JSON file: ${error.message}`);
+        }
+    };
+    
+    reader.onerror = () => {
+        showLoadingSpinner(false);
+        alert("Error reading file. Please try again.");
+    };
+    reader.readAsText(file);
+}
+
 // ============================================================================
 // Filtering & Sorting
 // ============================================================================
@@ -583,7 +634,15 @@ function renderBills() {
         container.innerHTML = `
             <div class="no-results">
                 <strong>📁 No Data Loaded</strong>
-                <p>Loading Georgia legislation data...</p>
+                <p>Please upload a JSON file containing Georgia legislation data to get started.</p>
+                <div class="suggestions">
+                    <strong>How to load data:</strong>
+                    <ol>
+                        <li>Click "📁 Choose JSON File" above</li>
+                        <li>Select a JSON file with bill data</li>
+                        <li>The bills will appear here</li>
+                    </ol>
+                </div>
             </div>
         `;
         paginationContainer.classList.add("hidden");
