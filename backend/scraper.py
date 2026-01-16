@@ -398,6 +398,8 @@ class GALegislationScraper:
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
                 )
                 page = await context.new_page()
+                # Separate page for detail fetching to avoid losing pagination context
+                detail_page = await context.new_page()
 
                 try:
                     page_num = 1
@@ -516,7 +518,7 @@ class GALegislationScraper:
                             )
                             for bill_data in page_bills:
                                 details = await self.fetch_bill_detail_async(
-                                    session, bill_data["detail_url"], page
+                                    session, bill_data["detail_url"], detail_page
                                 )
                                 bill_data.update(details)
 
@@ -587,6 +589,8 @@ class GALegislationScraper:
                             await asyncio.sleep(5)
 
                 finally:
+                    await detail_page.close()
+                    await page.close()
                     await context.close()
                     await browser.close()
 
