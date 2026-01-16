@@ -142,8 +142,10 @@ const issueKeywords = {
  * Determine the key issue category for a bill based on its content
  */
 function getBillIssue(bill) {
+    const sponsorsStr = Array.isArray(bill.sponsors) ? bill.sponsors.join(" ") : bill.sponsors;
+    const committeesStr = Array.isArray(bill.committees) ? bill.committees.join(" ") : bill.committees;
     const text =
-        `${bill.caption} ${bill.sponsors} ${bill.committees} ${bill.first_reader_summary || ""}`.toLowerCase();
+        `${bill.caption} ${sponsorsStr} ${committeesStr} ${bill.first_reader_summary || ""}`.toLowerCase();
 
     for (const [issue, keywords] of Object.entries(issueKeywords)) {
         if (keywords.some((keyword) => text.includes(keyword))) {
@@ -485,8 +487,8 @@ function filterBills() {
             !searchTerm ||
             bill.doc_number.toLowerCase().includes(searchTerm) ||
             bill.caption.toLowerCase().includes(searchTerm) ||
-            bill.sponsors.toLowerCase().includes(searchTerm) ||
-            bill.committees.toLowerCase().includes(searchTerm) ||
+            (Array.isArray(bill.sponsors) ? bill.sponsors.join(" ").toLowerCase().includes(searchTerm) : bill.sponsors.toLowerCase().includes(searchTerm)) ||
+            (Array.isArray(bill.committees) ? bill.committees.join(" ").toLowerCase().includes(searchTerm) : bill.committees.toLowerCase().includes(searchTerm)) ||
             bill.first_reader_summary?.toLowerCase().includes(searchTerm);
 
         const matchesType = !typeFilter || bill.doc_number.startsWith(typeFilter);
@@ -495,7 +497,7 @@ function filterBills() {
             selectedIssues.length === 0 || selectedIssues.includes(getBillIssue(bill));
 
         const matchesSponsor = 
-            !sponsorFilter || bill.sponsors.toLowerCase().includes(sponsorFilter);
+            !sponsorFilter || (Array.isArray(bill.sponsors) ? bill.sponsors.join(" ").toLowerCase().includes(sponsorFilter) : bill.sponsors.toLowerCase().includes(sponsorFilter));
 
         const matchesStatus =
             !statusFilter || (bill.status_history && 
@@ -819,8 +821,10 @@ function populateModalContent(bill) {
     // Basic information
     document.getElementById("modalBillNumber").textContent = bill.doc_number;
     document.getElementById("modalCaption").textContent = bill.caption;
-    document.getElementById("modalSponsors").textContent = bill.sponsors || "Not available";
-    document.getElementById("modalCommittees").textContent = bill.committees || "Not available";
+    const sponsorsText = Array.isArray(bill.sponsors) ? bill.sponsors.join(", ") : (bill.sponsors || "Not available");
+    const committeesText = Array.isArray(bill.committees) ? bill.committees.join(", ") : (bill.committees || "Not available");
+    document.getElementById("modalSponsors").textContent = sponsorsText;
+    document.getElementById("modalCommittees").textContent = committeesText;
     document.getElementById("modalSummary").textContent =
         bill.first_reader_summary || "Not available";
 
@@ -868,7 +872,9 @@ function closeModal() {
  * Truncate text to specified length with ellipsis
  */
 function truncate(text, length) {
-    return text.length > length ? `${text.substring(0, length)}...` : text;
+    // Handle arrays by joining them with commas
+    const str = Array.isArray(text) ? text.join(", ") : text;
+    return str.length > length ? `${str.substring(0, length)}...` : str;
 }
 
 /**
@@ -1121,14 +1127,18 @@ function exportFilteredResults() {
     }
 
     const headers = ["Bill Number", "Caption", "Sponsors", "Committees", "Status", "Summary"];
-    const rows = filteredBills.map((bill) => [
-        bill.doc_number,
-        `"${bill.caption.replace(/"/g, '""')}"`,
-        `"${bill.sponsors.replace(/"/g, '""')}"`,
-        `"${bill.committees.replace(/"/g, '""')}"`,
-        bill.status_history?.[bill.status_history.length - 1]?.status || "Unknown",
-        `"${(bill.first_reader_summary || "").slice(0, 100).replace(/"/g, '""')}"`,
-    ]);
+    const rows = filteredBills.map((bill) => {
+        const sponsorsStr = Array.isArray(bill.sponsors) ? bill.sponsors.join("; ") : bill.sponsors;
+        const committeesStr = Array.isArray(bill.committees) ? bill.committees.join("; ") : bill.committees;
+        return [
+            bill.doc_number,
+            `"${bill.caption.replace(/"/g, '""')}"`,
+            `"${sponsorsStr.replace(/"/g, '""')}"`,
+            `"${committeesStr.replace(/"/g, '""')}"`,
+            bill.status_history?.[bill.status_history.length - 1]?.status || "Unknown",
+            `"${(bill.first_reader_summary || "").slice(0, 100).replace(/"/g, '""')}"`,
+        ];
+    });
 
     const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
     const filename = `georgia-legislation-${new Date().toISOString().split("T")[0]}.csv`;
