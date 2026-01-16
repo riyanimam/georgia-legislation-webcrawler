@@ -414,6 +414,7 @@ function handleFileUpload(e) {
     const file = e.target.files[0];
     
     if (!file) {
+        console.warn("No file selected");
         return;
     }
 
@@ -422,12 +423,16 @@ function handleFileUpload(e) {
     reader.onload = (event) => {
         try {
             const data = JSON.parse(event.target.result);
+            console.log(`File loaded: ${data.length} bills found`);
             
-            if (Array.isArray(data)) {
+            if (Array.isArray(data) && data.length > 0) {
                 allBills = data;
                 filteredBills = [...allBills];
-                updateStats();
-                renderBills();
+                currentPage = 1; // Reset pagination
+                console.log("Data loaded successfully, calling filterBills...");
+                
+                // Use filterBills to ensure all display updates happen
+                filterBills();
                 showLoadingSpinner(false);
                 
                 // Hide file input wrapper after successful load
@@ -435,18 +440,21 @@ function handleFileUpload(e) {
                 if (fileInputWrapper) {
                     fileInputWrapper.style.display = "none";
                 }
+                console.log("File upload complete");
             } else {
                 showLoadingSpinner(false);
                 alert("Invalid JSON format. Expected an array of bills.");
             }
         } catch (error) {
             showLoadingSpinner(false);
+            console.error("Error parsing file:", error);
             alert(`Error loading JSON file: ${error.message}`);
         }
     };
     
     reader.onerror = () => {
         showLoadingSpinner(false);
+        console.error("Error reading file");
         alert("Error reading file. Please try again.");
     };
     reader.readAsText(file);
