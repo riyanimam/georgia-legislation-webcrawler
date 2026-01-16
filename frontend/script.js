@@ -259,7 +259,13 @@ function setupEventListeners() {
     // File input handler
     const fileInput = document.getElementById("fileInput");
     if (fileInput) {
-        fileInput.addEventListener("change", handleFileUpload);
+        console.log("File input element found, attaching change listener");
+        fileInput.addEventListener("change", function(e) {
+            console.log("File input change event triggered");
+            handleFileUpload(e);
+        });
+    } else {
+        console.error("File input element NOT found!");
     }
 
     // Dropdown toggle handler
@@ -411,6 +417,7 @@ function loadDataFromFile() {
  * Handle file upload from user
  */
 function handleFileUpload(e) {
+    console.log("handleFileUpload called");
     const file = e.target.files[0];
     
     if (!file) {
@@ -418,36 +425,44 @@ function handleFileUpload(e) {
         return;
     }
 
+    console.log(`File selected: ${file.name}, size: ${file.size} bytes`);
     showLoadingSpinner(true);
     const reader = new FileReader();
     reader.onload = (event) => {
         try {
+            console.log("FileReader onload event fired");
             const data = JSON.parse(event.target.result);
             console.log(`File loaded: ${data.length} bills found`);
+            console.log("First bill sample:", data[0]);
             
             if (Array.isArray(data) && data.length > 0) {
+                console.log("Data is valid array with items");
                 allBills = data;
                 filteredBills = [...allBills];
                 currentPage = 1; // Reset pagination
-                console.log("Data loaded successfully, calling filterBills...");
+                console.log(`Set allBills to ${allBills.length} items, calling filterBills...`);
                 
                 // Use filterBills to ensure all display updates happen
                 filterBills();
+                console.log(`After filterBills: filtered=${filteredBills.length} items`);
                 showLoadingSpinner(false);
                 
                 // Hide file input wrapper after successful load
                 const fileInputWrapper = document.querySelector(".file-input-wrapper");
                 if (fileInputWrapper) {
                     fileInputWrapper.style.display = "none";
+                    console.log("File input wrapper hidden");
                 }
                 console.log("File upload complete");
             } else {
                 showLoadingSpinner(false);
+                console.error("Data is not a valid array or is empty", typeof data, Array.isArray(data), data?.length);
                 alert("Invalid JSON format. Expected an array of bills.");
             }
         } catch (error) {
             showLoadingSpinner(false);
             console.error("Error parsing file:", error);
+            console.error("Error stack:", error.stack);
             alert(`Error loading JSON file: ${error.message}`);
         }
     };
@@ -457,6 +472,12 @@ function handleFileUpload(e) {
         console.error("Error reading file");
         alert("Error reading file. Please try again.");
     };
+    
+    reader.onprogress = (event) => {
+        console.log(`File reading progress: ${event.loaded}/${event.total}`);
+    };
+    
+    console.log("Starting to read file as text");
     reader.readAsText(file);
 }
 
@@ -468,6 +489,8 @@ function handleFileUpload(e) {
  * Filter bills based on search term, type, issue, and sort order
  */
 function filterBills() {
+    console.log("filterBills() called, allBills.length =", allBills.length);
+    
     const searchTerm = document.getElementById("searchInput").value.toLowerCase();
     const typeFilter = document.getElementById("typeFilter").value;
     const selectedIssues = Array.from(document.querySelectorAll(".issue-checkbox:checked")).map(
@@ -479,6 +502,8 @@ function filterBills() {
     const dateFromFilter = document.getElementById("dateFromFilter").value;
     const dateToFilter = document.getElementById("dateToFilter").value;
     const summarySearch = document.getElementById("summarySearch").value.toLowerCase();
+
+    console.log("Filter values:", {searchTerm, typeFilter, selectedIssues, sortBy, sponsorFilter, statusFilter});
 
     // Apply all filters
     filteredBills = allBills.filter((bill) => {
@@ -516,12 +541,16 @@ function filterBills() {
                matchesStatus && matchesSummary && matchesDateRange;
     });
 
+    console.log("After filtering: filteredBills.length =", filteredBills.length);
+
     // Apply sorting
     sortBills(filteredBills, sortBy);
 
     updateStats();
     updateSelectedFiltersDisplay();
+    console.log("Calling renderBills()");
     renderBills();
+    console.log("filterBills() complete");
 }
 
 /**
@@ -635,10 +664,18 @@ function updateStats() {
  * Render filtered bills to the page with pagination support
  */
 function renderBills() {
+    console.log("renderBills() called, allBills.length =", allBills.length, "filteredBills.length =", filteredBills.length);
+    
     const container = document.getElementById("billsContainer");
     const paginationContainer = document.getElementById("paginationContainer");
 
+    if (!container) {
+        console.error("billsContainer element not found!");
+        return;
+    }
+
     if (allBills.length === 0) {
+        console.log("No bills loaded, showing empty state");
         container.innerHTML = `
             <div class="no-results">
                 <strong>📁 No Data Loaded</strong>
@@ -658,6 +695,7 @@ function renderBills() {
     }
 
     if (filteredBills.length === 0) {
+        console.log("No filtered bills, showing no results");
         container.innerHTML = `
             <div class="no-results">
                 <strong>🔍 No Matching Bills</strong>
@@ -686,11 +724,13 @@ function renderBills() {
     const endIndex = startIndex + ITEMS_PER_PAGE;
     const billsToDisplay = filteredBills.slice(startIndex, endIndex);
     
+    console.log(`Rendering ${billsToDisplay.length} bills (page ${currentPage} of ${totalPages})`);
+    
     // Store displayed bills for modal navigation
     displayedBillsForModal = billsToDisplay;
 
     // Generate HTML for each bill
-    container.innerHTML = billsToDisplay
+    const billsHTML = billsToDisplay
         .map(
             (bill, displayIndex) => {
                 // Calculate actual index in filteredBills array
@@ -726,6 +766,10 @@ function renderBills() {
             }
         )
         .join("");
+    
+    console.log(`Generated HTML for ${billsToDisplay.length} bills`);
+    container.innerHTML = billsHTML;
+    console.log("HTML inserted into container, attaching event listeners...");
 
     // Show/hide pagination controls
     if (totalPages > 1) {
@@ -750,8 +794,15 @@ function renderBills() {
  * Attach event listeners to bill card buttons
  */
 function attachBillCardListeners() {
+    console.log("attachBillCardListeners called");
+    const viewDetailsBtns = document.querySelectorAll(".view-details-btn");
+    const copyUrlBtns = document.querySelectorAll(".copy-url-btn");
+    const favoriteBtns = document.querySelectorAll(".favorite-btn");
+    
+    console.log(`Found ${viewDetailsBtns.length} view buttons, ${copyUrlBtns.length} URL buttons, ${favoriteBtns.length} favorite buttons`);
+    
     // View details button handler
-    document.querySelectorAll(".view-details-btn").forEach((btn) => {
+    viewDetailsBtns.forEach((btn) => {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
             const billIndex = btn.closest(".bill-card").dataset.billIndex;
@@ -760,7 +811,7 @@ function attachBillCardListeners() {
     });
 
     // Open Link button handler
-    document.querySelectorAll(".copy-url-btn").forEach((btn) => {
+    copyUrlBtns.forEach((btn) => {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
             const url = btn.dataset.url;
@@ -769,7 +820,7 @@ function attachBillCardListeners() {
     });
 
     // Favorite button handler
-    document.querySelectorAll(".favorite-btn").forEach((btn) => {
+    favoriteBtns.forEach((btn) => {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
             const billNumber = btn.dataset.billNumber;
@@ -784,6 +835,8 @@ function attachBillCardListeners() {
             }
         });
     });
+    
+    console.log("Event listeners attached successfully");
 }
 
 // ============================================================================
