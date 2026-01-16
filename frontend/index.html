@@ -13,26 +13,9 @@
                 <h1>🏛️ Georgia Legislation Explorer</h1>
                 <p>Browse and search Georgia state legislation</p>
             </div>
-            <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">🌙</button>
         </header>
 
         <div class="controls" role="region" aria-label="Search and filter controls">
-            <div class="control-group full">
-                <div class="input-group" style="grid-column: 1 / -1">
-                    <label>📄 Load Data</label>
-                    <div class="file-input-wrapper">
-                        <input
-                            type="file"
-                            id="fileInput"
-                            accept=".json"
-                        />
-                        <label for="fileInput" class="btn-primary file-label">
-                            📁 Choose JSON File
-                        </label>
-                    </div>
-                </div>
-            </div>
-
             <div id="statsContainer" class="stats"></div>
 
             <div class="control-group">
@@ -131,12 +114,69 @@
                     <select id="sortBy" aria-label="Sort bills">
                         <option value="number">Bill Number</option>
                         <option value="caption">Caption</option>
+                        <option value="date-newest">Date (Newest)</option>
+                        <option value="date-oldest">Date (Oldest)</option>
                     </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="sponsorFilter">👤 Sponsor</label>
+                    <input
+                        type="text"
+                        id="sponsorFilter"
+                        placeholder="Search by sponsor name..."
+                        aria-label="Filter by bill sponsor"
+                    />
+                </div>
+
+                <div class="input-group">
+                    <label for="statusFilter">📍 Status</label>
+                    <select id="statusFilter" aria-label="Filter by bill status">
+                        <option value="">All Status</option>
+                        <option value="Introduced">Introduced</option>
+                        <option value="First Reader">Passed First Reader</option>
+                        <option value="Second Reader">Passed Second Reader</option>
+                        <option value="Signed">Signed into Law</option>
+                        <option value="Died in Committee">Died in Committee</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="dateFromFilter">📅 From Date</label>
+                    <input
+                        type="date"
+                        id="dateFromFilter"
+                        aria-label="Filter from date"
+                    />
+                </div>
+
+                <div class="input-group">
+                    <label for="dateToFilter">📅 To Date</label>
+                    <input
+                        type="date"
+                        id="dateToFilter"
+                        aria-label="Filter to date"
+                    />
+                </div>
+
+                <div class="input-group">
+                    <label for="summarySearch">📝 Search in Summary</label>
+                    <input
+                        type="text"
+                        id="summarySearch"
+                        placeholder="Search bill descriptions..."
+                        aria-label="Search in bill summaries and descriptions"
+                    />
                 </div>
             </div>
 
+            <div id="selectedFiltersDisplay" class="selected-filters"></div>
+
             <div class="button-group">
                 <button class="btn-secondary" id="resetBtn">🔄 Reset Filters</button>
+                <button class="btn-primary" id="batchExportBtn" style="display:none;">📥 Export Filtered Results</button>
+                <button class="btn-primary" id="favoritesBtn">⭐ My Favorites</button>
+                <button class="btn-secondary" id="advancedSearchBtn">🔎 Advanced Search</button>
             </div>
         </div>
 
@@ -196,6 +236,43 @@
                 <button class="btn-primary btn-small" id="exportJSONBtn">📥 Export as JSON</button>
                 <button class="btn-secondary btn-small" id="nextBillBtn" title="Next bill">Next ➡️</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">🌙</button>
+
+    <!-- Advanced Search Modal -->
+    <div id="advancedSearchModal" class="advanced-search-modal">
+        <div class="advanced-search-content">
+            <h2>Advanced Search</h2>
+            <input
+                type="text"
+                id="advancedSearchInput"
+                class="advanced-search-input"
+                placeholder='Use operators: "word1 AND word2", "word1 OR word2", "NOT word"'
+            />
+            <div class="advanced-search-help">
+                <strong>Examples:</strong><br>
+                • "healthcare AND gun" - both terms<br>
+                • "education OR school" - either term<br>
+                • "NOT environment" - exclude term
+            </div>
+            <div class="advanced-search-buttons">
+                <button class="btn-secondary" onclick="closeAdvancedSearch()">Cancel</button>
+                <button class="btn-primary" onclick="executeAdvancedSearch()">Search</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Favorites Modal -->
+    <div id="favoritesModal" class="favorites-modal">
+        <div class="favorites-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">⭐ My Favorites</h2>
+                <button class="modal-close" onclick="closeFavorites()" aria-label="Close favorites">&times;</button>
+            </div>
+            <div id="favoritesList" class="favorites-list"></div>
         </div>
     </div>
 

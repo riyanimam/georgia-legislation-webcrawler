@@ -13,6 +13,44 @@ const ITEMS_PER_PAGE = 20;
 // Keep track of which bills are being displayed for modal indexing across pages
 let displayedBillsForModal = [];
 
+// Favorites management
+let favorites = [];
+const FAVORITES_KEY = "georgia-bills-favorites";
+
+// Load favorites from localStorage on startup
+function loadFavorites() {
+    const stored = localStorage.getItem(FAVORITES_KEY);
+    favorites = stored ? JSON.parse(stored) : [];
+}
+
+// Save favorites to localStorage
+function saveFavorites() {
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+}
+
+// Add bill to favorites
+function addToFavorites(bill) {
+    if (!favorites.find(b => b.doc_number === bill.doc_number)) {
+        favorites.push({
+            doc_number: bill.doc_number,
+            caption: bill.caption,
+            sponsors: bill.sponsors
+        });
+        saveFavorites();
+    }
+}
+
+// Remove bill from favorites
+function removeFromFavorites(billNumber) {
+    favorites = favorites.filter(b => b.doc_number !== billNumber);
+    saveFavorites();
+}
+
+// Check if bill is in favorites
+function isFavorited(billNumber) {
+    return favorites.some(b => b.doc_number === billNumber);
+}
+
 /**
  * Keywords mapping for categorizing bills by key issues
  */
@@ -202,6 +240,7 @@ function updateDarkModeToggle(isDarkMode) {
  * Initialize the application by setting up event listeners and loading data
  */
 function initializeApp() {
+    loadFavorites();
     initializeDarkMode();
     setupEventListeners();
     loadDataFromFile();
@@ -215,15 +254,6 @@ function setupEventListeners() {
     const darkModeToggle = document.getElementById("darkModeToggle");
     if (darkModeToggle) {
         darkModeToggle.addEventListener("click", toggleDarkMode);
-    }
-
-    // File input handler
-    const fileInput = document.getElementById("fileInput");
-    
-    if (fileInput) {
-        fileInput.addEventListener("change", handleFileUpload);
-    } else {
-        console.error("File input element not found!");
     }
 
     // Dropdown toggle handler
@@ -262,9 +292,22 @@ function setupEventListeners() {
     const issueCheckboxes = document.querySelectorAll(".issue-checkbox");
     const sortBy = document.getElementById("sortBy");
     const resetBtn = document.getElementById("resetBtn");
+    const sponsorFilter = document.getElementById("sponsorFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const dateFromFilter = document.getElementById("dateFromFilter");
+    const dateToFilter = document.getElementById("dateToFilter");
+    const summarySearch = document.getElementById("summarySearch");
+    const batchExportBtn = document.getElementById("batchExportBtn");
+    const favoritesBtn = document.getElementById("favoritesBtn");
+    const advancedSearchBtn = document.getElementById("advancedSearchBtn");
 
     if (searchInput) searchInput.addEventListener("input", filterBills);
     if (typeFilter) typeFilter.addEventListener("change", filterBills);
+    if (sponsorFilter) sponsorFilter.addEventListener("input", filterBills);
+    if (statusFilter) statusFilter.addEventListener("change", filterBills);
+    if (dateFromFilter) dateFromFilter.addEventListener("change", filterBills);
+    if (dateToFilter) dateToFilter.addEventListener("change", filterBills);
+    if (summarySearch) summarySearch.addEventListener("input", filterBills);
     
     // Add change listeners to issue checkboxes
     issueCheckboxes.forEach((checkbox) => {
@@ -276,6 +319,9 @@ function setupEventListeners() {
     
     if (sortBy) sortBy.addEventListener("change", filterBills);
     if (resetBtn) resetBtn.addEventListener("click", resetFilters);
+    if (batchExportBtn) batchExportBtn.addEventListener("click", exportFilteredResults);
+    if (favoritesBtn) favoritesBtn.addEventListener("click", openFavorites);
+    if (advancedSearchBtn) advancedSearchBtn.addEventListener("click", openAdvancedSearch);
 
     // Modal navigation and export handlers
     const prevBillBtn = document.getElementById("prevBillBtn");
@@ -355,51 +401,6 @@ function loadDataFromFile() {
             showLoadingSpinner(false);
         });
 }
-/**
- * Handle file upload from user
- */
-function handleFileUpload(e) {
-    const file = e.target.files[0];
-    
-    if (!file) {
-        return;
-    }
-
-    showLoadingSpinner(true);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        try {
-            const data = JSON.parse(event.target.result);
-            
-            if (Array.isArray(data)) {
-                allBills = data;
-                filteredBills = [...allBills];
-                updateStats();
-                renderBills();
-                showLoadingSpinner(false);
-                
-                // Hide file input wrapper after successful load
-                const fileInputWrapper = document.querySelector(".file-input-wrapper");
-                if (fileInputWrapper) {
-                    fileInputWrapper.style.display = "none";
-                }
-            } else {
-                showLoadingSpinner(false);
-                alert("Invalid JSON format. Expected an array of bills.");
-            }
-        } catch (error) {
-            showLoadingSpinner(false);
-            alert(`Error loading JSON file: ${error.message}`);
-        }
-    };
-    
-    reader.onerror = () => {
-        showLoadingSpinner(false);
-        alert("Error reading file. Please try again.");
-    };
-    reader.readAsText(file);
-}
-
 // ============================================================================
 // Filtering & Sorting
 // ============================================================================
@@ -414,8 +415,13 @@ function filterBills() {
         (checkbox) => checkbox.value
     );
     const sortBy = document.getElementById("sortBy").value;
+    const sponsorFilter = document.getElementById("sponsorFilter").value.toLowerCase();
+    const statusFilter = document.getElementById("statusFilter").value;
+    const dateFromFilter = document.getElementById("dateFromFilter").value;
+    const dateToFilter = document.getElementById("dateToFilter").value;
+    const summarySearch = document.getElementById("summarySearch").value.toLowerCase();
 
-    // Apply search, type, and issue filters
+    // Apply all filters
     filteredBills = allBills.filter((bill) => {
         const matchesSearch =
             !searchTerm ||
@@ -427,17 +433,35 @@ function filterBills() {
 
         const matchesType = !typeFilter || bill.doc_number.startsWith(typeFilter);
 
-        // If no issues selected, match all bills; otherwise match any selected issue
         const matchesIssue =
             selectedIssues.length === 0 || selectedIssues.includes(getBillIssue(bill));
 
-        return matchesSearch && matchesType && matchesIssue;
+        const matchesSponsor = 
+            !sponsorFilter || bill.sponsors.toLowerCase().includes(sponsorFilter);
+
+        const matchesStatus =
+            !statusFilter || (bill.status_history && 
+            bill.status_history.some(status => status.status.includes(statusFilter)));
+
+        const matchesSummary =
+            !summarySearch || 
+            (bill.first_reader_summary && bill.first_reader_summary.toLowerCase().includes(summarySearch));
+
+        // Date filtering
+        const billDate = bill.introduced_date || bill.status_history?.[0]?.date;
+        const matchesDateRange = !dateFromFilter && !dateToFilter ||
+            ((!dateFromFilter || billDate >= dateFromFilter) &&
+             (!dateToFilter || billDate <= dateToFilter));
+
+        return matchesSearch && matchesType && matchesIssue && matchesSponsor && 
+               matchesStatus && matchesSummary && matchesDateRange;
     });
 
     // Apply sorting
     sortBills(filteredBills, sortBy);
 
     updateStats();
+    updateSelectedFiltersDisplay();
     renderBills();
 }
 
@@ -451,6 +475,16 @@ function sortBills(bills, sortBy) {
         }
         if (sortBy === "caption") {
             return a.caption.localeCompare(b.caption);
+        }
+        if (sortBy === "date-newest") {
+            const dateA = a.introduced_date || a.status_history?.[0]?.date || "";
+            const dateB = b.introduced_date || b.status_history?.[0]?.date || "";
+            return dateB.localeCompare(dateA);
+        }
+        if (sortBy === "date-oldest") {
+            const dateA = a.introduced_date || a.status_history?.[0]?.date || "";
+            const dateB = b.introduced_date || b.status_history?.[0]?.date || "";
+            return dateA.localeCompare(dateB);
         }
         return 0;
     });
@@ -549,15 +583,7 @@ function renderBills() {
         container.innerHTML = `
             <div class="no-results">
                 <strong>📁 No Data Loaded</strong>
-                <p>Please upload a JSON file containing Georgia legislation data to get started.</p>
-                <div class="suggestions">
-                    <strong>How to load data:</strong>
-                    <ol>
-                        <li>Click "📁 Choose JSON File" above</li>
-                        <li>Select a JSON file with bill data</li>
-                        <li>The bills will appear here</li>
-                    </ol>
-                </div>
+                <p>Loading Georgia legislation data...</p>
             </div>
         `;
         paginationContainer.classList.add("hidden");
@@ -626,6 +652,7 @@ function renderBills() {
                 <div class="bill-actions">
                     <button class="btn-primary btn-small view-details-btn">📖 View Details</button>
                     <button class="btn-secondary btn-small copy-url-btn" data-url="${bill.detail_url}">🔗 Open Link</button>
+                    <button class="favorite-btn ${isFavorited(bill.doc_number) ? 'favorited' : ''}" data-bill-number="${bill.doc_number}" title="Add to favorites">⭐</button>
                 </div>
             </div>
         `;
@@ -665,14 +692,29 @@ function attachBillCardListeners() {
         });
     });
 
-    // Copy URL button handler
+    // Open Link button handler
     document.querySelectorAll(".copy-url-btn").forEach((btn) => {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
             const url = btn.dataset.url;
-            navigator.clipboard.writeText(url).then(() => {
-                alert("Link copied to clipboard!");
-            });
+            window.open(url, "_blank");
+        });
+    });
+
+    // Favorite button handler
+    document.querySelectorAll(".favorite-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const billNumber = btn.dataset.billNumber;
+            const bill = filteredBills.find(b => b.doc_number === billNumber);
+            
+            if (isFavorited(billNumber)) {
+                removeFromFavorites(billNumber);
+                btn.classList.remove("favorited");
+            } else {
+                addToFavorites(bill);
+                btn.classList.add("favorited");
+            }
         });
     });
 }
@@ -889,8 +931,278 @@ function scrollToTop() {
 }
 
 // ============================================================================
-// App Startup
+// Advanced Filters & Features
 // ============================================================================
 
-// Initialize the app when DOM is ready
-document.addEventListener("DOMContentLoaded", initializeApp);
+/**
+ * Display selected filters as badges
+ */
+function updateSelectedFiltersDisplay() {
+    const filtersContainer = document.getElementById("selectedFiltersDisplay");
+    if (!filtersContainer) return;
+
+    const activeFilters = [];
+    
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput && searchInput.value) {
+        activeFilters.push({ type: "search", value: searchInput.value });
+    }
+
+    const typeFilter = document.getElementById("typeFilter");
+    if (typeFilter && typeFilter.value) {
+        const typeLabel = typeFilter.value === "HB" ? "House Bill" : "Senate Bill";
+        activeFilters.push({ type: "type", value: typeLabel });
+    }
+
+    const sponsorFilter = document.getElementById("sponsorFilter");
+    if (sponsorFilter && sponsorFilter.value) {
+        activeFilters.push({ type: "sponsor", value: sponsorFilter.value });
+    }
+
+    const statusFilter = document.getElementById("statusFilter");
+    if (statusFilter && statusFilter.value) {
+        activeFilters.push({ type: "status", value: statusFilter.value });
+    }
+
+    const dateFromFilter = document.getElementById("dateFromFilter");
+    const dateToFilter = document.getElementById("dateToFilter");
+    if (dateFromFilter && dateFromFilter.value) {
+        activeFilters.push({ type: "dateFrom", value: dateFromFilter.value });
+    }
+    if (dateToFilter && dateToFilter.value) {
+        activeFilters.push({ type: "dateTo", value: dateToFilter.value });
+    }
+
+    const summarySearch = document.getElementById("summarySearch");
+    if (summarySearch && summarySearch.value) {
+        activeFilters.push({ type: "summary", value: summarySearch.value });
+    }
+
+    const selectedIssues = Array.from(document.querySelectorAll(".issue-checkbox:checked"));
+    selectedIssues.forEach((checkbox) => {
+        const label = checkbox.nextElementSibling?.textContent || checkbox.value;
+        activeFilters.push({ type: "issue", value: label });
+    });
+
+    // Render filter badges
+    filtersContainer.innerHTML = activeFilters
+        .map(
+            (filter) =>
+                `<span class="filter-badge">
+                    ${filter.value}
+                    <button onclick="removeFilter('${filter.type}', '${filter.value.replace(/'/g, "\\'")}')">×</button>
+                </span>`
+        )
+        .join("");
+
+    // Show batch export button if there are results
+    const batchExportBtn = document.getElementById("batchExportBtn");
+    if (batchExportBtn) {
+        batchExportBtn.style.display = filteredBills.length > 0 ? "block" : "none";
+    }
+}
+
+/**
+ * Remove a specific filter and reapply filtering
+ */
+function removeFilter(filterType, filterValue) {
+    const typeFilter = document.getElementById("typeFilter");
+    const sponsorFilter = document.getElementById("sponsorFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const dateFromFilter = document.getElementById("dateFromFilter");
+    const dateToFilter = document.getElementById("dateToFilter");
+    const summarySearch = document.getElementById("summarySearch");
+    const searchInput = document.getElementById("searchInput");
+
+    if (filterType === "type" && typeFilter) typeFilter.value = "";
+    if (filterType === "sponsor" && sponsorFilter) sponsorFilter.value = "";
+    if (filterType === "status" && statusFilter) statusFilter.value = "";
+    if (filterType === "dateFrom" && dateFromFilter) dateFromFilter.value = "";
+    if (filterType === "dateTo" && dateToFilter) dateToFilter.value = "";
+    if (filterType === "summary" && summarySearch) summarySearch.value = "";
+    if (filterType === "search" && searchInput) searchInput.value = "";
+
+    if (filterType === "issue") {
+        const checkboxes = document.querySelectorAll(".issue-checkbox");
+        checkboxes.forEach((cb) => {
+            const label = cb.nextElementSibling?.textContent || "";
+            if (label === filterValue) {
+                cb.checked = false;
+            }
+        });
+    }
+
+    filterBills();
+}
+
+/**
+ * Export filtered results as CSV
+ */
+function exportFilteredResults() {
+    if (filteredBills.length === 0) {
+        alert("No bills to export. Please adjust your filters.");
+        return;
+    }
+
+    const headers = ["Bill Number", "Caption", "Sponsors", "Committees", "Status", "Summary"];
+    const rows = filteredBills.map((bill) => [
+        bill.doc_number,
+        `"${bill.caption.replace(/"/g, '""')}"`,
+        `"${bill.sponsors.replace(/"/g, '""')}"`,
+        `"${bill.committees.replace(/"/g, '""')}"`,
+        bill.status_history?.[bill.status_history.length - 1]?.status || "Unknown",
+        `"${(bill.first_reader_summary || "").slice(0, 100).replace(/"/g, '""')}"`,
+    ]);
+
+    const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
+    const filename = `georgia-legislation-${new Date().toISOString().split("T")[0]}.csv`;
+    downloadFile(csv, filename, "text/csv");
+}
+
+/**
+ * Open the favorites modal
+ */
+function openFavorites() {
+    const modal = document.getElementById("favoritesModal");
+    const favoritesList = document.getElementById("favoritesList");
+
+    if (favorites.length === 0) {
+        favoritesList.innerHTML = '<div class="favorites-empty">No favorites yet. Click the ⭐ icon on bills to add them!</div>';
+    } else {
+        favoritesList.innerHTML = favorites
+            .map(
+                (bill) =>
+                    `<div class="favorites-item">
+                        <div class="favorites-item-info">
+                            <div class="favorites-item-number">${bill.doc_number}</div>
+                            <div class="favorites-item-caption">${bill.caption}</div>
+                        </div>
+                        <button class="favorites-remove-btn" onclick="removeFromFavoritesUI('${bill.doc_number}')">Remove</button>
+                    </div>`
+            )
+            .join("");
+    }
+
+    if (modal) {
+        modal.classList.add("active");
+    }
+}
+
+/**
+ * Close the favorites modal
+ */
+function closeFavorites() {
+    const modal = document.getElementById("favoritesModal");
+    if (modal) {
+        modal.classList.remove("active");
+    }
+}
+
+/**
+ * Remove from favorites UI and data
+ */
+function removeFromFavoritesUI(billNumber) {
+    removeFromFavorites(billNumber);
+    openFavorites(); // Refresh the modal
+}
+
+/**
+ * Open the advanced search modal
+ */
+function openAdvancedSearch() {
+    const modal = document.getElementById("advancedSearchModal");
+    if (modal) {
+        modal.classList.add("active");
+        document.getElementById("advancedSearchInput").focus();
+    }
+}
+
+/**
+ * Close the advanced search modal
+ */
+function closeAdvancedSearch() {
+    const modal = document.getElementById("advancedSearchModal");
+    if (modal) {
+        modal.classList.remove("active");
+    }
+}
+
+/**
+ * Execute advanced search with boolean operators
+ */
+function executeAdvancedSearch() {
+    const input = document.getElementById("advancedSearchInput").value.toLowerCase();
+    if (!input) {
+        alert("Please enter a search query");
+        return;
+    }
+
+    const terms = parseAdvancedQuery(input);
+    
+    filteredBills = allBills.filter((bill) => {
+        const billText = `${bill.doc_number} ${bill.caption} ${bill.sponsors} ${bill.committees} ${bill.first_reader_summary || ""}`.toLowerCase();
+        return matchesAdvancedQuery(billText, terms);
+    });
+
+    closeAdvancedSearch();
+    updateStats();
+    updateSelectedFiltersDisplay();
+    renderBills();
+}
+
+/**
+ * Parse advanced search query with AND, OR, NOT operators
+ */
+function parseAdvancedQuery(query) {
+    // Simple parser for AND, OR, NOT operators
+    const terms = {
+        must: [],
+        should: [],
+        mustNot: [],
+    };
+
+    // Split by AND/OR/NOT while preserving them
+    const parts = query.split(/\s+(AND|OR|NOT)\s+/i);
+    
+    let currentOp = "AND";
+    for (let i = 0; i < parts.length; i++) {
+        const part = parts[i].trim();
+        if (part.toUpperCase() === "AND") {
+            currentOp = "AND";
+        } else if (part.toUpperCase() === "OR") {
+            currentOp = "OR";
+        } else if (part.toUpperCase() === "NOT") {
+            currentOp = "NOT";
+        } else if (part) {
+            if (currentOp === "NOT") {
+                terms.mustNot.push(part);
+                currentOp = "AND";
+            } else if (currentOp === "OR") {
+                terms.should.push(part);
+                currentOp = "AND";
+            } else {
+                terms.must.push(part);
+            }
+        }
+    }
+
+    return terms;
+}
+
+/**
+ * Check if text matches advanced query
+ */
+function matchesAdvancedQuery(text, terms) {
+    // Must have all required terms
+    const hasMust = terms.must.length === 0 || terms.must.every((term) => text.includes(term));
+
+    // Must not have any excluded terms
+    const noMustNot = terms.mustNot.every((term) => !text.includes(term));
+
+    // Should have at least one optional term (if any exist)
+    const hasShould = terms.should.length === 0 || terms.should.some((term) => text.includes(term));
+
+    return hasMust && noMustNot && hasShould;
+}
+
+// ============================================================================
