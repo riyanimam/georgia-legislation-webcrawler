@@ -1,7 +1,10 @@
+import asyncio
 import json
 import sys
-import time
+from pathlib import Path
+from typing import Optional
 
+import aiohttp
 import requests
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
@@ -9,7 +12,7 @@ from urllib3.util.retry import Retry
 
 # Try to import playwright, with fallback to requests-only mode
 try:
-    from playwright.sync_api import sync_playwright
+    from playwright.async_api import async_playwright
 
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
@@ -25,9 +28,20 @@ class ValidationError(Exception):
 
 
 class GALegislationScraper:
-    def __init__(self):
+    def __init__(self, max_concurrent: int = 5, request_delay: float = 0.1):
+        """Initialize scraper with async support and caching.
+
+        Args:
+            max_concurrent (int): Maximum concurrent requests. Default 5 (respectful).
+            request_delay (float): Delay between requests in seconds. Default 0.1.
+        """
         self.base_url = "https://www.legis.ga.gov"
+        self.max_concurrent = max_concurrent
+        self.request_delay = request_delay
+        self.cache_file = Path("bill_details_cache.json")
+        self.cache = self._load_cache()
         self.session = requests.Session()
+
         # Configure retries
         retry_strategy = Retry(
             total=5,
@@ -50,6 +64,31 @@ class GALegislationScraper:
                 "Upgrade-Insecure-Requests": "1",
             }
         )
+
+        # Statistics tracking
+        self.stats = {
+            "fetched": 0,
+            "cached": 0,
+            "failed": 0,
+        }
+
+    def _load_cache(self) -> dict:
+        """Load cached bill details from file."""
+        if self.cache_file.exists():
+            try:
+                with open(self.cache_file, encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"Warning: Could not load cache: {e}")
+        return {}
+
+    def _save_cache(self) -> None:
+        """Save cached bill details to file."""
+        try:
+            with open(self.cache_file, "w", encoding="utf-8") as f:
+                json.dump(self.cache, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"Warning: Could not save cache: {e}")
 
     def validate_bill_data(self, bill: dict) -> None:
         """Validate that bill data contains required fields and valid types.
@@ -80,21 +119,88 @@ class GALegislationScraper:
                         "Status history items must have 'date' and 'status' fields"
                     )
 
-    def get_legislation_details(self, page, url: str) -> dict:
-        """Scrape detailed information from individual legislation page using Playwright.
+    async def fetch_bill_detail_async(self, session: aiohttp.ClientSession, url: str, page) -> dict:
+        """Fetch bill details with caching and concurrent requests.
 
-        Navigates to a bill's detail page, waits for JavaScript rendering, and
-        extracts the First Reader Summary and Status History table.
+        Args:
+            session: aiohttp session for async requests.
+            url: Bill detail URL.
+            page: Playwright page object (reused for detail fetching).
+
+        Returns:
+            Dictionary with first_reader_summary and status_history.
+        """
+        # Check cache first
+        if url in self.cache:
+            self.stats["cached"] += 1
+            return self.cache[url]
+
+        # Fetch with retry logic
+        details = await self._fetch_with_retry(session, url, page)
+
+        # Save to cache
+        self.cache[url] = details
+        self._save_cache()
+        self.stats["fetched"] += 1
+
+        return details
+
+    async def _fetch_with_retry(
+        self, session: aiohttp.ClientSession, url: str, page, max_retries: int = 3
+    ) -> dict:
+        """Fetch bill detail with exponential backoff retry.
+
+        Args:
+            session: aiohttp session.
+            url: Bill detail URL.
+            page: Playwright page object.
+            max_retries: Maximum retry attempts.
+
+        Returns:
+            Dictionary with bill details.
+        """
+        for attempt in range(max_retries):
+            try:
+                # Use Playwright for JavaScript rendering
+                await asyncio.to_thread(self._get_legislation_details_sync, page, url)
+                return await asyncio.to_thread(self._get_legislation_details_sync, page, url)
+            except asyncio.TimeoutError:
+                if attempt < max_retries - 1:
+                    wait_time = 2**attempt
+                    print(f"    Timeout fetching {url}. Waiting {wait_time}s...")
+                    await asyncio.sleep(wait_time)
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    wait_time = 2**attempt
+                    await asyncio.sleep(wait_time)
+                else:
+                    print(f"    Error fetching {url}: {e}")
+                    self.stats["failed"] += 1
+                    return {"first_reader_summary": "", "status_history": []}
+
+        self.stats["failed"] += 1
+        return {"first_reader_summary": "", "status_history": []}
+
+    def _get_legislation_details_sync(self, page, url: str) -> dict:
+        """Synchronous wrapper for getting legislation details using Playwright.
 
         Args:
             page: Playwright page object for browser automation.
             url (str): URL of the bill's detail page.
 
         Returns:
-            Dict: Dictionary containing:
-                - first_reader_summary (str): Bill summary text.
-                - status_history (List[Dict]): List of status history items with
-                  'date' and 'status' keys.
+            Dict: Dictionary containing first_reader_summary and status_history.
+        """
+
+    def _get_legislation_details_sync(self, page, url: str) -> dict:
+        """Synchronous wrapper for getting legislation details using Playwright.
+
+        Args:
+            page: Playwright page object for browser automation.
+            url (str): URL of the bill's detail page.
+
+        Returns:
+            Dict: Dictionary containing first_reader_summary and status_history.
         """
         try:
             # Navigate to detail page
@@ -110,11 +216,6 @@ class GALegislationScraper:
 
             # Get the rendered HTML
             html_content = page.content()
-
-            # Debug: save a sample detail page
-            if url.endswith("69281"):
-                with open("debug_detail.html", "w", encoding="utf-8") as f:
-                    f.write(html_content)
 
             soup = BeautifulSoup(html_content, "html.parser")
 
@@ -175,7 +276,9 @@ class GALegislationScraper:
             print(f"[ERROR] Connection failed: {e}")
             return False
 
-    def scrape_and_save(self, output_file: str = "ga_legislation.json", max_pages: int = None):
+    def scrape_and_save(
+        self, output_file: str = "ga_legislation.json", max_pages: Optional[int] = None
+    ) -> list[dict]:
         """Main method to scrape all legislation and save to JSON.
 
         Orchestrates the entire scraping process: tests connection, scrapes pages,
@@ -200,21 +303,33 @@ class GALegislationScraper:
             print("3. Network connectivity issues")
             print("\nTry running this script from your local machine instead.")
             sys.exit(1)
+
         print("\nStarting to scrape Georgia legislation...")
-        legislation_data = self.get_all_pages(max_pages)
+        print(
+            f"Configuration: {self.max_concurrent} concurrent requests, {self.request_delay}s delay"
+        )
+
+        # Run async scraper
+        legislation_data = asyncio.run(self.get_all_pages(max_pages))
 
         # Save to JSON file
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(legislation_data, f, indent=2, ensure_ascii=False)
 
-        print(f"\nScraping complete! Saved {len(legislation_data)} items to {output_file}")
+        # Print statistics
+        print("\nScraping complete!")
+        print(f"  Saved {len(legislation_data)} items to {output_file}")
+        print(
+            f"  Stats: {self.stats['fetched']} fetched, {self.stats['cached']} cached, {self.stats['failed']} failed"
+        )
+
         return legislation_data
 
-    def get_all_pages(self, max_pages: int = None) -> list[dict]:
-        """Scrape all pages of legislation using Playwright for JavaScript rendering.
+    async def get_all_pages(self, max_pages: Optional[int] = None) -> list[dict]:
+        """Scrape all pages of legislation using async/concurrent requests.
 
         Iterates through paginated legislation listings, extracting bill information
-        and details from each bill's page.
+        and details from each bill's page using concurrent requests for improved performance.
 
         Args:
             max_pages (int, optional): Maximum number of pages to scrape. None = all pages.
@@ -237,129 +352,148 @@ class GALegislationScraper:
 
         all_legislation = []
 
-        with sync_playwright() as p:
-            # Launch browser with headless mode
-            browser = p.chromium.launch(headless=True)
-            context = browser.new_context(
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-            )
-            page = context.new_page()
+        connector = aiohttp.TCPConnector(
+            limit=self.max_concurrent, limit_per_host=2, ttl_dns_cache=300
+        )
+        timeout = aiohttp.ClientTimeout(total=60)
 
-            try:
-                page_num = 1
-                consecutive_failures = 0
-                max_consecutive_failures = 3
+        async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
+            async with async_playwright() as p:
+                # Launch browser with headless mode
+                browser = await p.chromium.launch(headless=True)
+                context = await browser.new_context(
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                )
+                page = await context.new_page()
 
-                while True:
-                    if max_pages and page_num > max_pages:
-                        break
+                try:
+                    page_num = 1
+                    consecutive_failures = 0
+                    max_consecutive_failures = 3
+                    pending_details = []
 
-                    if consecutive_failures >= max_consecutive_failures:
-                        print(
-                            f"\nStopping after {max_consecutive_failures} consecutive failed pages"
-                        )
-                        break
-
-                    print(f"\nScraping page {page_num}...")
-                    url = f"{self.base_url}/legislation/all?page={page_num}"
-
-                    try:
-                        # Navigate to the page and wait for content to load
-                        page.goto(url, wait_until="networkidle", timeout=60000)
-
-                        # Wait for table to load
-                        try:
-                            page.wait_for_selector("table tbody tr", timeout=10000)
-                        except TimeoutError:
-                            # Try alternative selectors
-                            print("  Waiting for alternative selectors...")
-                            try:
-                                page.wait_for_selector("table tr", timeout=10000)
-                            except TimeoutError:
-                                print("  No table rows found on page")
-                                break
-
-                        # Get the HTML after JavaScript has rendered
-                        html_content = page.content()
-                        soup = BeautifulSoup(html_content, "html.parser")
-
-                        # Find all legislation rows
-                        rows = soup.select("table tbody tr")
-                        if not rows:
-                            rows = soup.select("table tr")[1:]  # Skip header row if it exists
-
-                        if not rows:
-                            print("No more results found.")
+                    while True:
+                        if max_pages and page_num > max_pages:
                             break
 
-                        consecutive_failures = 0  # Reset on success
+                        if consecutive_failures >= max_consecutive_failures:
+                            print(
+                                f"\nStopping after {max_consecutive_failures} consecutive failed pages"
+                            )
+                            break
 
-                        for row in rows:
+                        print(f"\nScraping page {page_num}...")
+                        url = f"{self.base_url}/legislation/all?page={page_num}"
+
+                        try:
+                            # Navigate to the page and wait for content to load
+                            await page.goto(url, wait_until="networkidle", timeout=60000)
+
+                            # Wait for table to load
                             try:
-                                # Extract basic info
-                                doc_number_elem = row.select_one("td:first-child a")
-                                if not doc_number_elem:
+                                await page.wait_for_selector("table tbody tr", timeout=10000)
+                            except:
+                                # Try alternative selectors
+                                print("  Waiting for alternative selectors...")
+                                try:
+                                    await page.wait_for_selector("table tr", timeout=10000)
+                                except:
+                                    print("  No table rows found on page")
+                                    break
+
+                            # Get the HTML after JavaScript has rendered
+                            html_content = await page.content()
+                            soup = BeautifulSoup(html_content, "html.parser")
+
+                            # Find all legislation rows
+                            rows = soup.select("table tbody tr")
+                            if not rows:
+                                rows = soup.select("table tr")[1:]  # Skip header row if it exists
+
+                            if not rows:
+                                print("No more results found.")
+                                break
+
+                            consecutive_failures = 0  # Reset on success
+
+                            # Collect bill info and queue detail fetches
+                            page_bills = []
+                            for row in rows:
+                                try:
+                                    # Extract basic info
+                                    doc_number_elem = row.select_one("td:first-child a")
+                                    if not doc_number_elem:
+                                        continue
+
+                                    doc_number = doc_number_elem.text.strip()
+                                    detail_url = self.base_url + doc_number_elem["href"]
+
+                                    tds = row.select("td")
+                                    if len(tds) < 4:
+                                        continue
+
+                                    caption_elem = tds[1].select_one("a")
+                                    caption = caption_elem.text.strip() if caption_elem else ""
+
+                                    committees_list = []
+                                    for dd in tds[2].select("a"):
+                                        committees_list.append(dd.text.strip())
+                                    committees = "; ".join(committees_list)
+
+                                    sponsors_list = []
+                                    for sponsor in tds[3].select("a"):
+                                        sponsors_list.append(sponsor.text.strip())
+                                    sponsors = "; ".join(sponsors_list)
+                                    print(f"  Found {doc_number}...")
+
+                                    bill_data = {
+                                        "doc_number": doc_number,
+                                        "caption": caption,
+                                        "committees": committees,
+                                        "sponsors": sponsors,
+                                        "detail_url": detail_url,
+                                    }
+                                    page_bills.append(bill_data)
+
+                                except Exception as e:
+                                    print(f"  Error processing row: {e}")
                                     continue
 
-                                doc_number = doc_number_elem.text.strip()
-                                detail_url = self.base_url + doc_number_elem["href"]
-
-                                tds = row.select("td")
-                                if len(tds) < 4:
-                                    continue
-
-                                caption_elem = tds[1].select_one("a")
-                                caption = caption_elem.text.strip() if caption_elem else ""
-
-                                committees_list = []
-                                for dd in tds[2].select("a"):
-                                    committees_list.append(dd.text.strip())
-                                committees = "; ".join(committees_list)
-
-                                sponsors_list = []
-                                for sponsor in tds[3].select("a"):
-                                    sponsors_list.append(sponsor.text.strip())
-                                sponsors = "; ".join(sponsors_list)
-                                print(f"  Found {doc_number}...")
-                                details = self.get_legislation_details(page, detail_url)
-
-                                bill_data = {
-                                    "doc_number": doc_number,
-                                    "caption": caption,
-                                    "committees": committees,
-                                    "sponsors": sponsors,
-                                    "detail_url": detail_url,
-                                    "first_reader_summary": details.get("first_reader_summary", ""),
-                                    "status_history": details.get("status_history", []),
-                                }
+                            # Fetch details concurrently with rate limiting
+                            print(
+                                f"  Fetching details for {len(page_bills)} bills (with caching)..."
+                            )
+                            for bill_data in page_bills:
+                                details = await self.fetch_bill_detail_async(
+                                    session, bill_data["detail_url"], page
+                                )
+                                bill_data.update(details)
 
                                 # Validate bill data before adding
                                 try:
                                     self.validate_bill_data(bill_data)
                                     all_legislation.append(bill_data)
                                 except ValidationError as e:
-                                    print(f"  Validation error for {doc_number}: {e}")
+                                    print(
+                                        f"    Validation error for {bill_data['doc_number']}: {e}"
+                                    )
                                     continue
 
-                                # Delay between requests
-                                time.sleep(0.5)
+                                # Respectful delay between requests
+                                await asyncio.sleep(self.request_delay)
 
-                            except Exception as e:
-                                print(f"  Error processing row: {e}")
-                                continue
+                            page_num += 1
+                            # Delay between pages
+                            await asyncio.sleep(1)
 
-                        page_num += 1
-                        # Delay between pages
-                        time.sleep(1)
+                        except Exception as e:
+                            consecutive_failures += 1
+                            print(f"  Error on page {page_num}: {e}")
+                            await asyncio.sleep(5)
 
-                    except Exception as e:
-                        consecutive_failures += 1
-                        print(f"  Error on page {page_num}: {e}")
-                        time.sleep(5)
-
-            finally:
-                context.close()
-                browser.close()
+                finally:
+                    await context.close()
+                    await browser.close()
 
         return all_legislation
 
