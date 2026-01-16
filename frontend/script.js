@@ -432,7 +432,15 @@ function handleFileUpload(e) {
             const data = JSON.parse(event.target.result);
             
             if (Array.isArray(data) && data.length > 0) {
-                allBills = data;
+                // Deduplicate by doc_number when loading data
+                const seenDocNumbers = new Set();
+                allBills = data.filter((bill) => {
+                    if (seenDocNumbers.has(bill.doc_number)) {
+                        return false;
+                    }
+                    seenDocNumbers.add(bill.doc_number);
+                    return true;
+                });
                 filteredBills = [...allBills];
                 currentPage = 1; // Reset pagination
                 
@@ -517,6 +525,16 @@ function filterBills() {
 
         return matchesSearch && matchesType && matchesIssue && matchesSponsor && 
                matchesStatus && matchesSummary && matchesDateRange;
+    });
+
+    // Deduplicate by doc_number to ensure no duplicates
+    const seenDocNumbers = new Set();
+    filteredBills = filteredBills.filter((bill) => {
+        if (seenDocNumbers.has(bill.doc_number)) {
+            return false;
+        }
+        seenDocNumbers.add(bill.doc_number);
+        return true;
     });
 
     // Apply sorting
