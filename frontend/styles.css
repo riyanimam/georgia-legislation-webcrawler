@@ -25,9 +25,9 @@ body.dark-mode {
     --bg-primary: #1a1a2e;
     --bg-secondary: #16213e;
     --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --text-primary: #e0e0e0;
-    --text-secondary: #b0b0b0;
-    --text-tertiary: #808080;
+    --text-primary: #f0f0f0;
+    --text-secondary: #d0d0d0;
+    --text-tertiary: #a8a8a8;
     --border-color: #2d3561;
     --accent-primary: #667eea;
     --accent-secondary: #764ba2;
@@ -64,6 +64,7 @@ header {
 header .header-content {
     flex: 1;
     text-align: center;
+    padding: 0 20px;
 }
 
 header h1 {
@@ -79,35 +80,35 @@ header p {
 }
 
 .dark-mode-toggle {
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
-    padding: 10px 16px;
-    border-radius: 50px;
+    padding: 8px 10px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 1.2em;
+    font-size: 1em;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    flex-shrink: 0;
 }
 
 .dark-mode-toggle:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.5);
-    transform: scale(1.05);
 }
 
 /* Control Panel & Form Elements */
 .controls {
     background: var(--bg-primary);
-    border-radius: 16px;
-    padding: 30px;
+    border-radius: 12px;
+    padding: 28px;
     margin-bottom: 30px;
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-sm);
     animation: slideUp 0.6s ease-out 0.1s both;
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
@@ -144,11 +145,11 @@ label {
 
 input,
 select {
-    padding: 12px;
-    border: 2px solid var(--border-color);
-    border-radius: 10px;
+    padding: 11px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
     font-size: 1em;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     font-family: inherit;
     background: var(--bg-primary);
     color: var(--text-primary);
@@ -158,7 +159,7 @@ input:focus,
 select:focus {
     outline: none;
     border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
 /* Dropdown Filter Styling */
@@ -168,21 +169,21 @@ select:focus {
 
 .dropdown-toggle {
     width: 100%;
-    padding: 12px;
-    border: 2px solid var(--border-color);
-    border-radius: 10px;
+    padding: 11px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
     background: var(--bg-primary);
     color: var(--text-primary);
     font-size: 1em;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     text-align: left;
 }
 
 .dropdown-toggle:hover {
     border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
 .dropdown-toggle.active {
@@ -200,11 +201,11 @@ select:focus {
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 12px;
     padding: 12px;
-    border: 2px solid var(--accent-primary);
+    border: 1.5px solid var(--accent-primary);
     border-top: none;
-    border-radius: 0 0 10px 10px;
+    border-radius: 0 0 8px 8px;
     background: var(--bg-primary);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
     z-index: 100;
     margin-top: -2px;
 }
@@ -258,8 +259,8 @@ button {
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
@@ -322,16 +323,16 @@ button {
 .stat-card {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 20px;
-    border-radius: 12px;
+    padding: 18px;
+    border-radius: 10px;
     text-align: center;
-    box-shadow: var(--shadow-md);
-    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
 }
 
 .stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .stat-card .number {
@@ -361,19 +362,19 @@ button {
 
 .bill-card {
     background: var(--bg-primary);
-    border-radius: 14px;
-    padding: 25px;
-    box-shadow: var(--shadow-md);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-color);
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     cursor: pointer;
     display: flex;
     flex-direction: column;
 }
 
 .bill-card:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
     border-color: var(--accent-primary);
 }
 
@@ -409,7 +410,7 @@ button {
     background: var(--bg-secondary);
     color: var(--text-secondary);
     padding: 4px 10px;
-    border-radius: 12px;
+    border-radius: 6px;
     font-size: 0.75em;
     font-weight: 500;
     border: 1px solid var(--border-color);
@@ -490,9 +491,9 @@ button {
 .no-results {
     grid-column: 1 / -1;
     text-align: center;
-    padding: 60px 20px;
+    padding: 50px 20px;
     background: var(--bg-primary);
-    border-radius: 14px;
+    border-radius: 12px;
     color: var(--text-tertiary);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
@@ -519,14 +520,14 @@ button {
 
 .modal-content {
     background: var(--bg-primary);
-    border-radius: 16px;
-    padding: 35px;
+    border-radius: 14px;
+    padding: 32px;
     max-width: 700px;
     max-height: 90vh;
     overflow-y: auto;
     animation: slideUp 0.3s ease-out;
     border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-md);
 }
 
 .modal-header {
@@ -792,11 +793,11 @@ button {
     align-items: center;
     gap: 20px;
     margin-top: 30px;
-    padding: 20px;
+    padding: 18px;
     background: var(--bg-primary);
-    border-radius: 14px;
+    border-radius: 12px;
     border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-sm);
     animation: slideUp 0.6s ease-out;
 }
 
