@@ -141,7 +141,7 @@ jobs:
 
     # Step 12: Create feature branch and commit changes
     # Creates a new branch for the data update, commits the changes,
-    # and pushes to remote. Uses the GitHub App token for authentication.
+    # pushes to remote, and sets up auto-merge. Uses GitHub App token.
     - name: Create pull request with updated data
       if: |
         steps.check_file.outputs.exists == 'true' &&
@@ -165,11 +165,19 @@ jobs:
           git push origin "$BRANCH_NAME"
 
           # Create pull request using GitHub CLI
-          gh pr create \
+          PR_URL=$(gh pr create \
             --base main \
             --head "$BRANCH_NAME" \
             --title "chore: update legislation data - ${{ steps.date.outputs.date }}" \
-            --body "Automated legislation data update from web scraper. $(echo 'Date:') ${{ steps.date.outputs.date }}"
+            --body "Automated legislation data update from web scraper. Date: ${{ steps.date.outputs.date }}")
+
+          # Extract PR number from URL
+          PR_NUMBER=$(echo "$PR_URL" | grep -oP '/pull/\K[0-9]+')
+
+          # Enable auto-merge (squash merge strategy)
+          gh pr merge "$PR_NUMBER" --auto --squash
+
+          echo "PR #$PR_NUMBER created and set to auto-merge"
         else
           echo "No changes detected in ga_legislation.json"
         fi
