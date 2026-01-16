@@ -107,22 +107,15 @@ jobs:
       if: steps.check_file.outputs.exists == 'true'
       run: node scripts/validate-schema.js ga_legislation.json
 
-    # Step 9: Generate timestamp for artifact naming
-    # - Used to create unique artifact names for each run
-    # - Helps track when data was collected
-    - name: Get current date
-      id: date
-      run: echo "date=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
-
     # Step 10: Upload results as GitHub Artifact
     # - Only runs if output file was successfully created
-    # - Artifacts are retained for 90 days
+    # - Artifacts are retained for 7 days
     # - Can be downloaded from the Actions tab in GitHub
     - name: Upload JSON as artifact
       if: steps.check_file.outputs.exists == 'true'
       uses: actions/upload-artifact@v6
       with:
-        name: ga-legislation-${{ steps.date.outputs.date }}
+        name: ga-legislation
         path: ga_legislation.json
         retention-days: 7
 
@@ -131,29 +124,27 @@ jobs:
     # branch protection rules and create pull requests
     - name: Generate GitHub App token
       id: app-token
-      uses: actions/create-github-app-token@v1
+      uses: actions/create-github-app-token@v2
       with:
         app-id: ${{ secrets.APP_ID }}
         private-key: ${{ secrets.PRIVATE_KEY }}
       if: |
-        steps.check_file.outputs.exists == 'true' &&
-        github.event_name == 'schedule'
+        steps.check_file.outputs.exists == 'true'
 
     # Step 12: Create feature branch and commit changes
     # Creates a new branch for the data update, commits the changes,
     # pushes to remote, and sets up auto-merge. Uses GitHub App token.
     - name: Create pull request with updated data
       if: |
-        steps.check_file.outputs.exists == 'true' &&
-        github.event_name == 'schedule'
+        steps.check_file.outputs.exists == 'true'
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
 
-        # Create a feature branch with timestamp
-        BRANCH_NAME="update-legislation-${{ steps.date.outputs.date }}"
+        # Create a feature branch
+        BRANCH_NAME="update-legislation"
         git checkout -b "$BRANCH_NAME"
 
         # Add the generated file (force add since it's in .gitignore)
@@ -168,8 +159,8 @@ jobs:
           PR_URL=$(gh pr create \
             --base main \
             --head "$BRANCH_NAME" \
-            --title "chore: update legislation data - ${{ steps.date.outputs.date }}" \
-            --body "Automated legislation data update from web scraper. Date: ${{ steps.date.outputs.date }}")
+            --title "chore: update legislation data" \
+            --body "Automated legislation data update from web scraper")
 
           # Extract PR number from URL
           PR_NUMBER=$(echo "$PR_URL" | grep -oP '/pull/\K[0-9]+')
