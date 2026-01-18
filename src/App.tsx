@@ -10,11 +10,11 @@ import Filters from './components/Filters.tsx'
 import BillGrid from './components/BillGrid.tsx'
 import BillModal from './components/BillModal.tsx'
 import FavoritesModal from './components/FavoritesModal.tsx'
-import LoadingAnimation from './components/LoadingAnimation.tsx'
 import AnimatedBackground from './components/AnimatedBackground.tsx'
 import Sidebar from './components/Sidebar.tsx'
 import LanguageSelector from './components/LanguageSelector.tsx'
 import HelpModal from './components/HelpModal.tsx'
+import { StatsSkeleton, BillGridSkeleton } from './components/SkeletonLoaders.tsx'
 import './App.css'
 
 const ITEMS_PER_PAGE = 20
@@ -85,10 +85,42 @@ function App() {
     localStorage.setItem('georgia-bills-favorites', JSON.stringify(favorites))
   }, [favorites])
 
+  // Sync URL with current state
+  useEffect(() => {
+    const params = new URLSearchParams()
+    
+    if (filters.search) params.set('search', filters.search)
+    if (filters.type) params.set('type', filters.type)
+    if (filters.issues.length > 0) params.set('issues', filters.issues.join(','))
+    if (filters.sponsor) params.set('sponsor', filters.sponsor)
+    if (filters.status) params.set('status', filters.status)
+    if (filters.dateFrom) params.set('dateFrom', filters.dateFrom)
+    if (filters.dateTo) params.set('dateTo', filters.dateTo)
+    if (filters.summarySearch) params.set('summarySearch', filters.summarySearch)
+    if (filters.sortBy !== 'date-desc') params.set('sortBy', filters.sortBy)
+    if (currentPage !== 1) params.set('page', currentPage.toString())
+    if (language !== 'en') params.set('lang', language)
+    if (selectedBill) params.set('bill', selectedBill.doc_number)
+
+    const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname
+    window.history.replaceState({}, '', newUrl)
+  }, [filters, currentPage, language, selectedBill])
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1)
   }, [filters])
+
+  // Open bill from URL if specified
+  useEffect(() => {
+    const billId = urlParams.get('bill')
+    if (billId && bills.length > 0 && !selectedBill) {
+      const bill = bills.find(b => b.doc_number === billId)
+      if (bill) {
+        setSelectedBill(bill)
+      }
+    }
+  }, [bills])
 
   useEffect(() => {
     // Auto-load data in production (GitHub Pages)
@@ -505,7 +537,12 @@ function App() {
           />
         </motion.div>
 
-        {loading && <LoadingAnimation />}
+        {loading && (
+          <div>
+            <StatsSkeleton darkMode={darkMode} />
+            <BillGridSkeleton darkMode={darkMode} count={6} />
+          </div>
+        )}
 
         {bills.length > 0 && (
           <>
@@ -554,6 +591,7 @@ function App() {
         <AnimatePresence>
           {selectedBill && (
             <BillModal
+              key="bill-modal"
               bill={selectedBill}
               onClose={() => setSelectedBill(null)}
               isFavorited={favorites.includes(selectedBill.doc_number)}
@@ -565,6 +603,7 @@ function App() {
 
           {showFavorites && (
             <FavoritesModal
+              key="favorites-modal"
               favorites={favorites}
               bills={bills}
               onClose={() => setShowFavorites(false)}
@@ -576,6 +615,7 @@ function App() {
           )}
 
           <HelpModal
+            key="help-modal"
             isOpen={showHelp}
             onClose={() => setShowHelp(false)}
             darkMode={darkMode}
