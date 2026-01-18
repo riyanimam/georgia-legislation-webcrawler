@@ -3,6 +3,7 @@ import { Heart, FileText, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Bill } from '../types'
 import { generateBillTags, getLatestStatus } from '../utils'
 import SkeletonCard from './SkeletonCard'
+import { ReadingProgressBadge, useReadingProgress } from './ReadingProgress.tsx'
 import type { Translation } from '../i18n/translations'
 
 interface BillGridProps {
@@ -30,6 +31,8 @@ export default function BillGrid({
   loading = false,
   t,
 }: BillGridProps) {
+  const { isRead } = useReadingProgress()
+  
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -100,22 +103,24 @@ export default function BillGrid({
               </motion.button>
 
               {/* Bill Number Badge */}
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                  color: 'white',
-                  padding: '8px 14px',
-                  borderRadius: '8px',
-                  fontSize: '0.875em',
-                  fontWeight: 600,
-                  marginBottom: '14px',
-                }}
-              >
-                <FileText size={16} />
-                {bill.doc_number}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                    color: 'white',
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    fontSize: '0.875em',
+                    fontWeight: 600,
+                  }}
+                >
+                  <FileText size={16} />
+                  {bill.doc_number}
+                </div>
+                <ReadingProgressBadge isRead={isRead(bill.doc_number)} compact />
               </div>
 
               {/* Caption */}

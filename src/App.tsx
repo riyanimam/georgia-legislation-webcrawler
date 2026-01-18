@@ -14,6 +14,8 @@ import AnimatedBackground from './components/AnimatedBackground.tsx'
 import Sidebar from './components/Sidebar.tsx'
 import LanguageSelector from './components/LanguageSelector.tsx'
 import HelpModal from './components/HelpModal.tsx'
+import BillOfTheDay from './components/BillOfTheDay.tsx'
+import { ReadingProgressStats, useReadingProgress } from './components/ReadingProgress.tsx'
 import { StatsSkeleton, BillGridSkeleton } from './components/SkeletonLoaders.tsx'
 import './App.css'
 
@@ -22,6 +24,9 @@ const ITEMS_PER_PAGE = 20
 function App() {
   // Initialize from URL parameters for shareable links
   const urlParams = new URLSearchParams(window.location.search)
+  
+  // Reading progress tracking
+  const { markAsRead, getReadCount } = useReadingProgress()
   
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('darkMode') === 'true'
@@ -118,6 +123,7 @@ function App() {
       const bill = bills.find(b => b.doc_number === billId)
       if (bill) {
         setSelectedBill(bill)
+        markAsRead(bill.doc_number)
       }
     }
   }, [bills])
@@ -546,6 +552,20 @@ function App() {
 
         {bills.length > 0 && (
           <>
+            <BillOfTheDay
+              bills={bills}
+              onSelectBill={(bill) => {
+                setSelectedBill(bill)
+                markAsRead(bill.doc_number)
+              }}
+              darkMode={darkMode}
+              t={t}
+            />
+            <ReadingProgressStats
+              totalBills={filteredBills.length}
+              readBills={getReadCount()}
+              darkMode={darkMode}
+            />
             <Stats bills={bills} filteredBills={filteredBills} darkMode={darkMode} t={t} />
             <Filters
               filters={filters}
@@ -559,7 +579,10 @@ function App() {
                 bills={paginatedBills}
                 favorites={favorites}
                 onToggleFavorite={toggleFavorite}
-                onSelectBill={setSelectedBill}
+                onSelectBill={(bill) => {
+                  setSelectedBill(bill)
+                  markAsRead(bill.doc_number)
+                }}
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
