@@ -2,12 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
+adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
 ### Added
+
 - Initial project setup with Georgia legislation web scraper
 - Interactive web UI for exploring legislation data
 - Comprehensive CI/CD pipeline with GitHub Actions
@@ -21,11 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AI-powered issue summaries
 
 ### Changed
+
 - Updated dependencies to latest versions
 - Consolidated dependency management in pyproject.toml
 - Added Python 3.13 support
 
 ### Documentation
+
 - Added comprehensive README with quick start guide
 - Backend documentation for scraper setup
 - Frontend documentation for UI features
@@ -33,4 +36,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Contributing guidelines
 - CI/CD pipeline documentation
 
-[Unreleased]: https://github.com/riyanimam/georgia-legislation-webcrawler/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/riyanimam/georgia-legislation-webcrawler/compare/v0.1.0...HEAD

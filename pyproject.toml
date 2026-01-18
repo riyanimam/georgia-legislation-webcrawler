@@ -61,6 +61,24 @@ strikethrough = true
 [tool.mdformat.plugins.tables]
 tables = true
 
+[tool.mypy]
+check_untyped_defs = true
+disallow_incomplete_defs = false
+disallow_untyped_defs = false
+ignore_missing_imports = true
+no_implicit_optional = true
+python_version = "3.11"
+strict_equality = true
+warn_no_return = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_configs = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
+module = ["playwright.*", "bs4.*"]
+
 [tool.ruff]
 target-version = "py311"
 
@@ -81,21 +99,3 @@ select = [
 
 [tool.ruff.lint.isort]
 known-first-party = ["scraper"]
-
-[tool.mypy]
-python_version = "3.11"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = false
-disallow_incomplete_defs = false
-check_untyped_defs = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-strict_equality = true
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["playwright.*", "bs4.*"]
-ignore_missing_imports = true

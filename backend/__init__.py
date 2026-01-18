@@ -3,6 +3,6 @@
 __version__ = "1.0.0"
 __author__ = "Riyani Imam"
 
-from backend.scraper import scrape_and_save
+from backend.scraper import GALegislationScraper
 
-__all__ = ["scrape_and_save"]
+__all__ = ["GALegislationScraper"]

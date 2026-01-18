@@ -54,13 +54,13 @@ jobs:
 
     steps:
       # Create the labeler.yml configuration file from env variable
-      - name: Create labeler configuration
-        run: |
-          mkdir -p .github
-          echo "${{ env.LABELER_CONFIG }}" > .github/labeler.yml
+    - name: Create labeler configuration
+      run: |
+        mkdir -p .github
+        echo "${{ env.LABELER_CONFIG }}" > .github/labeler.yml
 
       # Run the labeler action
-      - uses: actions/labeler@v4
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          configuration-path: '.github/labeler.yml'
+    - uses: actions/labeler@v4
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        configuration-path: .github/labeler.yml

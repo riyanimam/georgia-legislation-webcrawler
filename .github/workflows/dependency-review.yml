@@ -1,8 +1,8 @@
-name: 'Dependency Review'
+name: Dependency Review
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
 
 permissions:
   contents: read
@@ -13,49 +13,49 @@ jobs:
     name: Review Dependencies
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
-        with:
+    - name: Dependency Review
+      uses: actions/dependency-review-action@v4
+      with:
           # Always include a summary comment in the PR
-          comment-summary-in-pr: always
+        comment-summary-in-pr: always
           # Fail on high and critical severity vulnerabilities
-          fail-on-severity: high
+        fail-on-severity: high
           # Deny GPL and AGPL licenses (optional reciprocal licenses)
-          deny-licenses: |
-            GPL-1.0-or-later
-            GPL-2.0-or-later
-            GPL-3.0-or-later
-            AGPL-1.0-or-later
-            AGPL-3.0-or-later
-          # Retry if snapshot warnings occur
-          retry-on-snapshot-warnings: true
+        deny-licenses: |
+          GPL-1.0-or-later
+          GPL-2.0-or-later
+          GPL-3.0-or-later
+          AGPL-1.0-or-later
+          AGPL-3.0-or-later
+         # Retry if snapshot warnings occur
+        retry-on-snapshot-warnings: true
 
-      - name: Set up Node.js
-        if: always()
-        uses: actions/setup-node@v6
-        with:
-          node-version: '20'
-          cache: 'npm'
+    - name: Set up Node.js
+      if: always()
+      uses: actions/setup-node@v6
+      with:
+        node-version: '20'
+        cache: npm
 
-      - name: Validate npm dependencies
-        if: always()
-        run: |
-          npm audit --audit-level=moderate || true
-          npm list
+    - name: Validate npm dependencies
+      if: always()
+      run: |
+        npm audit --audit-level=moderate || true
+        npm list
 
-      - name: Set up Python
-        if: always()
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.11'
-          cache: 'pip'
+    - name: Set up Python
+      if: always()
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+        cache: pip
 
-      - name: Validate Python dependencies
-        if: always()
-        run: |
-          pip install --upgrade pip
-          pip install safety
-          safety check --json || true
+    - name: Validate Python dependencies
+      if: always()
+      run: |
+        pip install --upgrade pip
+        pip install safety
+        safety check --json || true

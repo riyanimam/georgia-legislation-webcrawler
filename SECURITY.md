@@ -11,7 +11,8 @@ We release patches for security vulnerabilities for the following versions:
 
 ## Reporting a Vulnerability
 
-We take the security of the Georgia Legislation Web Crawler seriously. If you discover a security vulnerability, please follow these steps:
+We take the security of the Georgia Legislation Web Crawler seriously. If you discover a security
+vulnerability, please follow these steps:
 
 ### How to Report
 
@@ -20,12 +21,15 @@ We take the security of the Georgia Legislation Web Crawler seriously. If you di
 Instead, please report them via one of the following methods:
 
 1. **GitHub Security Advisories** (Preferred)
-   - Navigate to the [Security tab](https://github.com/riyanimam/georgia-legislation-webcrawler/security/advisories)
+
+   - Navigate to the
+     [Security tab](https://github.com/riyanimam/georgia-legislation-webcrawler/security/advisories)
    - Click "Report a vulnerability"
    - Fill out the form with details
 
 2. **Email**
-   - Send an email to: riyanimam@users.noreply.github.com
+
+   - Send an email to: <riyanimam@users.noreply.github.com>
    - Include "SECURITY" in the subject line
    - Provide detailed information about the vulnerability
 
@@ -88,6 +92,7 @@ Security updates will be announced through:
 
 ## Attribution
 
-We believe in responsible disclosure and will credit security researchers who report valid vulnerabilities (with permission).
+We believe in responsible disclosure and will credit security researchers who report valid
+vulnerabilities (with permission).
 
 Thank you for helping keep this project secure!

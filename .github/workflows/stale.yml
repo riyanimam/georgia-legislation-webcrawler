@@ -2,7 +2,7 @@ name: Mark stale issues and pull requests
 
 on:
   schedule:
-    - cron: '30 2 * * 0'  # Weekly on Monday at 2:30 AM UTC
+  - cron: 30 2 * * 0      # Weekly on Monday at 2:30 AM UTC
 
 jobs:
   stale:
@@ -12,59 +12,59 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Mark stale issues and PRs
-        uses: actions/stale@v5
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          
+    - name: Mark stale issues and PRs
+      uses: actions/stale@v5
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+
           # Issue configuration
-          days-before-issue-stale: 30
-          days-before-issue-close: 14
-          stale-issue-message: |
-            This issue has been inactive for 30 days. 
-            
-            To keep it open, please:
-            - Add a comment to indicate you're still working on it
-            - Update the issue with new information or progress
-            - Link any related pull requests
-            
-            If there's no activity in the next 14 days, this issue will be automatically closed.
-          close-issue-message: |
-            This issue has been closed due to inactivity.
-            
-            If this is still relevant, please:
-            - Reopen the issue
-            - Add a comment explaining the current status
-            - Submit a pull request to address it
-          stale-issue-label: 'stale'
-          close-issue-label: 'closed-inactive'
-          
+        days-before-issue-stale: 30
+        days-before-issue-close: 14
+        stale-issue-message: |
+          This issue has been inactive for 30 days.
+
+          To keep it open, please:
+          - Add a comment to indicate you're still working on it
+          - Update the issue with new information or progress
+          - Link any related pull requests
+
+          If there's no activity in the next 14 days, this issue will be automatically closed.
+        close-issue-message: |
+          This issue has been closed due to inactivity.
+
+          If this is still relevant, please:
+          - Reopen the issue
+          - Add a comment explaining the current status
+          - Submit a pull request to address it
+        stale-issue-label: stale
+        close-issue-label: closed-inactive
+
           # Pull request configuration
-          days-before-pr-stale: 14
-          days-before-pr-close: 7
-          stale-pr-message: |
-            This pull request has been inactive for 14 days.
-            
-            To keep it open, please:
-            - Push new commits to update the PR
-            - Resolve pending review comments
-            - Mark as ready for review if still in draft
-            
-            If there's no activity in the next 7 days, this PR will be automatically closed.
-          close-pr-message: |
-            This pull request has been closed due to inactivity.
-            
-            If you'd like to continue with this work:
-            - Reopen the pull request
-            - Push new commits to update it
-            - Request review when ready
-          stale-pr-label: 'stale'
-          close-pr-label: 'closed-inactive'
-          
+        days-before-pr-stale: 14
+        days-before-pr-close: 7
+        stale-pr-message: |
+          This pull request has been inactive for 14 days.
+
+          To keep it open, please:
+          - Push new commits to update the PR
+          - Resolve pending review comments
+          - Mark as ready for review if still in draft
+
+          If there's no activity in the next 7 days, this PR will be automatically closed.
+        close-pr-message: |
+          This pull request has been closed due to inactivity.
+
+          If you'd like to continue with this work:
+          - Reopen the pull request
+          - Push new commits to update it
+          - Request review when ready
+        stale-pr-label: stale
+        close-pr-label: closed-inactive
+
           # General configuration
-          exempt-issue-labels: 'pinned,help-wanted,good-first-issue,blocked'
-          exempt-pr-labels: 'pinned,work-in-progress,awaiting-review'
-          exempt-draft-pr: true
-          
+        exempt-issue-labels: pinned,help-wanted,good-first-issue,blocked
+        exempt-pr-labels: pinned,work-in-progress,awaiting-review
+        exempt-draft-pr: true
+
           # Don't automatically close pull requests from authors
-          ignore-updates: false
+        ignore-updates: false
