@@ -432,12 +432,8 @@ button {
     color: var(--text-primary);
     margin-bottom: 12px;
     line-height: 1.45;
-    min-height: 3.35em;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .bill-meta {
