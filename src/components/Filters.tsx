@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion'
-import { Search, Filter as FilterIcon, X } from 'lucide-react'
-import type { FilterState } from '../types'
+import { Filter as FilterIcon, X } from 'lucide-react'
+import type { Bill, FilterState } from '../types'
 import type { Translation } from '../i18n/translations'
+import SearchSuggestions from './SearchSuggestions.tsx'
 
 interface FiltersProps {
+  bills: Bill[]
   filters: FilterState
   setFilters: (filters: FilterState) => void
   onReset: () => void
@@ -25,7 +27,7 @@ const issueOptions = [
   { value: 'workers-rights', label: 'Workers Rights' },
 ]
 
-export default function Filters({ filters, setFilters, onReset, darkMode, t }: FiltersProps) {
+export default function Filters({ bills, filters, setFilters, onReset, darkMode, t }: FiltersProps) {
   const updateFilter = (key: keyof FilterState, value: string | string[]) => {
     setFilters({ ...filters, [key]: value })
   }
@@ -89,33 +91,14 @@ export default function Filters({ filters, setFilters, onReset, darkMode, t }: F
       </div>
 
       <div style={{ display: 'grid', gap: '20px' }}>
-        {/* Search Input */}
-        <div style={{ position: 'relative' }}>
-          <Search
-            size={20}
-            style={{
-              position: 'absolute',
-              left: '12px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: 'var(--text-tertiary)',
-            }}
-          />
-          <input
-            type="text"
-            placeholder={t.searchPlaceholder}
+        {/* Search Input with Suggestions */}
+        <div>
+          <SearchSuggestions
+            bills={bills}
             value={filters.search}
-            onChange={(e) => updateFilter('search', e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px 12px 12px 44px',
-              border: '2px solid var(--border-color)',
-              borderRadius: '12px',
-              fontSize: '1em',
-              background: 'var(--bg-primary)',
-              color: 'var(--text-primary)',
-              transition: 'all 0.05s ease',
-            }}
+            onChange={(value) => updateFilter('search', value)}
+            onSelectSuggestion={(suggestion) => updateFilter('search', suggestion)}
+            darkMode={darkMode}
           />
         </div>
 

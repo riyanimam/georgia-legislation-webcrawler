@@ -568,6 +568,7 @@ function App() {
             />
             <Stats bills={bills} filteredBills={filteredBills} darkMode={darkMode} t={t} />
             <Filters
+              bills={bills}
               filters={filters}
               setFilters={setFilters}
               onReset={resetFilters}
