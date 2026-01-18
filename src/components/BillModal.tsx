@@ -4,6 +4,7 @@ import type { LucideIcon } from 'lucide-react'
 import type { Bill } from '../types'
 import { formatDate, exportToCSV, exportToJSON, getLatestStatus } from '../utils'
 import ShareButtons from './ShareButtons'
+import type { Translation } from '../i18n/translations'
 
 interface BillModalProps {
   bill: Bill
@@ -11,6 +12,7 @@ interface BillModalProps {
   isFavorited: boolean
   onToggleFavorite: () => void
   darkMode: boolean
+  t: Translation
 }
 
 export default function BillModal({
@@ -19,6 +21,7 @@ export default function BillModal({
   isFavorited,
   onToggleFavorite,
   darkMode,
+  t,
 }: BillModalProps) {
   return (
     <motion.div
@@ -146,7 +149,7 @@ export default function BillModal({
               }}
             >
               <Heart size={16} fill={isFavorited ? 'white' : 'none'} />
-              {isFavorited ? 'Unfavorite' : 'Add to Favorites'}
+              {isFavorited ? t.removeFromFavorites : t.addToFavorites}
             </motion.button>
 
             <motion.button
@@ -190,7 +193,7 @@ export default function BillModal({
               }}
             >
               <Download size={16} />
-              Export JSON
+              {t.exportJSON}
             </motion.button>
           </div>
 
@@ -225,7 +228,7 @@ export default function BillModal({
 
             <DetailSection
               icon={Calendar}
-              title="Latest Status"
+              title={t.latestStatus}
               content={getLatestStatus(bill)}
               darkMode={darkMode}
             />
@@ -233,7 +236,7 @@ export default function BillModal({
             {bill.first_reader_summary && (
               <DetailSection
                 icon={null}
-                title="Summary"
+                title={t.modalSummary}
                 content={bill.first_reader_summary}
                 darkMode={darkMode}
               />
@@ -249,7 +252,7 @@ export default function BillModal({
                     color: 'var(--text-primary)',
                   }}
                 >
-                  Status History
+                  {t.history}
                 </h3>
                 <div style={{ display: 'grid', gap: '12px' }}>
                   {bill.status_history.map((status, index) => (

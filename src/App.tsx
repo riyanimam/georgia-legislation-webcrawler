@@ -559,6 +559,7 @@ function App() {
               isFavorited={favorites.includes(selectedBill.doc_number)}
               onToggleFavorite={() => toggleFavorite(selectedBill.doc_number)}
               darkMode={darkMode}
+              t={t}
             />
           )}
 
@@ -570,6 +571,7 @@ function App() {
               onToggleFavorite={toggleFavorite}
               onSelectBill={setSelectedBill}
               darkMode={darkMode}
+              t={t}
             />
           )}
 
@@ -590,6 +592,7 @@ function App() {
           onSelectBill={setSelectedBill}
           onExport={exportFavoritesJSON}
           darkMode={darkMode}
+          t={t}
         />
       </div>
     </div>

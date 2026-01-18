@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Heart, ChevronLeft, ChevronRight, Download, Trash2, X } from 'lucide-react'
 import type { Bill } from '../types'
 import { getLatestStatus } from '../utils'
+import type { Translation } from '../i18n/translations'
 
 interface SidebarProps {
   favorites: string[]
@@ -12,6 +13,7 @@ interface SidebarProps {
   onSelectBill: (bill: Bill) => void
   onExport: () => void
   darkMode: boolean
+  t: Translation
 }
 
 export default function Sidebar({
@@ -23,6 +25,7 @@ export default function Sidebar({
   onSelectBill,
   onExport,
   darkMode,
+  t,
 }: SidebarProps) {
   const favoritedBills = bills.filter((bill) => favorites.includes(bill.doc_number))
 
@@ -110,7 +113,7 @@ export default function Sidebar({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Heart size={24} color="white" fill="white" />
                   <h3 style={{ margin: 0, fontSize: '1.3em', fontWeight: 600, color: 'white' }}>
-                    Favorites
+                    {t.favoritesTitle}
                   </h3>
                 </div>
                 <motion.button
@@ -160,7 +163,7 @@ export default function Sidebar({
                 }}
               >
                 <Download size={18} />
-                Export All (JSON)
+                {t.exportAll}
               </motion.button>
             )}
 
@@ -279,7 +282,7 @@ export default function Sidebar({
                     style={{ marginBottom: '16px', opacity: 0.4, color: 'var(--text-tertiary)' }}
                   />
                   <p style={{ fontSize: '0.95em', lineHeight: 1.5, margin: 0 }}>
-                    No favorites yet. Click the heart icon on any bill to save it here!
+                    {t.noFavoritesMessage}
                   </p>
                 </motion.div>
               )}

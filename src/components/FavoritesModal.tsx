@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { X, Heart, Download, Trash2 } from 'lucide-react'
 import type { Bill } from '../types'
+import type { Translation } from '../i18n/translations'
 
 interface FavoritesModalProps {
   favorites: string[]
@@ -9,6 +10,7 @@ interface FavoritesModalProps {
   onToggleFavorite: (billNumber: string) => void
   onSelectBill: (bill: Bill) => void
   darkMode: boolean
+  t: Translation
 }
 
 export default function FavoritesModal({
@@ -18,6 +20,7 @@ export default function FavoritesModal({
   onToggleFavorite,
   onSelectBill,
   darkMode,
+  t,
 }: FavoritesModalProps) {
   const favoritedBills = bills.filter((bill) => favorites.includes(bill.doc_number))
 
@@ -109,7 +112,7 @@ export default function FavoritesModal({
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
             <Heart size={32} fill="white" />
             <h2 style={{ fontSize: '2em', fontWeight: 700, margin: 0 }}>
-              Favorite Bills
+              {t.favoritesTitle}
             </h2>
           </div>
           <p style={{ opacity: 0.9, fontSize: '1.1em' }}>
@@ -144,7 +147,7 @@ export default function FavoritesModal({
                 }}
               >
                 <Download size={20} />
-                Export All Favorites (JSON)
+                {t.exportAll}
               </motion.button>
 
               {/* Favorites List */}
@@ -203,7 +206,7 @@ export default function FavoritesModal({
                             margin: 0,
                           }}
                         >
-                          Sponsor:{' '}
+                          {t.billSponsor}:{' '}
                           {Array.isArray(bill.sponsors) ? bill.sponsors.join(', ') : bill.sponsors}
                         </p>
                       )}
@@ -246,8 +249,8 @@ export default function FavoritesModal({
               }}
             >
               <Heart size={64} strokeWidth={1} style={{ marginBottom: '24px', opacity: 0.5 }} />
-              <h3 style={{ fontSize: '1.5em', marginBottom: '12px' }}>No favorites yet</h3>
-              <p>Click the heart icon on any bill to add it to your favorites!</p>
+              <h3 style={{ fontSize: '1.5em', marginBottom: '12px' }}>{t.noFavorites}</h3>
+              <p>{t.noFavoritesMessage}</p>
             </motion.div>
           )}
         </div>
