@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [opened, edited, synchronize]
 
+permissions:
+  contents: read
+
 jobs:
   validate-code:
     name: Validate Code Quality
@@ -77,6 +80,8 @@ jobs:
     name: Validate PR Title Format
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
     steps:
     - name: Validate PR Title Format
       uses: amannn/action-semantic-pull-request@v6
