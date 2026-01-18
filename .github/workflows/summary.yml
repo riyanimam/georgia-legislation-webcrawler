@@ -18,15 +18,22 @@ jobs:
 
     - name: Extract issue content
       id: extract
+      env:
+        ISSUE_TITLE: ${{ github.event.issue.title }}
+        ISSUE_BODY: ${{ github.event.issue.body }}
+        ISSUE_LABELS: ${{ join(github.event.issue.labels.*.name, ', ') }}
       run: |
         # Extract and prepare issue content for summarization
-        TITLE="${{ github.event.issue.title }}"
-        BODY="${{ github.event.issue.body }}"
-        LABELS="${{ join(github.event.issue.labels.*.name, ', ') }}"
+        # Use environment variables to prevent code injection
+        echo "title<<EOF" >> $GITHUB_OUTPUT
+        echo "$ISSUE_TITLE" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
 
-        echo "title=$TITLE" >> $GITHUB_OUTPUT
-        echo "body=$BODY" >> $GITHUB_OUTPUT
-        echo "labels=$LABELS" >> $GITHUB_OUTPUT
+        echo "body<<EOF" >> $GITHUB_OUTPUT
+        echo "$ISSUE_BODY" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+        echo "labels=$ISSUE_LABELS" >> $GITHUB_OUTPUT
 
     - name: Run AI inference for issue summary
       id: inference

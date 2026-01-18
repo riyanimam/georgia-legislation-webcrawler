@@ -373,6 +373,9 @@ function setupEventListeners() {
             }
         });
     }
+    
+    // Modal backdrop click handler
+    const modal = document.getElementById("detailModal");
     if (modal) {
         modal.addEventListener("click", (e) => {
             if (e.target.id === "detailModal") {
@@ -1025,16 +1028,6 @@ function updatePaginationDisplay(currentPageNum, totalPages) {
             }
             pageSelector.appendChild(option);
         }
-        
-        // Add change event listener
-        pageSelector.addEventListener("change", (e) => {
-            const selectedPage = parseInt(e.target.value);
-            if (selectedPage !== currentPageNum) {
-                currentPage = selectedPage;
-                renderBills();
-                scrollToTop();
-            }
-        });
     }
 }
 
