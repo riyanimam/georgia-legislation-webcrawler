@@ -1089,16 +1089,24 @@ function updateSelectedFiltersDisplay() {
         activeFilters.push({ type: "issue", value: label });
     });
 
-    // Render filter badges
-    filtersContainer.innerHTML = activeFilters
-        .map(
-            (filter) =>
-                `<span class="filter-badge">
-                    ${filter.value}
-                    <button onclick="removeFilter('${filter.type}', '${filter.value.replace(/'/g, "\\'")}')">×</button>
-                </span>`
-        )
-        .join("");
+    // Render filter badges safely using DOM APIs
+    filtersContainer.innerHTML = "";
+    activeFilters.forEach((filter) => {
+        const badge = document.createElement("span");
+        badge.className = "filter-badge";
+
+        const labelNode = document.createTextNode(filter.value);
+        badge.appendChild(labelNode);
+
+        const button = document.createElement("button");
+        button.textContent = "×";
+        button.addEventListener("click", () => {
+            removeFilter(filter.type, filter.value);
+        });
+
+        badge.appendChild(button);
+        filtersContainer.appendChild(badge);
+    });
 
     // Show batch export button if there are results
     const batchExportBtn = document.getElementById("batchExportBtn");
