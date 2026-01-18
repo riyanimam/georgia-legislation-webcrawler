@@ -138,6 +138,7 @@ jobs:
     # Creates a new branch for the data update, commits the changes,
     # pushes to remote, auto-approves, and sets up auto-merge.
     - name: Create pull request with updated data
+      id: create_pr
       if: |
         steps.check_file.outputs.exists == 'true'
       env:
@@ -174,7 +175,7 @@ jobs:
           PR_NUMBER=$(echo "$PR_URL" | grep -oP '/pull/\K[0-9]+')
 
           echo "PR #$PR_NUMBER created"
-          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+          echo "pr-number=$PR_NUMBER" >> $GITHUB_OUTPUT
         else
           echo "No changes detected in ga_legislation.json"
         fi
@@ -184,16 +185,16 @@ jobs:
     # then enables auto-merge with squash strategy.
     # Uses GitHub App token which has separate identity from github-actions[bot]
     - name: Auto-approve and merge PR
-      if: env.PR_NUMBER != ''
+      if: steps.create_pr.outputs.pr-number != ''
       uses: hmarr/auto-approve-action@v4
       with:
         github-token: ${{ steps.app-token.outputs.token }}
-        pull-request-number: ${{ env.PR_NUMBER }}
+        pull-request-number: ${{ steps.create_pr.outputs.pr-number }}
 
     - name: Enable auto-merge
-      if: env.PR_NUMBER != ''
+      if: steps.create_pr.outputs.pr-number != ''
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
-        gh pr merge ${{ env.PR_NUMBER }} --auto --squash
-        echo "PR #${{ env.PR_NUMBER }} approved and set to auto-merge"
+        gh pr merge ${{ steps.create_pr.outputs.pr-number }} --auto --squash
+        echo "PR #${{ steps.create_pr.outputs.pr-number }} approved and set to auto-merge"

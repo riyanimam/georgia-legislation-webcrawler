@@ -291,7 +291,7 @@ This typically indicates:
 
 ## Development
 
-### Project Structure
+### Directory Layout
 
 ```txt
 georgia-legislation-webcrawler/
@@ -363,7 +363,7 @@ yamllint .github/workflows/
 | `markdownlint-cli` | Markdown linting                            |
 | `pre-commit`       | Pre-commit hook framework                   |
 
-## Contributing
+## How to Contribute
 
 Contributions are welcome! Please read our [Contributing Guide](docs/CONTRIBUTING.md) for:
 
