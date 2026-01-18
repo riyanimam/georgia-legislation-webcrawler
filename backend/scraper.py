@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Optional
@@ -339,13 +340,25 @@ class GALegislationScraper:
         # Run async scraper
         legislation_data = asyncio.run(self.get_all_pages(max_pages))
 
+        # Deduplicate by doc_number (pagination may create duplicates)
+        seen_doc_numbers = set()
+        unique_legislation = []
+        for bill in legislation_data:
+            doc_num = bill.get("doc_number")
+            if doc_num and doc_num not in seen_doc_numbers:
+                seen_doc_numbers.add(doc_num)
+                unique_legislation.append(bill)
+
         # Save to JSON file
         with open(output_file, "w", encoding="utf-8") as f:
-            json.dump(legislation_data, f, indent=2, ensure_ascii=False)
+            json.dump(unique_legislation, f, indent=2, ensure_ascii=False)
 
         # Print statistics
         print("\nScraping complete!")
-        print(f"  Saved {len(legislation_data)} items to {output_file}")
+        print(f"  Saved {len(unique_legislation)} unique items to {output_file}")
+        if len(legislation_data) > len(unique_legislation):
+            duplicates_removed = len(legislation_data) - len(unique_legislation)
+            print(f"  Removed {duplicates_removed} duplicate entries")
         print(
             f"  Stats: {self.stats['fetched']} fetched, {self.stats['cached']} cached, {self.stats['failed']} failed"
         )
@@ -353,23 +366,16 @@ class GALegislationScraper:
         return legislation_data
 
     async def get_all_pages(self, max_pages: Optional[int] = None) -> list[dict]:
-        """Scrape all pages of legislation using async/concurrent requests.
+        """Scrape all pages of legislation using JavaScript pagination clicks.
 
-        Iterates through paginated legislation listings, extracting bill information
-        and details from each bill's page using concurrent requests for improved performance.
+        Uses Playwright to click pagination buttons to navigate through all pages,
+        extracting bill information and details from each page using concurrent requests.
 
         Args:
             max_pages (int, optional): Maximum number of pages to scrape. None = all pages.
 
         Returns:
-            List[Dict]: List of legislation records containing:
-                - doc_number (str): Bill identifier (e.g., 'HB1', 'SB42')
-                - caption (str): Bill title/summary
-                - committees (List[str]): Assigned committees
-                - sponsors (List[str]): List of sponsors
-                - detail_url (str): URL to bill detail page
-                - first_reader_summary (str): Full bill summary
-                - status_history (List[Dict]): Historical status changes
+            List[Dict]: List of legislation records.
         """
         if not PLAYWRIGHT_AVAILABLE:
             print("Error: Playwright is required to scrape this website (it uses JavaScript).")
@@ -392,11 +398,20 @@ class GALegislationScraper:
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
                 )
                 page = await context.new_page()
+                # Separate page for detail fetching to avoid losing pagination context
+                detail_page = await context.new_page()
 
                 try:
                     page_num = 1
+                    total_pages = None
                     consecutive_failures = 0
                     max_consecutive_failures = 3
+
+                    # Load initial page
+                    print("Loading legislation page...")
+                    url = f"{self.base_url}/legislation/all"
+                    await page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                    await asyncio.sleep(2)
 
                     while True:
                         if max_pages and page_num > max_pages:
@@ -408,27 +423,30 @@ class GALegislationScraper:
                             )
                             break
 
+                        if total_pages and page_num > total_pages:
+                            print(f"\nReached last page ({total_pages})")
+                            break
+
                         print(f"\nScraping page {page_num}...")
-                        url = f"{self.base_url}/legislation/all?page={page_num}"
 
                         try:
-                            # Navigate to the page and wait for content to load
-                            await page.goto(url, wait_until="networkidle", timeout=60000)
-
-                            # Wait for table to load
-                            try:
-                                await page.wait_for_selector("table tbody tr", timeout=10000)
-                            except Exception:
-                                # Try alternative selectors
-                                print("  Waiting for alternative selectors...")
-                                try:
-                                    await page.wait_for_selector("table tr", timeout=10000)
-                                except Exception:
-                                    pass
-
                             # Get the HTML after JavaScript has rendered
                             html_content = await page.content()
                             soup = BeautifulSoup(html_content, "html.parser")
+
+                            # Detect total pages from pagination info on first page
+                            if not total_pages:
+                                pagination_text = soup.get_text()
+                                match = re.search(r"(\d+)-(\d+)\s+of\s+(\d+)", pagination_text)
+                                if match:
+                                    total_results = int(match.group(3))
+                                    items_per_page = int(match.group(2)) - int(match.group(1)) + 1
+                                    total_pages = (
+                                        total_results + items_per_page - 1
+                                    ) // items_per_page
+                                    print(
+                                        f"  Detected: {total_results} total bills across {total_pages} pages"
+                                    )
 
                             # Find all legislation rows
                             rows = soup.select("table tbody tr")
@@ -436,8 +454,20 @@ class GALegislationScraper:
                                 rows = soup.select("table tr")[1:]  # Skip header row if it exists
 
                             if not rows:
-                                print("No more results found.")
-                                break
+                                consecutive_failures += 1
+                                print(
+                                    f"  No rows found (attempt {consecutive_failures}/{max_consecutive_failures})"
+                                )
+                                await asyncio.sleep(2)
+                                # Try clicking next page anyway
+                                if total_pages and page_num < total_pages:
+                                    try:
+                                        await page.click(f'a:text("{page_num + 1}")', timeout=5000)
+                                        await asyncio.sleep(2)
+                                    except Exception:
+                                        pass
+                                page_num += 1
+                                continue
 
                             consecutive_failures = 0  # Reset on success
 
@@ -488,7 +518,7 @@ class GALegislationScraper:
                             )
                             for bill_data in page_bills:
                                 details = await self.fetch_bill_detail_async(
-                                    session, bill_data["detail_url"], page
+                                    session, bill_data["detail_url"], detail_page
                                 )
                                 bill_data.update(details)
 
@@ -505,9 +535,53 @@ class GALegislationScraper:
                                 # Respectful delay between requests
                                 await asyncio.sleep(self.request_delay)
 
+                            # Click next page if not at last page
+                            if total_pages is None or page_num < total_pages:
+                                next_page_num = page_num + 1
+                                try:
+                                    print(f"  Clicking page {next_page_num}...")
+                                    # Get current bill count to detect when new content loads
+                                    old_content = await page.content()
+
+                                    # First, scroll to bottom to ensure pagination is visible
+                                    await page.evaluate(
+                                        "window.scrollTo(0, document.body.scrollHeight)"
+                                    )
+                                    await asyncio.sleep(0.5)
+
+                                    # Click the next page button using playwright's :text selector
+                                    try:
+                                        await page.click(
+                                            f'a:text("{next_page_num}")', timeout=10000, force=True
+                                        )
+                                    except Exception:
+                                        # If force-click doesn't work, try a gentler approach
+                                        await page.locator(
+                                            f'a:text("{next_page_num}")'
+                                        ).scroll_into_view_if_needed()
+                                        await asyncio.sleep(0.5)
+                                        await page.locator(f'a:text("{next_page_num}")').click()
+
+                                    # Wait for content to change
+                                    for attempt in range(15):
+                                        await asyncio.sleep(1)
+                                        new_content = await page.content()
+                                        if new_content != old_content:
+                                            print(f"    Page loaded after {attempt + 1}s")
+                                            break
+
+                                except Exception as e:
+                                    print(f"  Could not click page {next_page_num}: {e}")
+                                    if total_pages and page_num < total_pages:
+                                        # If we can't click but there are more pages, increment failure counter
+                                        consecutive_failures += 1
+                                    else:
+                                        # Otherwise we've reached the end
+                                        break
+                            else:
+                                break
+
                             page_num += 1
-                            # Delay between pages
-                            await asyncio.sleep(1)
 
                         except Exception as e:
                             consecutive_failures += 1
@@ -515,6 +589,8 @@ class GALegislationScraper:
                             await asyncio.sleep(5)
 
                 finally:
+                    await detail_page.close()
+                    await page.close()
                     await context.close()
                     await browser.close()
 
@@ -523,10 +599,17 @@ class GALegislationScraper:
 
 # Usage
 if __name__ == "__main__":
+    import os
+
+    # Read environment variables for CI/CD configuration
+    max_concurrent = int(os.getenv("SCRAPER_CONCURRENCY", "5"))
+    request_delay = float(os.getenv("SCRAPER_DELAY", "0.1"))
+
     # Allow command line argument for max pages (useful for testing)
     max_pages = int(sys.argv[1]) if len(sys.argv) > 1 else None
 
-    scraper = GALegislationScraper()
+    print(f"Starting scraper with concurrency={max_concurrent}, delay={request_delay}s")
+    scraper = GALegislationScraper(max_concurrent=max_concurrent, request_delay=request_delay)
     data = scraper.scrape_and_save("ga_legislation.json", max_pages=max_pages)
 
     # Print summary

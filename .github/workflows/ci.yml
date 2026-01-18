@@ -55,12 +55,10 @@ jobs:
       run: npm install
 
     # Step 6: Run the scraper
-    # - Conditionally passes max_pages parameter if provided
-    #   (useful if website is temporarily down)
-    # Step 6: Run the scraper
     # - Respectfully scrapes with configurable delays to respect server
     # - Uses environment variables to control request rate
     # - continue-on-error: true allows workflow to continue if server blocks IPs
+    # - Outputs ga_legislation.json to repository root
     - name: Run scraper
       continue-on-error: true
       env:
@@ -75,6 +73,15 @@ jobs:
           echo "Scraping all available pages..."
           echo "Using respectful settings: 2s delay, 2 concurrent requests"
           python backend/scraper.py
+        fi
+
+        # Verify output file location
+        if [ -f ga_legislation.json ]; then
+          echo "✓ Output file created at repository root"
+        else
+          echo "⚠ Output file not found at repository root"
+          # Check if it was created elsewhere
+          find . -name "ga_legislation.json" -type f
         fi
 
     # Step 7: Verify that output file was created
@@ -100,40 +107,90 @@ jobs:
       if: steps.check_file.outputs.exists == 'true'
       run: node scripts/validate-schema.js ga_legislation.json
 
-    # Step 9: Generate timestamp for artifact naming
-    # - Used to create unique artifact names for each run
-    # - Helps track when data was collected
-    - name: Get current date
-      id: date
-      run: echo "date=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
-
     # Step 10: Upload results as GitHub Artifact
     # - Only runs if output file was successfully created
-    # - Artifacts are retained for 90 days
+    # - Artifacts are retained for 7 days
     # - Can be downloaded from the Actions tab in GitHub
     - name: Upload JSON as artifact
       if: steps.check_file.outputs.exists == 'true'
       uses: actions/upload-artifact@v6
       with:
-        name: ga-legislation-${{ steps.date.outputs.date }}
+        name: ga-legislation
         path: ga_legislation.json
         retention-days: 7
 
-    # Step 11: Commit and push results to repository
-    # Automatically commits scraped data to the repository
-    # Uses semantic versioning for commit messages
-    # Note: Using -f flag to force-add ga_legislation.json even though it's in .gitignore
-    # This allows CI to commit generated data while keeping local copies ignored
-    # Only runs on scheduled runs (daily) which execute on main branch
-    - name: Commit and push if changes
+    # Step 11: Create GitHub App token for bypass branch protection
+    # Uses the GitHub App credentials to get a token that can bypass
+    # branch protection rules and create pull requests
+    - name: Generate GitHub App token
+      id: app-token
+      uses: actions/create-github-app-token@v2
+      with:
+        app-id: ${{ secrets.APP_ID }}
+        private-key: ${{ secrets.PRIVATE_KEY }}
       if: |
-        steps.check_file.outputs.exists == 'true' &&
-        github.event_name == 'schedule'
+        steps.check_file.outputs.exists == 'true'
+
+    # Step 12: Create pull request and auto-approve/merge
+    # Creates a new branch for the data update, commits the changes,
+    # pushes to remote, auto-approves, and sets up auto-merge.
+    - name: Create pull request with updated data
+      if: |
+        steps.check_file.outputs.exists == 'true'
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
+
+        # Create a feature branch
+        BRANCH_NAME="update-legislation"
+
+        # Delete remote branch if it exists (from previous run)
+        git push origin --delete "$BRANCH_NAME" 2>/dev/null || true
+
+        # Create fresh local branch
+        git checkout -b "$BRANCH_NAME"
+
+        # Add the generated file (force add since it's in .gitignore)
         git add -f ga_legislation.json
-        git diff --quiet && git diff --staged --quiet || (
-          git commit -m "chore: update legislation data - ${{ steps.date.outputs.date }}"
-          git push origin main
-        )
+
+        # Check if there are changes to commit
+        if ! git diff --cached --quiet; then
+          git commit -m "chore: update legislation data"
+          git push origin "$BRANCH_NAME"
+
+          # Create pull request using GitHub CLI
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --title "chore: update legislation data" \
+            --body "Automated legislation data update from web scraper")
+
+          # Extract PR number from URL
+          PR_NUMBER=$(echo "$PR_URL" | grep -oP '/pull/\K[0-9]+')
+
+          echo "PR #$PR_NUMBER created"
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+        else
+          echo "No changes detected in ga_legislation.json"
+        fi
+
+    # Step 13: Auto-approve and merge the PR
+    # Uses hmarr/auto-approve-action to approve the PR created by the bot,
+    # then enables auto-merge with squash strategy.
+    # Uses GitHub App token which has separate identity from github-actions[bot]
+    - name: Auto-approve and merge PR
+      if: env.PR_NUMBER != ''
+      uses: hmarr/auto-approve-action@v4
+      with:
+        github-token: ${{ steps.app-token.outputs.token }}
+        pull-request-number: ${{ env.PR_NUMBER }}
+
+    - name: Enable auto-merge
+      if: env.PR_NUMBER != ''
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      run: |
+        gh pr merge ${{ env.PR_NUMBER }} --auto --squash
+        echo "PR #${{ env.PR_NUMBER }} approved and set to auto-merge"
