@@ -37,15 +37,22 @@ export default function LanguageSelector({
       transition={{ duration: 0.2 }}
       style={{
         position: 'fixed',
-        top: '24px',
-        right: '24px',
-        zIndex: 998,
+        top: '16px',
+        right: '16px',
+        zIndex: 1002,
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
+        padding: '4px 8px',
+        background: darkMode
+          ? 'rgba(42, 34, 32, 0.9)'
+          : 'rgba(255, 255, 255, 0.9)',
+        borderRadius: '12px',
+        backdropFilter: 'blur(10px)',
+        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.15)',
       }}
     >
-      <Languages size={20} color="white" />
+      <Languages size={18} color={darkMode ? '#f97316' : '#667eea'} />
       <select
         value={currentLanguage}
         onChange={(e) => onLanguageChange(e.target.value as Language)}

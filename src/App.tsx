@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Moon, Sun, Download, Upload, HelpCircle } from 'lucide-react'
+import { Moon, Sun, Upload, HelpCircle } from 'lucide-react'
 import type { Bill, FilterState } from './types'
 import { getBillIssue, getLatestStatus, getSponsorNames } from './utils'
 import { translations, type Language } from './i18n/translations'
@@ -388,19 +388,6 @@ function App() {
     setCurrentPage(1)
   }
 
-  const exportFilteredBillsJSON = () => {
-    const dataStr = JSON.stringify(filteredBills, null, 2)
-    const blob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `filtered-bills-${new Date().toISOString().split('T')[0]}.json`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-  }
-
   const exportFavoritesJSON = () => {
     const favoritedBills = bills.filter((bill) => favorites.includes(bill.doc_number))
     const dataStr = JSON.stringify(favoritedBills, null, 2)
@@ -437,10 +424,14 @@ function App() {
           style={{
             position: 'fixed',
             bottom: '24px',
-            right: '24px',
-            background: 'rgba(255, 255, 255, 0.15)',
-            border: '1px solid rgba(255, 255, 255, 0.25)',
-            color: 'white',
+            left: '24px',
+            background: darkMode 
+              ? 'rgba(58, 47, 45, 0.9)'
+              : 'rgba(255, 255, 255, 0.9)',
+            border: darkMode
+              ? '1px solid rgba(255, 255, 255, 0.2)'
+              : '1px solid rgba(0, 0, 0, 0.1)',
+            color: darkMode ? 'white' : '#2c3e50',
             padding: '12px',
             borderRadius: '50%',
             cursor: 'pointer',
@@ -448,6 +439,8 @@ function App() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            boxShadow: 'var(--shadow-md)',
+            backdropFilter: 'blur(10px)',
           }}
           aria-label="Toggle dark mode"
         >
@@ -462,11 +455,15 @@ function App() {
           onClick={() => setShowHelp(true)}
           style={{
             position: 'fixed',
-            bottom: '88px',
-            right: '24px',
-            background: 'linear-gradient(135deg, #667eea, #764ba2)',
-            border: 'none',
-            color: 'white',
+            bottom: '24px',
+            left: '80px',
+            background: darkMode 
+              ? 'rgba(58, 47, 45, 0.9)'
+              : 'rgba(255, 255, 255, 0.9)',
+            border: darkMode
+              ? '1px solid rgba(255, 255, 255, 0.2)'
+              : '1px solid rgba(0, 0, 0, 0.1)',
+            color: darkMode ? 'white' : '#2c3e50',
             padding: '12px',
             borderRadius: '50%',
             cursor: 'pointer',
@@ -474,42 +471,13 @@ function App() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            boxShadow: 'var(--shadow-md)',
+            backdropFilter: 'blur(10px)',
           }}
           aria-label="Show keyboard shortcuts"
         >
           <HelpCircle size={20} />
         </motion.button>
-
-        {/* Export Button */}
-        {filteredBills.length > 0 && (
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.15 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={exportFilteredBillsJSON}
-            style={{
-              position: 'fixed',
-              bottom: '152px',
-              right: '24px',
-              background: 'linear-gradient(135deg, #ffa502, #ffd700)',
-              border: 'none',
-              color: 'white',
-              padding: '12px',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              zIndex: 999,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: 'var(--shadow-lg)',
-            }}
-            aria-label="Export filtered results"
-          >
-            <Download size={20} />
-          </motion.button>
-        )}
 
         {/* File Upload */}
         <motion.div

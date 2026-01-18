@@ -48,9 +48,9 @@ export default function QuickActions({
   return (
     <div style={{
       position: 'fixed',
-      bottom: '32px',
-      right: '32px',
-      zIndex: 100,
+      bottom: '24px',
+      right: '24px',
+      zIndex: 998,
     }}>
       {/* Action Buttons */}
       <AnimatePresence>
