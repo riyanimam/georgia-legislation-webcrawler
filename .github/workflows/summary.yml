@@ -33,7 +33,8 @@ jobs:
       uses: actions/ai-inference@v1
       with:
         prompt: |
-          Analyze the following GitHub issue from the georgia-legislation-webcrawler project and provide a concise summary.
+          Analyze the following GitHub issue from the georgia-legislation-webcrawler
+          project and provide a concise summary.
 
           Title: ${{ steps.extract.outputs.title }}
           Labels: ${{ steps.extract.outputs.labels }}
@@ -53,7 +54,7 @@ jobs:
       run: |
         gh issue comment ${{ github.event.issue.number }} \
           --body "## 📋 AI-Generated Summary
-          
+
         ${{ steps.inference.outputs.response }}
 
         ---
