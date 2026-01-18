@@ -3,6 +3,7 @@ import { X, Heart, Download, Calendar, Users, Building } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { Bill } from '../types'
 import { formatDate, exportToCSV, exportToJSON, getLatestStatus } from '../utils'
+import ShareButtons from './ShareButtons'
 
 interface BillModalProps {
   bill: Bill
@@ -191,6 +192,11 @@ export default function BillModal({
               <Download size={16} />
               Export JSON
             </motion.button>
+          </div>
+
+          {/* Share Buttons */}
+          <div style={{ marginBottom: '24px' }}>
+            <ShareButtons bill={bill} darkMode={darkMode} />
           </div>
 
           {/* Details Grid */}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Moon, Sun, Download, Upload } from 'lucide-react'
+import { Moon, Sun, Download, Upload, HelpCircle } from 'lucide-react'
 import type { Bill, FilterState } from './types'
 import { getBillIssue, getLatestStatus } from './utils'
 import { translations, type Language } from './i18n/translations'
@@ -14,6 +14,7 @@ import LoadingAnimation from './components/LoadingAnimation.tsx'
 import AnimatedBackground from './components/AnimatedBackground.tsx'
 import Sidebar from './components/Sidebar.tsx'
 import LanguageSelector from './components/LanguageSelector.tsx'
+import HelpModal from './components/HelpModal.tsx'
 import './App.css'
 
 const ITEMS_PER_PAGE = 20
@@ -43,6 +44,7 @@ function App() {
     return null // Will be set by URL effect
   })
   const [showFavorites, setShowFavorites] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [favorites, setFavorites] = useState<string[]>(() => {
     const stored = localStorage.getItem('georgia-bills-favorites')
@@ -137,6 +139,7 @@ function App() {
       if (e.key === 'Escape') {
         setSelectedBill(null)
         setShowFavorites(false)
+        setShowHelp(false)
         setSidebarOpen(false)
       }
       
@@ -152,6 +155,15 @@ function App() {
         const activeElement = document.activeElement
         if (activeElement?.tagName !== 'INPUT' && activeElement?.tagName !== 'TEXTAREA') {
           setSidebarOpen(prev => !prev)
+        }
+      }
+      
+      // ? - show help modal
+      if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const activeElement = document.activeElement
+        if (activeElement?.tagName !== 'INPUT' && activeElement?.tagName !== 'TEXTAREA') {
+          e.preventDefault()
+          setShowHelp(true)
         }
       }
     }
@@ -394,6 +406,32 @@ function App() {
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </motion.button>
 
+        {/* Help Button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ duration: 0.1 }}
+          onClick={() => setShowHelp(true)}
+          style={{
+            position: 'fixed',
+            bottom: '88px',
+            right: '24px',
+            background: 'linear-gradient(135deg, #667eea, #764ba2)',
+            border: 'none',
+            color: 'white',
+            padding: '12px',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            zIndex: 999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          aria-label="Show keyboard shortcuts"
+        >
+          <HelpCircle size={20} />
+        </motion.button>
+
         {/* Export Button */}
         {filteredBills.length > 0 && (
           <motion.button
@@ -532,6 +570,12 @@ function App() {
               darkMode={darkMode}
             />
           )}
+
+          <HelpModal
+            isOpen={showHelp}
+            onClose={() => setShowHelp(false)}
+            darkMode={darkMode}
+          />
         </AnimatePresence>
 
         {/* Sidebar for Favorites */}
