@@ -1,10 +1,12 @@
 import { motion } from 'framer-motion'
-import { Heart, FileText, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Heart, FileText, ChevronLeft, ChevronRight, GitCompare } from 'lucide-react'
 import type { Bill } from '../types'
 import { generateBillTags, getLatestStatus } from '../utils'
 import SkeletonCard from './SkeletonCard'
 import { ReadingProgressBadge, useReadingProgress } from './ReadingProgress.tsx'
 import type { Translation } from '../i18n/translations'
+import { useState } from 'react'
+import { BillComparison } from './BillComparison'
 
 interface BillGridProps {
   bills: Bill[]
@@ -32,6 +34,24 @@ export default function BillGrid({
   t,
 }: BillGridProps) {
   const { isRead } = useReadingProgress()
+  const [selectedForComparison, setSelectedForComparison] = useState<string[]>([])
+  const [showComparison, setShowComparison] = useState(false)
+
+  const toggleComparisonSelection = (billNumber: string) => {
+    setSelectedForComparison(prev => 
+      prev.includes(billNumber)
+        ? prev.filter(n => n !== billNumber)
+        : [...prev, billNumber].slice(0, 3) // Max 3 bills
+    )
+  }
+
+  const handleCompare = () => {
+    if (selectedForComparison.length >= 2) {
+      setShowComparison(true)
+    }
+  }
+
+  const comparisonBills = bills.filter(b => selectedForComparison.includes(b.doc_number))
   
   return (
     <motion.div
@@ -74,6 +94,49 @@ export default function BillGrid({
               }}
               onClick={() => onSelectBill(bill)}
             >
+              {/* Comparison Checkbox */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  left: '16px',
+                  zIndex: 10,
+                }}
+              >
+                <motion.label
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    padding: '6px 10px',
+                    background: selectedForComparison.includes(bill.doc_number)
+                      ? darkMode ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.2)'
+                      : darkMode ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.8)',
+                    borderRadius: '8px',
+                    fontSize: '0.85em',
+                    fontWeight: 500,
+                    color: selectedForComparison.includes(bill.doc_number)
+                      ? darkMode ? '#60a5fa' : '#2563eb'
+                      : 'var(--text-secondary)',
+                    border: selectedForComparison.includes(bill.doc_number)
+                      ? darkMode ? '1px solid rgba(59, 130, 246, 0.5)' : '1px solid rgba(59, 130, 246, 0.3)'
+                      : darkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedForComparison.includes(bill.doc_number)}
+                    onChange={() => toggleComparisonSelection(bill.doc_number)}
+                    style={{ cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
+                  />
+                  Compare
+                </motion.label>
+              </div>
+
               {/* Favorite Button */}
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -315,6 +378,64 @@ export default function BillGrid({
           </motion.button>
         </motion.div>
       )}
+
+      {/* Floating Compare Button */}
+      {selectedForComparison.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.8 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 20, scale: 0.8 }}
+          style={{
+            position: 'fixed',
+            bottom: '32px',
+            right: '32px',
+            zIndex: 1000,
+          }}
+        >
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleCompare}
+            disabled={selectedForComparison.length < 2}
+            style={{
+              background: selectedForComparison.length >= 2
+                ? 'linear-gradient(135deg, #3b82f6, #2563eb)'
+                : darkMode ? 'rgba(100, 100, 100, 0.8)' : 'rgba(200, 200, 200, 0.8)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '16px',
+              padding: '16px 24px',
+              cursor: selectedForComparison.length >= 2 ? 'pointer' : 'not-allowed',
+              fontSize: '1.1em',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              boxShadow: selectedForComparison.length >= 2
+                ? '0 10px 40px rgba(59, 130, 246, 0.4)'
+                : '0 4px 12px rgba(0, 0, 0, 0.2)',
+            }}
+          >
+            <GitCompare size={24} />
+            <span>
+              Compare {selectedForComparison.length} Bill{selectedForComparison.length > 1 ? 's' : ''}
+            </span>
+            {selectedForComparison.length < 2 && (
+              <span style={{ fontSize: '0.85em', opacity: 0.8 }}>
+                (Select {2 - selectedForComparison.length} more)
+              </span>
+            )}
+          </motion.button>
+        </motion.div>
+      )}
+
+      {/* Bill Comparison Modal */}
+      <BillComparison
+        bills={comparisonBills}
+        isOpen={showComparison}
+        onClose={() => setShowComparison(false)}
+        darkMode={darkMode}
+      />
     </motion.div>
   )
 }

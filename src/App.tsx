@@ -17,6 +17,7 @@ import HelpModal from './components/HelpModal.tsx'
 import BillOfTheDay from './components/BillOfTheDay.tsx'
 import { ReadingProgressStats, useReadingProgress } from './components/ReadingProgress.tsx'
 import { StatsSkeleton, BillGridSkeleton } from './components/SkeletonLoaders.tsx'
+import { PWAInstall, useServiceWorker, useFavoritesCache } from './components/PWAInstall.tsx'
 import './App.css'
 
 const ITEMS_PER_PAGE = 20
@@ -27,6 +28,9 @@ function App() {
   
   // Reading progress tracking
   const { markAsRead, getReadCount } = useReadingProgress()
+  
+  // PWA service worker registration
+  useServiceWorker()
   
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('darkMode') === 'true'
@@ -55,6 +59,9 @@ function App() {
     const stored = localStorage.getItem('georgia-bills-favorites')
     return stored ? JSON.parse(stored) : []
   })
+  
+  // Cache favorites for offline access
+  useFavoritesCache(favorites)
 
   const [filters, setFilters] = useState<FilterState>(() => {
     return {
@@ -617,9 +624,11 @@ function App() {
             <BillModal
               key="bill-modal"
               bill={selectedBill}
+              allBills={bills}
               onClose={() => setSelectedBill(null)}
               isFavorited={favorites.includes(selectedBill.doc_number)}
               onToggleFavorite={() => toggleFavorite(selectedBill.doc_number)}
+              onSelectBill={setSelectedBill}
               darkMode={darkMode}
               t={t}
             />
@@ -658,6 +667,9 @@ function App() {
           darkMode={darkMode}
           t={t}
         />
+
+        {/* PWA Install Prompt */}
+        <PWAInstall darkMode={darkMode} />
       </div>
     </div>
   )

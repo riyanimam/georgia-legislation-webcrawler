@@ -93,15 +93,18 @@ export default function BillOfTheDay({ bills, onSelectBill, darkMode }: BillOfTh
             whileHover={{ scale: 1.01 }}
             style={{
               background: darkMode
-                ? 'linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.15))'
-                : 'linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2))',
+                ? 'linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(20, 20, 30, 0.98))'
+                : 'linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(250, 250, 255, 0.95))',
               border: darkMode
-                ? '2px solid rgba(255, 215, 0, 0.3)'
-                : '2px solid rgba(255, 165, 0, 0.3)',
+                ? '3px solid rgba(255, 215, 0, 0.5)'
+                : '3px solid rgba(255, 165, 0, 0.6)',
               borderRadius: '16px',
               padding: '24px',
               position: 'relative',
               cursor: 'pointer',
+              boxShadow: darkMode
+                ? '0 8px 32px rgba(255, 215, 0, 0.15), inset 0 1px 0 rgba(255, 215, 0, 0.1)'
+                : '0 8px 32px rgba(255, 165, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
             }}
             onClick={() => onSelectBill(featuredBill)}
           >
@@ -117,10 +120,10 @@ export default function BillOfTheDay({ bills, onSelectBill, darkMode }: BillOfTh
                 position: 'absolute',
                 top: '12px',
                 right: '12px',
-                background: 'rgba(0, 0, 0, 0.2)',
-                border: 'none',
+                background: darkMode ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255, 165, 0, 0.15)',
+                border: darkMode ? '1px solid rgba(255, 215, 0, 0.4)' : '1px solid rgba(255, 165, 0, 0.3)',
                 borderRadius: '50%',
-                padding: '6px',
+                padding: '8px',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -129,7 +132,7 @@ export default function BillOfTheDay({ bills, onSelectBill, darkMode }: BillOfTh
               }}
               aria-label="Dismiss bill of the day"
             >
-              <X size={16} color={darkMode ? 'white' : 'black'} />
+              <X size={18} color={darkMode ? '#ffd700' : '#ff8c00'} strokeWidth={2.5} />
             </motion.button>
 
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
@@ -147,14 +150,15 @@ export default function BillOfTheDay({ bills, onSelectBill, darkMode }: BillOfTh
                 style={{
                   background: 'linear-gradient(135deg, #ffd700, #ffa500)',
                   borderRadius: '12px',
-                  padding: '12px',
+                  padding: '14px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
+                  boxShadow: '0 4px 12px rgba(255, 165, 0, 0.4)',
                 }}
               >
-                <Star size={28} color="white" fill="white" />
+                <Star size={32} color="white" fill="white" strokeWidth={2} />
               </motion.div>
 
               {/* Content */}
@@ -162,10 +166,11 @@ export default function BillOfTheDay({ bills, onSelectBill, darkMode }: BillOfTh
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
                   <h3
                     style={{
-                      fontSize: '1.1em',
+                      fontSize: '1.2em',
                       fontWeight: 700,
                       color: darkMode ? '#ffd700' : '#ff8c00',
                       margin: 0,
+                      textShadow: darkMode ? '0 2px 4px rgba(0, 0, 0, 0.3)' : 'none',
                     }}
                   >
                     ⭐ Bill of the Day
@@ -174,10 +179,11 @@ export default function BillOfTheDay({ bills, onSelectBill, darkMode }: BillOfTh
                     <span
                       style={{
                         fontSize: '0.85em',
-                        color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                        color: darkMode ? 'rgba(255, 215, 0, 0.85)' : 'rgba(255, 140, 0, 0.9)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '4px',
+                        fontWeight: 600,
                       }}
                     >
                       <TrendingUp size={14} />
@@ -227,14 +233,19 @@ export default function BillOfTheDay({ bills, onSelectBill, darkMode }: BillOfTh
                   transition={{ delay: 0.3 }}
                   style={{
                     marginTop: '12px',
-                    padding: '12px',
-                    background: darkMode ? 'rgba(255, 215, 0, 0.1)' : 'rgba(255, 215, 0, 0.15)',
+                    padding: '14px',
+                    background: darkMode 
+                      ? 'rgba(255, 215, 0, 0.08)' 
+                      : 'rgba(255, 215, 0, 0.12)',
+                    border: darkMode
+                      ? '1px solid rgba(255, 215, 0, 0.25)'
+                      : '1px solid rgba(255, 165, 0, 0.25)',
                     borderRadius: '8px',
                     fontSize: '0.9em',
                     color: 'var(--text-secondary)',
                   }}
                 >
-                  💡 <strong>Why this matters:</strong> This bill has shown recent legislative activity, making it 
+                  💡 <strong style={{ color: darkMode ? '#ffd700' : '#ff8c00' }}>Why this matters:</strong> This bill has shown recent legislative activity, making it 
                   particularly relevant to current discussions in the Georgia legislature.
                 </motion.div>
               </div>
@@ -244,9 +255,9 @@ export default function BillOfTheDay({ bills, onSelectBill, darkMode }: BillOfTh
               style={{
                 marginTop: '16px',
                 textAlign: 'center',
-                fontSize: '0.85em',
-                color: darkMode ? 'rgba(255, 215, 0, 0.8)' : 'rgba(255, 140, 0, 0.8)',
-                fontWeight: 500,
+                fontSize: '0.9em',
+                color: darkMode ? 'rgba(255, 215, 0, 0.9)' : 'rgba(255, 140, 0, 1)',
+                fontWeight: 600,
               }}
             >
               Click to view full details →

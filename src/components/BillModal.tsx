@@ -4,22 +4,27 @@ import type { LucideIcon } from 'lucide-react'
 import type { Bill } from '../types'
 import { formatDate, exportToCSV, exportToJSON, getLatestStatus } from '../utils'
 import ShareButtons from './ShareButtons'
+import { BillSimilarity } from './BillSimilarity'
 import type { Translation } from '../i18n/translations'
 
 interface BillModalProps {
   bill: Bill
+  allBills: Bill[]
   onClose: () => void
   isFavorited: boolean
   onToggleFavorite: () => void
+  onSelectBill: (bill: Bill) => void
   darkMode: boolean
   t: Translation
 }
 
 export default function BillModal({
   bill,
+  allBills,
   onClose,
   isFavorited,
   onToggleFavorite,
+  onSelectBill,
   darkMode,
   t,
 }: BillModalProps) {
@@ -201,6 +206,17 @@ export default function BillModal({
           <div style={{ marginBottom: '24px' }}>
             <ShareButtons bill={bill} darkMode={darkMode} />
           </div>
+
+          {/* Similar Bills */}
+          <BillSimilarity
+            currentBill={bill}
+            allBills={allBills}
+            onSelectBill={(newBill) => {
+              onClose()
+              setTimeout(() => onSelectBill(newBill), 100)
+            }}
+            darkMode={darkMode}
+          />
 
           {/* Details Grid */}
           <div style={{ display: 'grid', gap: '24px' }}>

@@ -3,6 +3,7 @@ import { Filter as FilterIcon, X } from 'lucide-react'
 import type { Bill, FilterState } from '../types'
 import type { Translation } from '../i18n/translations'
 import SearchSuggestions from './SearchSuggestions.tsx'
+import { SavedSearches } from './SavedSearches'
 
 interface FiltersProps {
   bills: Bill[]
@@ -39,6 +40,20 @@ export default function Filters({ bills, filters, setFilters, onReset, darkMode,
     updateFilter('issues', newIssues)
   }
 
+  const handleLoadSearch = (loadedFilters: any) => {
+    setFilters({
+      search: loadedFilters.searchQuery || '',
+      type: loadedFilters.billType || '',
+      sponsor: loadedFilters.selectedSponsor || '',
+      status: loadedFilters.selectedStatus || '',
+      dateFrom: loadedFilters.dateFilter?.start || '',
+      dateTo: loadedFilters.dateFilter?.end || '',
+      issues: loadedFilters.issueFilter ? [loadedFilters.issueFilter] : [],
+      summarySearch: '',
+      sortBy: filters.sortBy,
+    })
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -59,6 +74,8 @@ export default function Filters({ bills, filters, setFilters, onReset, darkMode,
           alignItems: 'center',
           justifyContent: 'space-between',
           marginBottom: '24px',
+          flexWrap: 'wrap',
+          gap: '16px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -67,27 +84,41 @@ export default function Filters({ bills, filters, setFilters, onReset, darkMode,
             {t.filtersTitle}
           </h2>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onReset}
-          style={{
-            background: 'var(--accent-primary)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            padding: '10px 20px',
-            cursor: 'pointer',
-            fontSize: '0.95em',
-            fontWeight: 500,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-        >
-          <X size={16} />
-          {t.resetFilters}
-        </motion.button>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <SavedSearches
+            currentFilters={{
+              searchQuery: filters.search,
+              billType: filters.type,
+              selectedSponsor: filters.sponsor,
+              selectedStatus: filters.status,
+              dateFilter: { start: filters.dateFrom, end: filters.dateTo },
+              issueFilter: filters.issues[0] || '',
+            }}
+            onLoadSearch={handleLoadSearch}
+            darkMode={darkMode}
+          />
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onReset}
+            style={{
+              background: 'var(--accent-primary)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '10px 20px',
+              cursor: 'pointer',
+              fontSize: '0.95em',
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <X size={16} />
+            {t.resetFilters}
+          </motion.button>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gap: '20px' }}>

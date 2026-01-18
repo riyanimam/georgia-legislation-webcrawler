@@ -1,0 +1,49 @@
+{
+  "name": "Georgia Legislation Tracker",
+  "short_name": "GA Legislation",
+  "description": "Track and explore Georgia state legislation with multilingual support",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e293b",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["government", "politics", "news"],
+  "screenshots": [
+    {
+      "src": "/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Main view of legislation tracker"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Search Bills",
+      "short_name": "Search",
+      "description": "Search legislation",
+      "url": "/?action=search",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Favorites",
+      "short_name": "Favorites",
+      "description": "View favorite bills",
+      "url": "/?action=favorites",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
