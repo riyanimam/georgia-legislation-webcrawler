@@ -154,7 +154,7 @@ implementation plan
 
 ### Code Structure
 
-```
+```text
 src/
 ├── i18n/
 │   └── translations.ts          # NEW: Multi-language support

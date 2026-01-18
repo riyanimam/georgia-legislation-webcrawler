@@ -94,15 +94,21 @@ export default function BillGrid({
               }}
               onClick={() => onSelectBill(bill)}
             >
-              {/* Comparison Checkbox */}
+              {/* Top Controls Row */}
               <div
                 style={{
                   position: 'absolute',
-                  top: '16px',
-                  left: '16px',
+                  top: '12px',
+                  left: '12px',
+                  right: '12px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
                   zIndex: 10,
+                  pointerEvents: 'none', // Allow clicks to pass through container
                 }}
               >
+                {/* Comparison Checkbox */}
                 <motion.label
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -117,7 +123,7 @@ export default function BillGrid({
                       ? darkMode ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.2)'
                       : darkMode ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.8)',
                     borderRadius: '8px',
-                    fontSize: '0.85em',
+                    fontSize: '0.8em',
                     fontWeight: 500,
                     color: selectedForComparison.includes(bill.doc_number)
                       ? darkMode ? '#60a5fa' : '#2563eb'
@@ -125,48 +131,46 @@ export default function BillGrid({
                     border: selectedForComparison.includes(bill.doc_number)
                       ? darkMode ? '1px solid rgba(59, 130, 246, 0.5)' : '1px solid rgba(59, 130, 246, 0.3)'
                       : darkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
+                    pointerEvents: 'auto', // Enable clicks on this element
                   }}
                 >
                   <input
                     type="checkbox"
                     checked={selectedForComparison.includes(bill.doc_number)}
                     onChange={() => toggleComparisonSelection(bill.doc_number)}
-                    style={{ cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
+                    style={{ cursor: 'pointer', accentColor: 'var(--accent-primary)', margin: 0 }}
                   />
-                  Compare
+                  <span style={{ whiteSpace: 'nowrap' }}>Compare</span>
                 </motion.label>
+
+                {/* Favorite Button */}
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.1 }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onToggleFavorite(bill.doc_number)
+                  }}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '8px',
+                    pointerEvents: 'auto', // Enable clicks on this element
+                  }}
+                  aria-label="Toggle favorite"
+                >
+                  <Heart
+                    size={22}
+                    fill={favorites.includes(bill.doc_number) ? '#ef4444' : 'none'}
+                    color={favorites.includes(bill.doc_number) ? '#ef4444' : 'var(--text-tertiary)'}
+                  />
+                </motion.button>
               </div>
 
-              {/* Favorite Button */}
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.1 }}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onToggleFavorite(bill.doc_number)
-                }}
-                style={{
-                  position: 'absolute',
-                  top: '16px',
-                  right: '16px',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '8px',
-                  zIndex: 10,
-                }}
-                aria-label="Toggle favorite"
-              >
-                <Heart
-                  size={24}
-                  fill={favorites.includes(bill.doc_number) ? '#ef4444' : 'none'}
-                  color={favorites.includes(bill.doc_number) ? '#ef4444' : 'var(--text-tertiary)'}
-                />
-              </motion.button>
-
               {/* Bill Number Badge */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px', marginTop: '44px' }}>
                 <div
                   style={{
                     display: 'inline-flex',

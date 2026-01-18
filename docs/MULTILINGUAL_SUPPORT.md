@@ -32,7 +32,7 @@ accessible to diverse communities across the United States and beyond.
 
 ### File Structure
 
-```
+```text
 src/
 ├── i18n/
 │   └── translations.ts       # All 14 languages (1,078 translations)
@@ -266,15 +266,15 @@ const helpText = {
 export const translations: Record<'en' | 'es' | '...' | 'newLang', Translation>
 ```
 
-2. Copy existing translation object and translate all 77 keys
+1. Copy existing translation object and translate all 77 keys
 
-3. Add to LanguageSelector:
+2. Add to LanguageSelector:
 
 ```typescript
 { code: 'newLang', name: 'Language Name', flag: '🏳️' }
 ```
 
-4. Test thoroughly
+1. Test thoroughly
 
 ### Updating Existing Translations
 

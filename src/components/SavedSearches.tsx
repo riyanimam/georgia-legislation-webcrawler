@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Save, X, Download, Upload, Trash2, Search, Check } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface SavedSearch {
   id: string
@@ -37,6 +37,7 @@ export function SavedSearches({ currentFilters, onLoadSearch, darkMode }: SavedS
   const [showLoadDropdown, setShowLoadDropdown] = useState(false)
   const [newSearchName, setNewSearchName] = useState('')
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Load saved searches from localStorage
   useEffect(() => {
@@ -49,6 +50,20 @@ export function SavedSearches({ currentFilters, onLoadSearch, darkMode }: SavedS
       console.error('Failed to load saved searches:', error)
     }
   }, [])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowLoadDropdown(false)
+      }
+    }
+
+    if (showLoadDropdown) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showLoadDropdown])
 
   // Save to localStorage whenever savedSearches changes
   useEffect(() => {
@@ -150,7 +165,7 @@ export function SavedSearches({ currentFilters, onLoadSearch, darkMode }: SavedS
       </motion.button>
 
       {/* Load Button */}
-      <div style={{ position: 'relative' }}>
+      <div style={{ position: 'relative' }} ref={dropdownRef}>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
