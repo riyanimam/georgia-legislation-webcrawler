@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion'
-import { Heart, FileText, ChevronLeft, ChevronRight, GitCompare } from 'lucide-react'
+import { Heart, FileText, ChevronLeft, ChevronRight, GitCompare, ChevronDown } from 'lucide-react'
 import type { Bill } from '../types'
 import { generateBillTags, getLatestStatus, getSponsorNames } from '../utils'
 import SkeletonCard from './SkeletonCard'
 import { ReadingProgressBadge, useReadingProgress } from './ReadingProgress.tsx'
 import type { Translation } from '../i18n/translations'
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { BillComparison } from './BillComparison'
 
 interface BillGridProps {
@@ -19,6 +19,12 @@ interface BillGridProps {
   darkMode: boolean
   loading?: boolean
   t: Translation
+  // New props for infinite scroll
+  infiniteScroll?: boolean
+  onLoadMore?: () => void
+  hasMore?: boolean
+  // Representative profile
+  onViewRepresentative?: (sponsorName: string) => void
 }
 
 export default function BillGrid({
@@ -32,10 +38,36 @@ export default function BillGrid({
   darkMode,
   loading = false,
   t,
+  infiniteScroll = false,
+  onLoadMore,
+  hasMore = false,
+  onViewRepresentative,
 }: BillGridProps) {
   const { isRead } = useReadingProgress()
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([])
   const [showComparison, setShowComparison] = useState(false)
+  const loadMoreRef = useRef<HTMLDivElement>(null)
+
+  // Infinite scroll observer
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const target = entries[0]
+    if (target.isIntersecting && hasMore && !loading && onLoadMore) {
+      onLoadMore()
+    }
+  }, [hasMore, loading, onLoadMore])
+
+  useEffect(() => {
+    if (!infiniteScroll || !loadMoreRef.current) return
+
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: '100px',
+      threshold: 0.1,
+    })
+
+    observer.observe(loadMoreRef.current)
+    return () => observer.disconnect()
+  }, [infiniteScroll, handleObserver])
 
   const toggleComparisonSelection = (billNumber: string) => {
     setSelectedForComparison(prev => 
@@ -242,8 +274,14 @@ export default function BillGrid({
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                     {getSponsorNames(bill).slice(0, 3).map((sponsor, i) => (
-                      <span
+                      <motion.span
                         key={i}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onViewRepresentative?.(sponsor)
+                        }}
                         style={{
                           background: darkMode 
                             ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(251, 146, 60, 0.2))' 
@@ -257,10 +295,11 @@ export default function BillGrid({
                             ? '1px solid rgba(249, 115, 22, 0.3)' 
                             : '1px solid rgba(249, 115, 22, 0.2)',
                           boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                          cursor: onViewRepresentative ? 'pointer' : 'default',
                         }}
                       >
                         {sponsor}
-                      </span>
+                      </motion.span>
                     ))}
                     {getSponsorNames(bill).length > 3 && (
                       <span style={{
@@ -430,6 +469,54 @@ export default function BillGrid({
             <ChevronRight size={20} />
           </motion.button>
         </motion.div>
+      )}
+
+      {/* Infinite Scroll Load More Section */}
+      {infiniteScroll && (
+        <div ref={loadMoreRef} style={{ marginTop: '32px', textAlign: 'center' }}>
+          {loading && (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <SkeletonCard key={`loading-${i}`} darkMode={darkMode} />
+              ))}
+            </div>
+          )}
+          {hasMore && !loading && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onLoadMore}
+              style={{
+                background: darkMode 
+                  ? 'linear-gradient(135deg, #f97316, #fb923c)'
+                  : 'linear-gradient(135deg, #667eea, #764ba2)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '16px 32px',
+                fontSize: '1em',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+              }}
+            >
+              <ChevronDown size={20} />
+              Load More Bills
+            </motion.button>
+          )}
+          {!hasMore && bills.length > 0 && (
+            <p style={{ 
+              color: 'var(--text-tertiary)', 
+              fontSize: '0.95em',
+              padding: '24px',
+            }}>
+              You've reached the end — all {bills.length} bills loaded!
+            </p>
+          )}
+        </div>
       )}
 
       {/* Floating Compare Button */}

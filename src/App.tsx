@@ -20,6 +20,7 @@ import { StatsSkeleton, BillGridSkeleton } from './components/SkeletonLoaders.ts
 import { PWAInstall, useServiceWorker, useFavoritesCache } from './components/PWAInstall.tsx'
 import AnalyticsTabs from './components/AnalyticsTabs.tsx'
 import QuickActions from './components/QuickActions.tsx'
+import RepresentativeProfile from './components/RepresentativeProfile.tsx'
 import './App.css'
 
 const ITEMS_PER_PAGE = 20
@@ -78,6 +79,9 @@ function App() {
       sortBy: (urlParams.get('sortBy') || 'date-desc') as FilterState['sortBy'],
     }
   })
+
+  // Representative profile state
+  const [selectedRepresentative, setSelectedRepresentative] = useState<string | null>(null)
 
   useEffect(() => {
     if (darkMode) {
@@ -609,6 +613,7 @@ function App() {
                 darkMode={darkMode}
                 loading={loading}
                 t={t}
+                onViewRepresentative={(name) => setSelectedRepresentative(name)}
               />
             ) : (
               <motion.div
@@ -641,6 +646,7 @@ function App() {
               isFavorited={favorites.includes(selectedBill.doc_number)}
               onToggleFavorite={() => toggleFavorite(selectedBill.doc_number)}
               onSelectBill={setSelectedBill}
+              onViewRepresentative={(name) => setSelectedRepresentative(name)}
               darkMode={darkMode}
               t={t}
             />
@@ -702,6 +708,19 @@ function App() {
               alert('Link copied to clipboard!')
             }
           }}
+        />
+
+        {/* Representative Profile Modal */}
+        <RepresentativeProfile
+          sponsorName={selectedRepresentative || ''}
+          allBills={bills}
+          isOpen={selectedRepresentative !== null}
+          onClose={() => setSelectedRepresentative(null)}
+          onSelectBill={(bill) => {
+            setSelectedBill(bill)
+            markAsRead(bill.doc_number)
+          }}
+          darkMode={darkMode}
         />
 
         {/* Sidebar for Favorites */}

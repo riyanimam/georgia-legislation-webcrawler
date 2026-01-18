@@ -2,9 +2,10 @@ import { motion } from 'framer-motion'
 import { X, Heart, Download, Calendar, Users, Building } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { Bill } from '../types'
-import { formatDate, exportToCSV, exportToJSON, getLatestStatus } from '../utils'
+import { formatDate, exportToCSV, exportToJSON, getLatestStatus, getSponsorNames } from '../utils'
 import ShareButtons from './ShareButtons'
 import { BillSimilarity } from './BillSimilarity'
+import RelatedBills from './RelatedBills.tsx'
 import type { Translation } from '../i18n/translations'
 
 interface BillModalProps {
@@ -14,6 +15,7 @@ interface BillModalProps {
   isFavorited: boolean
   onToggleFavorite: () => void
   onSelectBill: (bill: Bill) => void
+  onViewRepresentative?: (sponsorName: string) => void
   darkMode: boolean
   t: Translation
 }
@@ -25,6 +27,7 @@ export default function BillModal({
   isFavorited,
   onToggleFavorite,
   onSelectBill,
+  onViewRepresentative,
   darkMode,
   t,
 }: BillModalProps) {
@@ -218,15 +221,50 @@ export default function BillModal({
             darkMode={darkMode}
           />
 
+          {/* Related Bills */}
+          <RelatedBills
+            currentBill={bill}
+            allBills={allBills}
+            darkMode={darkMode}
+            onSelectBill={(newBill) => {
+              onClose()
+              setTimeout(() => onSelectBill(newBill), 100)
+            }}
+          />
+
           {/* Details Grid */}
           <div style={{ display: 'grid', gap: '24px' }}>
             <DetailSection
               icon={Users}
               title="Sponsors"
               content={
-                Array.isArray(bill.sponsors)
-                  ? bill.sponsors.join(', ')
-                  : bill.sponsors || 'N/A'
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {getSponsorNames(bill).map((sponsor, i) => (
+                    <motion.span
+                      key={i}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => onViewRepresentative?.(sponsor)}
+                      style={{
+                        background: darkMode 
+                          ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(251, 146, 60, 0.2))' 
+                          : 'linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(251, 146, 60, 0.1))',
+                        color: darkMode ? '#fb923c' : '#f97316',
+                        padding: '6px 14px',
+                        borderRadius: '16px',
+                        fontSize: '0.9em',
+                        fontWeight: 500,
+                        border: darkMode 
+                          ? '1px solid rgba(249, 115, 22, 0.3)' 
+                          : '1px solid rgba(249, 115, 22, 0.2)',
+                        cursor: onViewRepresentative ? 'pointer' : 'default',
+                      }}
+                    >
+                      {sponsor}
+                    </motion.span>
+                  ))}
+                  {getSponsorNames(bill).length === 0 && 'N/A'}
+                </div>
               }
               darkMode={darkMode}
             />
@@ -307,7 +345,7 @@ export default function BillModal({
 interface DetailSectionProps {
   icon: LucideIcon | null
   title: string
-  content: string
+  content: React.ReactNode
   darkMode: boolean
 }
 
@@ -342,7 +380,7 @@ function DetailSection({ icon: Icon, title, content, darkMode }: DetailSectionPr
           {title}
         </h3>
       </div>
-      <p
+      <div
         style={{
           color: 'var(--text-secondary)',
           lineHeight: 1.6,
@@ -350,7 +388,7 @@ function DetailSection({ icon: Icon, title, content, darkMode }: DetailSectionPr
         }}
       >
         {content}
-      </p>
+      </div>
     </motion.div>
   )
 }
