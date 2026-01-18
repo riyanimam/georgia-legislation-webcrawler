@@ -73,7 +73,11 @@
         function log(message, type = "info") {
             const timestamp = new Date().toLocaleTimeString();
             const className = type;
-            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            const span = document.createElement("span");
+            span.className = className;
+            span.textContent = `[${timestamp}] ${message}`;
+            output.appendChild(span);
+            output.appendChild(document.createElement("br"));
             output.scrollTop = output.scrollHeight;
         }
 
