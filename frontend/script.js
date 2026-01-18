@@ -1042,6 +1042,18 @@ function scrollToTop() {
 /**
  * Display selected filters as badges
  */
+function escapeHtml(str) {
+    if (str == null) {
+        return "";
+    }
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 function updateSelectedFiltersDisplay() {
     const filtersContainer = document.getElementById("selectedFiltersDisplay");
     if (!filtersContainer) return;
@@ -1094,8 +1106,13 @@ function updateSelectedFiltersDisplay() {
         .map(
             (filter) =>
                 `<span class="filter-badge">
-                    ${filter.value}
-                    <button onclick="removeFilter('${filter.type}', '${filter.value.replace(/'/g, "\\'")}')">×</button>
+                    ${escapeHtml(filter.value)}
+                    <button
+                        type="button"
+                        class="remove-filter-btn"
+                        data-filter-type="${escapeHtml(filter.type)}"
+                        data-filter-value="${escapeHtml(filter.value)}"
+                    >×</button>
                 </span>`
         )
         .join("");
@@ -1106,6 +1123,21 @@ function updateSelectedFiltersDisplay() {
         batchExportBtn.style.display = filteredBills.length > 0 ? "block" : "none";
     }
 }
+
+// Delegate click events for removing filters to avoid inline onclick handlers
+document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) {
+        return;
+    }
+    if (target.classList.contains("remove-filter-btn")) {
+        const filterType = target.getAttribute("data-filter-type");
+        const filterValue = target.getAttribute("data-filter-value");
+        if (filterType !== null && filterValue !== null) {
+            removeFilter(filterType, filterValue);
+        }
+    }
+});
 
 /**
  * Remove a specific filter and reapply filtering
