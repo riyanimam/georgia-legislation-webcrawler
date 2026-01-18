@@ -1,24 +1,26 @@
 import { motion } from 'framer-motion'
 import { FileText, Filter, TrendingUp, Clock } from 'lucide-react'
 import type { Bill } from '../types'
+import type { Translation } from '../i18n/translations'
 
 interface StatsProps {
   bills: Bill[]
   filteredBills: Bill[]
   darkMode: boolean
+  t: Translation
 }
 
-export default function Stats({ bills, filteredBills, darkMode }: StatsProps) {
+export default function Stats({ bills, filteredBills, darkMode, t }: StatsProps) {
   const stats = [
     {
       icon: FileText,
-      label: 'Total Bills',
+      label: t.totalBills,
       value: bills.length,
       color: '#667eea',
     },
     {
       icon: Filter,
-      label: 'Filtered Results',
+      label: t.billsShowing,
       value: filteredBills.length,
       color: '#10b981',
     },

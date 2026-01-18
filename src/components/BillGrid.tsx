@@ -3,6 +3,7 @@ import { Heart, FileText, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Bill } from '../types'
 import { generateBillTags, getLatestStatus } from '../utils'
 import SkeletonCard from './SkeletonCard'
+import type { Translation } from '../i18n/translations'
 
 interface BillGridProps {
   bills: Bill[]
@@ -14,6 +15,7 @@ interface BillGridProps {
   onPageChange: (page: number) => void
   darkMode: boolean
   loading?: boolean
+  t: Translation
 }
 
 export default function BillGrid({
@@ -26,6 +28,7 @@ export default function BillGrid({
   onPageChange,
   darkMode,
   loading = false,
+  t,
 }: BillGridProps) {
   return (
     <motion.div
@@ -162,7 +165,7 @@ export default function BillGrid({
                   borderTop: '1px solid var(--border-color)',
                 }}
               >
-                <strong>Status:</strong> {getLatestStatus(bill)}
+                <strong>{t.billStatus}:</strong> {getLatestStatus(bill)}
               </div>
 
               {/* Animated Gradient Accent */}
@@ -226,7 +229,7 @@ export default function BillGrid({
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span style={{ color: 'white', fontWeight: 500, fontSize: '1.1em' }}>
-              Page {currentPage} of {totalPages}
+              {t.pageText} {currentPage} {t.ofText} {totalPages}
             </span>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -282,7 +285,7 @@ export default function BillGrid({
                   fontWeight: 500,
                 }}
               >
-                Go
+                {t.goButton}
               </button>
             </div>
           </div>

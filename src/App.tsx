@@ -509,12 +509,13 @@ function App() {
 
         {bills.length > 0 && (
           <>
-            <Stats bills={bills} filteredBills={filteredBills} darkMode={darkMode} />
+            <Stats bills={bills} filteredBills={filteredBills} darkMode={darkMode} t={t} />
             <Filters
               filters={filters}
               setFilters={setFilters}
               onReset={resetFilters}
               darkMode={darkMode}
+              t={t}
             />
             {filteredBills.length > 0 ? (
               <BillGrid
@@ -527,6 +528,7 @@ function App() {
                 onPageChange={setCurrentPage}
                 darkMode={darkMode}
                 loading={loading}
+                t={t}
               />
             ) : (
               <motion.div

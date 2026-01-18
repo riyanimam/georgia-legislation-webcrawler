@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion'
 import { Search, Filter as FilterIcon, X } from 'lucide-react'
 import type { FilterState } from '../types'
+import type { Translation } from '../i18n/translations'
 
 interface FiltersProps {
   filters: FilterState
   setFilters: (filters: FilterState) => void
   onReset: () => void
   darkMode: boolean
+  t: Translation
 }
 
 const issueOptions = [
@@ -23,7 +25,7 @@ const issueOptions = [
   { value: 'workers-rights', label: 'Workers Rights' },
 ]
 
-export default function Filters({ filters, setFilters, onReset, darkMode }: FiltersProps) {
+export default function Filters({ filters, setFilters, onReset, darkMode, t }: FiltersProps) {
   const updateFilter = (key: keyof FilterState, value: string | string[]) => {
     setFilters({ ...filters, [key]: value })
   }
@@ -60,7 +62,7 @@ export default function Filters({ filters, setFilters, onReset, darkMode }: Filt
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <FilterIcon size={24} color="var(--accent-primary)" />
           <h2 style={{ fontSize: '1.5em', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
-            Filters & Search
+            {t.filtersTitle}
           </h2>
         </div>
         <motion.button
@@ -82,7 +84,7 @@ export default function Filters({ filters, setFilters, onReset, darkMode }: Filt
           }}
         >
           <X size={16} />
-          Reset Filters
+          {t.resetFilters}
         </motion.button>
       </div>
 
@@ -101,7 +103,7 @@ export default function Filters({ filters, setFilters, onReset, darkMode }: Filt
           />
           <input
             type="text"
-            placeholder="Search by bill number, caption, sponsor, or committee..."
+            placeholder={t.searchPlaceholder}
             value={filters.search}
             onChange={(e) => updateFilter('search', e.target.value)}
             style={{
@@ -122,7 +124,7 @@ export default function Filters({ filters, setFilters, onReset, darkMode }: Filt
           {/* Type Filter */}
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9em', fontWeight: 500, color: 'var(--text-secondary)' }}>
-              Bill Type
+              {t.billType}
             </label>
             <select
               value={filters.type}
@@ -138,7 +140,7 @@ export default function Filters({ filters, setFilters, onReset, darkMode }: Filt
                 cursor: 'pointer',
               }}
             >
-              <option value="">All Types</option>
+              <option value="">{t.billTypeAll}</option>
               <option value="HB">House Bill (HB)</option>
               <option value="SB">Senate Bill (SB)</option>
             </select>
@@ -147,7 +149,7 @@ export default function Filters({ filters, setFilters, onReset, darkMode }: Filt
           {/* Sort By */}
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9em', fontWeight: 500, color: 'var(--text-secondary)' }}>
-              Sort By
+              {t.sortBy}
             </label>
             <select
               value={filters.sortBy}
@@ -163,21 +165,21 @@ export default function Filters({ filters, setFilters, onReset, darkMode }: Filt
                 cursor: 'pointer',
               }}
             >
-              <option value="date-desc">Latest First</option>
-              <option value="date-asc">Oldest First</option>
-              <option value="bill-asc">Bill Number (A-Z)</option>
-              <option value="bill-desc">Bill Number (Z-A)</option>
+              <option value="date-desc">{t.sortDateDesc}</option>
+              <option value="date-asc">{t.sortDateAsc}</option>
+              <option value="bill-asc">{t.sortTitleAsc}</option>
+              <option value="bill-desc">{t.sortTitleDesc}</option>
             </select>
           </div>
 
           {/* Sponsor Filter */}
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9em', fontWeight: 500, color: 'var(--text-secondary)' }}>
-              Sponsor
+              {t.filterSponsor}
             </label>
             <input
               type="text"
-              placeholder="Filter by sponsor name..."
+              placeholder={t.sponsorPlaceholder}
               value={filters.sponsor}
               onChange={(e) => updateFilter('sponsor', e.target.value)}
               style={{
@@ -195,11 +197,11 @@ export default function Filters({ filters, setFilters, onReset, darkMode }: Filt
           {/* Status Filter */}
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9em', fontWeight: 500, color: 'var(--text-secondary)' }}>
-              Status
+              {t.filterStatus}
             </label>
             <input
               type="text"
-              placeholder="Filter by status..."
+              placeholder={t.filterStatus}
               value={filters.status}
               onChange={(e) => updateFilter('status', e.target.value)}
               style={{
@@ -219,7 +221,7 @@ export default function Filters({ filters, setFilters, onReset, darkMode }: Filt
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9em', fontWeight: 500, color: 'var(--text-secondary)' }}>
-              Date From
+              {t.from}
             </label>
             <input
               type="date"
@@ -240,7 +242,7 @@ export default function Filters({ filters, setFilters, onReset, darkMode }: Filt
 
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9em', fontWeight: 500, color: 'var(--text-secondary)' }}>
-              Date To
+              {t.to}
             </label>
             <input
               type="date"
@@ -263,11 +265,11 @@ export default function Filters({ filters, setFilters, onReset, darkMode }: Filt
         {/* Summary Search */}
         <div>
           <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9em', fontWeight: 500, color: 'var(--text-secondary)' }}>
-            Search in Summary
+            {t.summarySearch}
           </label>
           <input
             type="text"
-            placeholder="Search within bill summaries..."
+            placeholder={t.summaryPlaceholder}
             value={filters.summarySearch}
             onChange={(e) => updateFilter('summarySearch', e.target.value)}
             style={{
@@ -285,7 +287,7 @@ export default function Filters({ filters, setFilters, onReset, darkMode }: Filt
         {/* Issue Checkboxes */}
         <div>
           <label style={{ display: 'block', marginBottom: '12px', fontSize: '0.9em', fontWeight: 500, color: 'var(--text-secondary)' }}>
-            Key Issues
+            {t.issueArea}
           </label>
           <div
             style={{
