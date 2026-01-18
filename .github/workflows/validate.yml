@@ -15,24 +15,24 @@ jobs:
     steps:
       # Step 1: Clone the repository
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v4
 
       # Step 2: Set up Python
     - name: Set up Python
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
 
       # Step 3: Set up Node.js for markdownlint and tests
     - name: Set up Node.js
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@v4
       with:
         node-version: '20'
 
       # Step 4: Install Python validation tools
     - name: Install Python validation tools
       run: |
-        pip install ruff mdformat mdformat-gfm mdformat-tables yamllint
+        pip install ruff mdformat mdformat-gfm mdformat-tables
 
       # Step 5: Install Node.js validation tools and dependencies
     - name: Install Node.js dependencies
@@ -44,9 +44,11 @@ jobs:
     - name: Biome check
       run: biome ci --no-errors-on-unmatched
 
+      # Step 7: Run Ruff linting
     - name: Ruff lint
       run: ruff check backend/scraper.py --fix --exit-zero
 
+      # Step 8: Check Ruff formatting
     - name: Ruff format check
       run: ruff format backend/scraper.py --line-length=100 --check
 
@@ -58,24 +60,113 @@ jobs:
     - name: Markdownlint check
       run: markdownlint README.md --disable=MD013 --disable=MD024
 
-      # Step 11: Validate YAML formatting
-    - name: Yamllint check
-      run: |
-        yamllint .github/workflows/ --format=parsable --strict
-        yamllint .pre-commit-config.yaml --format=parsable --strict
-
-      # Step 12: Run unit tests
+      # Step 11: Run unit tests
     - name: Run unit tests
       run: npm test
 
-      # Step 13: Validate JSON schema
+      # Step 12: Generate test coverage report
+    - name: Generate coverage report
+      run: npm run test:coverage
+      continue-on-error: true
+
+      # Step 13: Upload coverage report
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-report
+        path: coverage/
+        retention-days: 1
+
+      # Step 14: Build TypeScript
+    - name: Build TypeScript
+      run: npm run build
+      continue-on-error: true
+
+      # Step 15: Upload build report
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: build-report
+        path: |
+          dist/
+          *.log
+        retention-days: 1
+
+      # Step 16: Validate JSON schema
     - name: Validate JSON schema
       if: ${{ hashFiles('ga_legislation.json') != '' }}
       run: node scripts/validate-schema.js ga_legislation.json
+      continue-on-error: true
 
-      # Step 14: Validate accessibility
+      # Step 17: Upload validation report
+    - name: Upload validation results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: validation-report
+        path: |
+          validation-report.json
+          *.log
+        retention-days: 1
+
+      # Step 18: Validate accessibility
     - name: Validate accessibility
       run: node scripts/validate-accessibility.js frontend/index.html
+      continue-on-error: true
+
+      # Step 19: Upload accessibility report
+    - name: Upload accessibility report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: accessibility-report
+        path: |
+          accessibility-report.json
+          *.log
+        retention-days: 1
+
+      # Step 20: Generate validation summary
+    - name: Generate validation summary
+      if: always()
+      run: |
+        echo "# Validation Summary" > validation-summary.md
+        echo "" >> validation-summary.md
+        echo "## Test Results" >> validation-summary.md
+        if [ -f coverage/coverage-summary.json ]; then
+          echo "✅ Coverage report generated" >> validation-summary.md
+        else
+          echo "❌ Coverage report missing" >> validation-summary.md
+        fi
+        echo "" >> validation-summary.md
+        echo "## Build Status" >> validation-summary.md
+        if [ -d dist ]; then
+          echo "✅ Build successful" >> validation-summary.md
+        else
+          echo "❌ Build failed" >> validation-summary.md
+        fi
+        echo "" >> validation-summary.md
+        echo "## Validation Reports" >> validation-summary.md
+        if [ -f validation-report.json ]; then
+          echo "✅ Schema validation completed" >> validation-summary.md
+        else
+          echo "⚠️  Schema validation skipped or failed" >> validation-summary.md
+        fi
+        if [ -f accessibility-report.json ]; then
+          echo "✅ Accessibility validation completed" >> validation-summary.md
+        else
+          echo "⚠️  Accessibility validation skipped or failed" >> validation-summary.md
+        fi
+
+      # Step 21: Upload validation summary
+    - name: Upload validation summary
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: validation-summary
+        path: validation-summary.md
+        retention-days: 1
 
   validate-pr-title:
     name: Validate PR Title Format

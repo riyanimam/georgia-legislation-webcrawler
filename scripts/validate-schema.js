@@ -246,4 +246,15 @@ if (result.errors.length > 0) {
   console.log();
 }
 
+// Write validation report
+const report = {
+  timestamp: new Date().toISOString(),
+  status: result.isValid ? 'success' : 'failure',
+  stats: result.stats,
+  errors: result.errors,
+};
+
+fs.writeFileSync('validation-report.json', JSON.stringify(report, null, 2));
+console.log('📄 Validation report written to validation-report.json\n');
+
 process.exit(result.isValid ? 0 : 1);

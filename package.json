@@ -1,22 +1,41 @@
 {
   "name": "georgia-legislation-webcrawler",
-  "version": "1.0.0",
-  "description": "Georgia state legislation explorer and web crawler",
+  "version": "2.0.0",
+  "description": "Georgia state legislation explorer and web crawler - React Edition",
   "type": "module",
   "private": true,
   "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "validate:schema": "node scripts/validate-schema.js",
     "validate:a11y": "node scripts/validate-accessibility.js",
-    "validate:all": "npm run test && npm run validate:schema && npm run validate:a11y"
+    "validate:all": "npm run test && npm run validate:schema && npm run validate:a11y",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
+  },
+  "dependencies": {
+    "framer-motion": "^11.15.0",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.11",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
     "@vitest/coverage-v8": "^4.0.17",
     "axe-core": "^4.10.2",
     "jsdom": "^25.0.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
     "vitest": "^4.0.17"
   }
 }

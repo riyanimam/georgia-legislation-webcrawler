@@ -1,113 +1,145 @@
 # Frontend - Georgia Legislation Explorer UI
 
-Interactive web dashboard for exploring and searching Georgia state legislation.
+Modern React-based web application for exploring and searching Georgia state legislation with
+stunning animations and interactive features.
 
 ## Overview
 
-This directory contains all frontend code for the Georgia Legislation Explorer - a beautiful,
-responsive web interface for browsing legislation data collected by the backend scraper.
+This is a fully-featured React application built with TypeScript, Vite, and Framer Motion that
+provides a beautiful, responsive interface for browsing legislation data collected by the backend
+scraper.
 
 ## Technology Stack
 
-- **HTML5**: Semantic markup
-- **CSS3**: Modern styling with Grid, Flexbox, and animations
-- **Vanilla JavaScript**: No external dependencies, pure ES6+
+- **React 18**: Modern React with hooks and concurrent features
+- **TypeScript**: Type-safe development
+- **Vite**: Lightning-fast build tool and dev server
+- **Framer Motion**: Smooth, performant animations
+- **Lucide React**: Beautiful icon library
+- **CSS Variables**: Theme system with dark mode support
 
 ## File Structure
 
 ```text
-frontend/
-├── index.html       # Main application markup
-├── styles.css       # All styling and animations
-├── script.js        # Application logic and interactivity
-└── README.md        # This file
+src/
+├── components/          # React components
+│   ├── Header.tsx      # Animated header with branding
+│   ├── Stats.tsx       # Statistics dashboard with animations
+│   ├── Filters.tsx     # Search and filter controls
+│   ├── BillGrid.tsx    # Grid of bill cards with pagination
+│   ├── BillModal.tsx   # Detailed bill modal dialog
+│   └── LoadingAnimation.tsx  # Loading state animation
+├── App.tsx             # Main application component
+├── App.css             # Global styles and animations
+├── main.tsx            # Application entry point
+src/
+├── components/          # React components
+│   ├── Header.tsx      # Animated header with branding
+│   ├── Stats.tsx       # Statistics dashboard with animations
+│   ├── Filters.tsx     # Search and filter controls
+│   ├── BillGrid.tsx    # Grid of bill cards with pagination
+│   ├── BillModal.tsx   # Detailed bill modal dialog
+│   ├── FavoritesModal.tsx  # Favorites management modal
+│   ├── LoadingAnimation.tsx  # Loading state animation
+│   ├── AnimatedBackground.tsx  # Background animations with SVGs
+│   └── __tests__/      # Component tests
+├── test/               # Test configuration
+│   └── setup.ts        # Test environment setup
+├── App.tsx             # Main application component
+├── App.css             # Global styles and animations
+├── main.tsx            # Application entry point
+├── types.ts            # TypeScript type definitions
+├── utils.ts            # Utility functions
+└── vite-env.d.ts       # Vite environment types
+public/
+├── capitol.svg         # Capitol building icon
+├── capitol-detailed.svg # Detailed capitol illustration
+├── georgia-state.svg   # Georgia state outline
+├── peach.svg          # Georgia peach icon
+└── voting.svg         # Voting/democracy icon
 ```
 
 ## Features
 
-- 🔍 **Search & Filter**: Find bills by number, caption, sponsors, or committees
-- 📊 **Statistics Dashboard**: Real-time statistics on loaded bills
-- 🎯 **Type Filtering**: Filter by House Bills (HB) or Senate Bills (SB)
-- ↕️ **Sorting**: Sort by bill number or caption
-- 📋 **Detailed View**: Modal with comprehensive bill information
-- 📱 **Responsive Design**: Works on desktop, tablet, and mobile
-- 🎨 **Modern UI**: Gradient design with smooth animations
-- 📁 **File Upload**: Load custom JSON data files
-- 🔗 **Share Links**: Copy legislation URLs to clipboard
+- 🔍 **Advanced Search**: Multi-field search across bill data
+- 🏷️ **Smart Filters**: Filter by type, issues, dates, sponsors, status
+- 📊 **Animated Statistics**: Real-time bill counts with smooth animations
+- 🎯 **Key Issue Tags**: Auto-categorization of bills by topic
+- ↕️ **Flexible Sorting**: Multiple sort options
+- 📋 **Rich Modal View**: Detailed bill information with status history
+- ⭐ **Favorites System**: Save bills with localStorage persistence
+- 📥 **Export Features**: Download bills as CSV or JSON
+- 📱 **Fully Responsive**: Optimized for all screen sizes
+- 🎨 **Beautiful Animations**: Smooth transitions with Framer Motion
+- 🌙 **Dark Mode**: Complete theme switching with persistence
+- 🔗 **Direct Links**: Deep linking support
+- ♿ **Accessible**: ARIA labels, keyboard navigation, screen reader support
 
 ## How It Works
 
 ### Data Loading
 
-The UI expects JSON data in the following format:
+The application expects JSON data in this format:
 
 ```json
 [
   {
     "doc_number": "HB 1",
     "caption": "Bill title/caption",
-    "sponsors": "Sponsor names",
-    "committees": "Committee assignments",
+    "sponsors": "Sponsor names" | ["Sponsor 1", "Sponsor 2"],
+    "committees": "Committee assignments" | ["Committee 1"],
     "first_reader_summary": "Summary text",
     "status_history": [
       {
         "date": "2024-01-15",
         "status": "Status text"
       }
-    ],
-    "detail_url": "https://..."
+    ]
   }
 ]
 ```
 
 ### Auto-Loading
 
-The application automatically tries to load `ga_legislation.json` from the same directory. If not
-found, users can manually upload a JSON file via the file picker.
+In production (GitHub Pages), the application automatically loads `ga_legislation.json` from the
+repository root. In development, users can manually upload JSON files via the file picker interface.
 
-### Event Architecture
+### Component Architecture
 
-The application uses event delegation pattern for dynamic elements:
-
-```javascript
-// Data attributes store references
-<button class="view-details-btn" data-bill-index="${index}">View Details</button>
-
-// Event listeners attached after rendering
-document.querySelectorAll(".view-details-btn").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-        const billIndex = btn.closest(".bill-card").dataset.billIndex;
-        const bill = filteredBills[billIndex];
-        openModal(bill);
-    });
-});
+```text
+App (Main State Management)
+├── AnimatedBackground (Background SVG animations)
+├── Header (Animated branding with theme toggle)
+├── Stats (Statistics with animations)
+├── Filters (Search & filter controls)
+├── BillGrid (Card grid with pagination)
+│   └── BillCard (Individual bill cards)
+├── BillModal (Detail modal - conditionally rendered)
+└── FavoritesModal (Favorites management - conditionally rendered)
 ```
 
 ## Running Locally
 
-### Option 1: Using Python's Built-in Server
+### Development Server
 
 ```bash
-# From the project root
-python -m http.server 8000
-# Visit http://localhost:8000/frontend/
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+# Visit http://localhost:5173
 ```
 
-### Option 2: Using Node.js HTTP Server
+### Production Build
 
 ```bash
-# Install if needed
-npm install -g http-server
+# Build for production
+npm run build
 
-# From the project root
-http-server . -p 8000
-# Visit http://localhost:8000/frontend/
+# Preview production build
+npm run preview
 ```
-
-### Option 3: Using VS Code Live Server
-
-1. Install the "Live Server" extension in VS Code
-2. Right-click `index.html` and select "Open with Live Server"
 
 ## Development Workflow
 
