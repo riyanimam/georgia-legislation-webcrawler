@@ -1,5 +1,8 @@
 name: Scrape Georgia Legislation
 
+permissions:
+  contents: read
+
 # Trigger configuration
 on:
   # Manual trigger - allows running the workflow from GitHub UI
