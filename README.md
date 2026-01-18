@@ -1,5 +1,14 @@
 # Georgia Legislation Web Scraper
 
+[![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6.0.7-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Languages](https://img.shields.io/badge/Languages-14-blue.svg)](docs/MULTILINGUAL_SUPPORT.md)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Code Quality](https://img.shields.io/badge/Code%20Quality-Biome-60A5FA?logo=biomejs&logoColor=white)](https://biomejs.dev/)
+[![Framer Motion](https://img.shields.io/badge/Framer%20Motion-11.15-FF0055?logo=framer&logoColor=white)](https://www.framer.com/motion/)
+
 A modern React-based web application and Python scraper for exploring Georgia state legislation from
 the [Georgia General Assembly](https://www.legis.ga.gov) website.
 

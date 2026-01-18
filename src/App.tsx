@@ -83,6 +83,11 @@ function App() {
     localStorage.setItem('georgia-bills-favorites', JSON.stringify(favorites))
   }, [favorites])
 
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filters])
+
   useEffect(() => {
     // Auto-load data in production (GitHub Pages)
     const isProduction = import.meta.env.PROD
@@ -95,7 +100,6 @@ function App() {
           return res.json()
         })
         .then((data) => {
-          console.log('Auto-loaded data from repo:', data.length, 'bills')
           setBills(data)
           setLoading(false)
         })
@@ -160,14 +164,11 @@ function App() {
     const file = event.target.files?.[0]
     if (!file) return
 
-    console.log('File selected:', file.name, file.size, 'bytes')
     setLoading(true)
     const reader = new FileReader()
     reader.onload = (e) => {
       try {
         const data = JSON.parse(e.target?.result as string)
-        console.log('Parsed JSON data:', data.length, 'bills')
-        console.log('First bill:', data[0])
         setBills(data)
         setCurrentPage(1)
       } catch (error) {
@@ -186,7 +187,6 @@ function App() {
   }
 
   const filteredBills = useMemo(() => {
-    console.log('Filtering bills, total bills:', bills.length)
     let result = [...bills]
 
     // Search filter
@@ -293,18 +293,17 @@ function App() {
       }
     })
 
-    console.log('Filtered bills count:', result.length)
+
     return result
   }, [bills, filters])
 
   const paginatedBills = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE
     const end = start + ITEMS_PER_PAGE
-    console.log('Paginating bills, showing', start, 'to', end, 'of', filteredBills.length)
     return filteredBills.slice(start, end)
   }, [filteredBills, currentPage])
 
-  const totalPages = Math.ceil(filteredBills.length / ITEMS_PER_PAGE)
+  const totalPages = Math.max(1, Math.ceil(filteredBills.length / ITEMS_PER_PAGE))
 
   const toggleFavorite = (billNumber: string) => {
     setFavorites((prev) =>
