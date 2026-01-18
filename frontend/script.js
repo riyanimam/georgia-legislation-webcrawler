@@ -359,10 +359,21 @@ function setupEventListeners() {
     // Pagination handlers
     const prevPageBtn = document.getElementById("prevPageBtn");
     const nextPageBtn = document.getElementById("nextPageBtn");
-    
+    const pageSelector = document.getElementById("pageSelector");
+
     if (prevPageBtn) prevPageBtn.addEventListener("click", goToPreviousPage);
     if (nextPageBtn) nextPageBtn.addEventListener("click", goToNextPage);
-
+    if (pageSelector) {
+        pageSelector.addEventListener("change", (e) => {
+            const selectedPage = parseInt(e.target.value);
+            if (selectedPage !== currentPage) {
+                currentPage = selectedPage;
+                renderBills();
+                scrollToTop();
+            }
+        });
+    }
+    
     // Modal backdrop click handler
     const modal = document.getElementById("detailModal");
     if (modal) {
@@ -999,6 +1010,24 @@ function updatePaginationDisplay(currentPageNum, totalPages) {
     const pageInfo = document.getElementById("pageInfo");
     if (pageInfo) {
         pageInfo.textContent = `Page ${currentPageNum} of ${totalPages}`;
+    }
+    
+    // Update page selector dropdown
+    const pageSelector = document.getElementById("pageSelector");
+    if (pageSelector) {
+        // Clear existing options
+        pageSelector.innerHTML = "";
+        
+        // Add options for each page
+        for (let i = 1; i <= totalPages; i++) {
+            const option = document.createElement("option");
+            option.value = i;
+            option.textContent = i;
+            if (i === currentPageNum) {
+                option.selected = true;
+            }
+            pageSelector.appendChild(option);
+        }
     }
 }
 

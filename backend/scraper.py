@@ -3,7 +3,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
 import aiohttp
 import requests
@@ -73,12 +73,12 @@ class GALegislationScraper:
             "failed": 0,
         }
 
-    def _load_cache(self) -> dict:
+    def _load_cache(self) -> dict[str, dict[str, Any]]:
         """Load cached bill details from file."""
         if self.cache_file.exists():
             try:
                 with open(self.cache_file, encoding="utf-8") as f:
-                    return json.load(f)
+                    return json.load(f)  # type: ignore[no-any-return]
             except Exception as e:
                 print(f"Warning: Could not load cache: {e}")
         return {}
@@ -188,7 +188,7 @@ class GALegislationScraper:
             try:
                 # Use async Playwright for detail fetching
                 return await self._get_legislation_details_async(page, url)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 if attempt < max_retries - 1:
                     wait_time = 2**attempt
                     print(f"    Timeout fetching {url}. Waiting {wait_time}s...")
@@ -254,7 +254,7 @@ class GALegislationScraper:
                     history_table = history_div.find("table")
                     if history_table:
                         # Skip header row (tr with th elements)
-                        history_rows = history_table.select("tbody tr")
+                        history_rows = history_table.select("tbody tr")  # type: ignore[union-attr]
                         for row in history_rows:
                             cols = row.find_all("td")
                             if len(cols) >= 2:
@@ -268,7 +268,8 @@ class GALegislationScraper:
                                 except ValueError:
                                     formatted_date = date_str
 
-                                details["status_history"].append(
+                                status_list: list[dict[str, str]] = details["status_history"]  # type: ignore[assignment]
+                                status_list.append(
                                     {
                                         "date": formatted_date,
                                         "status": cols[1].get_text(strip=True),
@@ -305,7 +306,7 @@ class GALegislationScraper:
             return False
 
     def scrape_and_save(
-        self, output_file: str = "ga_legislation.json", max_pages: Optional[int] = None
+        self, output_file: str = "ga_legislation.json", max_pages: int | None = None
     ) -> list[dict]:
         """Main method to scrape all legislation and save to JSON.
 
@@ -365,7 +366,7 @@ class GALegislationScraper:
 
         return legislation_data
 
-    async def get_all_pages(self, max_pages: Optional[int] = None) -> list[dict]:
+    async def get_all_pages(self, max_pages: int | None = None) -> list[dict]:
         """Scrape all pages of legislation using JavaScript pagination clicks.
 
         Uses Playwright to click pagination buttons to navigate through all pages,
@@ -449,9 +450,12 @@ class GALegislationScraper:
                                     )
 
                             # Find all legislation rows
-                            rows = soup.select("table tbody tr")
+                            rows: Any = soup.select("table tbody tr")
                             if not rows:
-                                rows = soup.select("table tr")[1:]  # Skip header row if it exists
+                                rows_temp = soup.select("table tr")[
+                                    1:
+                                ]  # Skip header row if it exists
+                                rows = rows_temp
 
                             if not rows:
                                 consecutive_failures += 1
@@ -481,7 +485,10 @@ class GALegislationScraper:
                                         continue
 
                                     doc_number = doc_number_elem.text.strip().replace(" ", "")
-                                    detail_url = self.base_url + doc_number_elem["href"]
+                                    href = doc_number_elem.get("href", "")
+                                    detail_url = self.base_url + (
+                                        href if isinstance(href, str) else str(href)
+                                    )
 
                                     tds = row.select("td")
                                     if len(tds) < 4:
@@ -517,10 +524,12 @@ class GALegislationScraper:
                                 f"  Fetching details for {len(page_bills)} bills (with caching)..."
                             )
                             for bill_data in page_bills:
-                                details = await self.fetch_bill_detail_async(
-                                    session, bill_data["detail_url"], detail_page
-                                )
-                                bill_data.update(details)
+                                detail_url_val = bill_data.get("detail_url", "")
+                                if isinstance(detail_url_val, str):
+                                    details = await self.fetch_bill_detail_async(
+                                        session, detail_url_val, detail_page
+                                    )
+                                    bill_data.update(details)
 
                                 # Validate bill data before adding
                                 try:

@@ -1,0 +1,62 @@
+name: Question
+description: Ask a question about the project
+title: '[Question]: '
+labels: [question]
+body:
+- type: markdown
+  attributes:
+    value: |
+      Have a question? We're here to help! Please fill out the sections below.
+
+- type: textarea
+  id: question
+  attributes:
+    label: Your Question
+    description: What would you like to know?
+    placeholder: How do I...?
+  validations:
+    required: true
+
+- type: dropdown
+  id: category
+  attributes:
+    label: Question Category
+    description: What is your question about?
+    options:
+    - Installation/Setup
+    - Usage/How-to
+    - Configuration
+    - Troubleshooting
+    - Best Practices
+    - Contributing
+    - Other
+  validations:
+    required: true
+
+- type: textarea
+  id: context
+  attributes:
+    label: Context
+    description: Please provide any relevant context or what you've tried so far
+    placeholder: I tried...
+
+- type: textarea
+  id: documentation
+  attributes:
+    label: Documentation Checked
+    description: Which documentation have you already reviewed?
+    placeholder: |
+      - [ ] README.md
+      - [ ] Backend Documentation
+      - [ ] Frontend Documentation
+      - [ ] Contributing Guide
+
+- type: checkboxes
+  id: checklist
+  attributes:
+    label: Pre-submission Checklist
+    options:
+    - label: I have searched existing issues and discussions
+      required: true
+    - label: I have reviewed the relevant documentation
+      required: true
