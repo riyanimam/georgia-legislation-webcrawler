@@ -6,7 +6,7 @@ import { translations } from '../../i18n/translations'
 describe('Header', () => {
   it('should render the header title', () => {
     render(<Header t={translations.en} />)
-    expect(screen.getByText('Georgia Legislation Explorer')).toBeInTheDocument()
+    expect(screen.getByText('Georgia Legislation Tracker')).toBeInTheDocument()
   })
 
   it('should render with correct animation', () => {

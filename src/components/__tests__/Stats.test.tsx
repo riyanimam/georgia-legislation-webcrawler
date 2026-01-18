@@ -38,7 +38,7 @@ describe('Stats', () => {
     const { container } = render(<Stats bills={mockBills} filteredBills={filtered} darkMode={false} t={t} />)
     const cards = container.querySelectorAll('[style*="border-radius: 16px"]')
     const secondCard = within(cards[1] as HTMLElement)
-    expect(secondCard.getByText('Filtered Results')).toBeInTheDocument()
+    expect(secondCard.getByText('Showing')).toBeInTheDocument()
     expect(secondCard.getByText('1')).toBeInTheDocument()
   })
 
