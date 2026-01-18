@@ -15,20 +15,20 @@ translate complex legislative language into clear, understandable explanations f
 
 ### 1. LLM Integration Options
 
-**Option A: Server-Side Processing (Recommended)**
+#### Option A: Server-Side Processing (Recommended)
 
 - Set up a backend API (AWS Lambda, Vercel Serverless, etc.)
 - Use OpenAI GPT-4, Anthropic Claude, or similar API
 - Process bill summaries on-demand or during data refresh
 - Cache explanations to reduce API costs
 
-**Option B: Client-Side Processing**
+#### Option B: Client-Side Processing
 
 - Use browser-based LLM (e.g., Web LLM, smaller models)
 - Process on user's device (privacy-friendly)
 - May have performance limitations
 
-**Option C: Pre-Generated Explanations**
+#### Option C: Pre-Generated Explanations
 
 - Generate explanations during scraping/data pipeline
 - Store in JSON alongside bill data
@@ -81,7 +81,7 @@ export interface PlainEnglishSummary {
 
 #### Recommended Prompt Template
 
-```
+```text
 You are an expert at explaining legislation to everyday citizens.
 
 Bill Title: {bill.caption}
@@ -351,7 +351,7 @@ export interface PlainEnglishSummary {
 
 #### Recommended Disclaimer
 
-```
+```text
 ⚠️ AI-Generated Content: This explanation was created by artificial intelligence 
 and should not be considered legal advice. Always refer to the official bill 
 text and consult with legal professionals for authoritative information.

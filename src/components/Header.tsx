@@ -1,7 +1,12 @@
 import { motion } from 'framer-motion'
 import { Building2, Sparkles } from 'lucide-react'
+import type { Translation } from '../i18n/translations'
 
-export default function Header() {
+interface HeaderProps {
+  t: Translation
+}
+
+export default function Header({ t }: HeaderProps) {
   return (
     <motion.header
       initial={{ opacity: 0, y: -30 }}
@@ -48,7 +53,7 @@ export default function Header() {
             backgroundClip: 'text',
           }}
         >
-          Georgia Legislation Explorer
+          {t.headerTitle}
         </motion.h1>
         <motion.div
           animate={{
@@ -74,7 +79,7 @@ export default function Header() {
           margin: 0,
         }}
       >
-        Browse and explore Georgia state legislation with modern, interactive interface
+        {t.headerSubtitle}
       </motion.p>
 
       {/* Animated Background Elements */}

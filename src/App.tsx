@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Moon, Sun, Download, Upload } from 'lucide-react'
 import type { Bill, FilterState } from './types'
 import { getBillIssue, getLatestStatus } from './utils'
-import type { Language } from './i18n/translations'
+import { translations, type Language } from './i18n/translations'
 import Header from './components/Header.tsx'
 import Stats from './components/Stats.tsx'
 import Filters from './components/Filters.tsx'
@@ -19,17 +19,29 @@ import './App.css'
 const ITEMS_PER_PAGE = 20
 
 function App() {
+  // Initialize from URL parameters for shareable links
+  const urlParams = new URLSearchParams(window.location.search)
+  
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('darkMode') === 'true'
   })
   const [language, setLanguage] = useState<Language>(() => {
+    const urlLang = urlParams.get('lang')
+    if (urlLang && ['en', 'es', 'fr', 'zh', 'ja', 'ko', 'hi', 'ur', 'ar', 'vi', 'tl', 'ru', 'pt', 'de'].includes(urlLang)) {
+      return urlLang as Language
+    }
     const stored = localStorage.getItem('language')
     return (stored as Language) || 'en'
   })
   const [bills, setBills] = useState<Bill[]>([])
   const [loading, setLoading] = useState(false)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [selectedBill, setSelectedBill] = useState<Bill | null>(null)
+  const [currentPage, setCurrentPage] = useState(() => {
+    const page = urlParams.get('page')
+    return page ? Number.parseInt(page, 10) : 1
+  })
+  const [selectedBill, setSelectedBill] = useState<Bill | null>(() => {
+    return null // Will be set by URL effect
+  })
   const [showFavorites, setShowFavorites] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [favorites, setFavorites] = useState<string[]>(() => {
@@ -37,16 +49,18 @@ function App() {
     return stored ? JSON.parse(stored) : []
   })
 
-  const [filters, setFilters] = useState<FilterState>({
-    search: '',
-    type: '',
-    issues: [],
-    sponsor: '',
-    status: '',
-    dateFrom: '',
-    dateTo: '',
-    summarySearch: '',
-    sortBy: 'date-desc',
+  const [filters, setFilters] = useState<FilterState>(() => {
+    return {
+      search: urlParams.get('search') || '',
+      type: urlParams.get('type') || '',
+      issues: urlParams.get('issues')?.split(',').filter(Boolean) || [],
+      sponsor: urlParams.get('sponsor') || '',
+      status: urlParams.get('status') || '',
+      dateFrom: urlParams.get('dateFrom') || '',
+      dateTo: urlParams.get('dateTo') || '',
+      summarySearch: urlParams.get('summarySearch') || '',
+      sortBy: (urlParams.get('sortBy') || 'date-desc') as FilterState['sortBy'],
+    }
   })
 
   useEffect(() => {
@@ -60,6 +74,9 @@ function App() {
 
   useEffect(() => {
     localStorage.setItem('language', language)
+    // Set document direction for RTL languages
+    document.documentElement.dir = ['ar', 'ur'].includes(language) ? 'rtl' : 'ltr'
+    document.documentElement.lang = language
   }, [language])
 
   useEffect(() => {
@@ -88,6 +105,55 @@ function App() {
           // File upload still available as fallback
         })
     }
+  }, [])
+
+  // Sync state to URL for shareable links
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (filters.search) params.set('search', filters.search)
+    if (filters.type) params.set('type', filters.type)
+    if (filters.issues.length > 0) params.set('issues', filters.issues.join(','))
+    if (filters.sponsor) params.set('sponsor', filters.sponsor)
+    if (filters.status) params.set('status', filters.status)
+    if (filters.dateFrom) params.set('dateFrom', filters.dateFrom)
+    if (filters.dateTo) params.set('dateTo', filters.dateTo)
+    if (filters.summarySearch) params.set('summarySearch', filters.summarySearch)
+    if (filters.sortBy !== 'date-desc') params.set('sortBy', filters.sortBy)
+    if (currentPage !== 1) params.set('page', currentPage.toString())
+    if (language !== 'en') params.set('lang', language)
+    
+    const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname
+    window.history.replaceState({}, '', newUrl)
+  }, [filters, currentPage, language])
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Escape - close modals
+      if (e.key === 'Escape') {
+        setSelectedBill(null)
+        setShowFavorites(false)
+        setSidebarOpen(false)
+      }
+      
+      // Ctrl/Cmd + K - focus search (command palette style)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement
+        searchInput?.focus()
+      }
+      
+      // F - toggle sidebar
+      if (e.key === 'f' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const activeElement = document.activeElement
+        if (activeElement?.tagName !== 'INPUT' && activeElement?.tagName !== 'TEXTAREA') {
+          setSidebarOpen(prev => !prev)
+        }
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -290,8 +356,7 @@ function App() {
     URL.revokeObjectURL(url)
   }
 
-  // Translation helper - will be used when components are fully translated
-  // const t = translations[language]
+  const t = translations[language]
 
   return (
     <div style={{ minHeight: '100vh', padding: '20px', position: 'relative' }}>
@@ -302,7 +367,7 @@ function App() {
         darkMode={darkMode}
       />
       <div style={{ maxWidth: '1400px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        <Header />
+        <Header t={t} />
 
         {/* Dark Mode Toggle */}
         <motion.button
@@ -424,6 +489,7 @@ function App() {
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
                 darkMode={darkMode}
+                loading={loading}
               />
             ) : (
               <motion.div
