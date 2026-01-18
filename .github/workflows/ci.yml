@@ -145,6 +145,11 @@ jobs:
 
         # Create a feature branch
         BRANCH_NAME="update-legislation"
+
+        # Delete remote branch if it exists (from previous run)
+        git push origin --delete "$BRANCH_NAME" 2>/dev/null || true
+
+        # Create fresh local branch
         git checkout -b "$BRANCH_NAME"
 
         # Add the generated file (force add since it's in .gitignore)
