@@ -131,9 +131,9 @@ jobs:
       if: |
         steps.check_file.outputs.exists == 'true'
 
-    # Step 12: Create feature branch and commit changes
+    # Step 12: Create pull request and auto-approve/merge
     # Creates a new branch for the data update, commits the changes,
-    # pushes to remote, and sets up auto-merge. Uses GitHub App token.
+    # pushes to remote, auto-approves, and sets up auto-merge.
     - name: Create pull request with updated data
       if: |
         steps.check_file.outputs.exists == 'true'
@@ -165,10 +165,26 @@ jobs:
           # Extract PR number from URL
           PR_NUMBER=$(echo "$PR_URL" | grep -oP '/pull/\K[0-9]+')
 
-          # Enable auto-merge (squash merge strategy)
-          gh pr merge "$PR_NUMBER" --auto --squash
-
-          echo "PR #$PR_NUMBER created and set to auto-merge"
+          echo "PR #$PR_NUMBER created"
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
         else
           echo "No changes detected in ga_legislation.json"
         fi
+
+    # Step 13: Auto-approve and merge the PR
+    # Uses hmarr/auto-approve-action to approve the PR created by the bot,
+    # then enables auto-merge with squash strategy
+    - name: Auto-approve and merge PR
+      if: env.PR_NUMBER != ''
+      uses: hmarr/auto-approve-action@v4
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        pull-request-number: ${{ env.PR_NUMBER }}
+
+    - name: Enable auto-merge
+      if: env.PR_NUMBER != ''
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      run: |
+        gh pr merge ${{ env.PR_NUMBER }} --auto --squash
+        echo "PR #${{ env.PR_NUMBER }} approved and set to auto-merge"
