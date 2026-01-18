@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Heart, FileText, ChevronLeft, ChevronRight, GitCompare } from 'lucide-react'
 import type { Bill } from '../types'
-import { generateBillTags, getLatestStatus } from '../utils'
+import { generateBillTags, getLatestStatus, getSponsorNames } from '../utils'
 import SkeletonCard from './SkeletonCard'
 import { ReadingProgressBadge, useReadingProgress } from './ReadingProgress.tsx'
 import type { Translation } from '../i18n/translations'
@@ -226,6 +226,55 @@ export default function BillGrid({
                   </span>
                 ))}
               </div>
+
+              {/* Sponsors */}
+              {getSponsorNames(bill).length > 0 && (
+                <div style={{ marginBottom: '14px' }}>
+                  <div style={{ 
+                    fontSize: '0.75em', 
+                    color: 'var(--text-tertiary)', 
+                    marginBottom: '6px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
+                    Sponsors
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {getSponsorNames(bill).slice(0, 3).map((sponsor, i) => (
+                      <span
+                        key={i}
+                        style={{
+                          background: darkMode 
+                            ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(251, 146, 60, 0.2))' 
+                            : 'linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(251, 146, 60, 0.1))',
+                          color: darkMode ? '#fb923c' : '#f97316',
+                          padding: '5px 12px',
+                          borderRadius: '12px',
+                          fontSize: '0.85em',
+                          fontWeight: 500,
+                          border: darkMode 
+                            ? '1px solid rgba(249, 115, 22, 0.3)' 
+                            : '1px solid rgba(249, 115, 22, 0.2)',
+                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                        }}
+                      >
+                        {sponsor}
+                      </span>
+                    ))}
+                    {getSponsorNames(bill).length > 3 && (
+                      <span style={{
+                        color: 'var(--text-tertiary)',
+                        fontSize: '0.85em',
+                        padding: '5px 8px',
+                        fontStyle: 'italic'
+                      }}>
+                        +{getSponsorNames(bill).length - 3} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Status */}
               <div

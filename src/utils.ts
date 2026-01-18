@@ -180,3 +180,51 @@ export function exportToJSON(bill: Bill): void {
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
 }
+
+/**
+ * Normalize sponsor names to "First Last" format
+ * Handles formats like:
+ * - "LAST, FIRST" → "First Last"
+ * - "LAST, FIRST MIDDLE" → "First Middle Last"
+ * - "First Last" → "First Last" (already normalized)
+ */
+export function normalizeSponsorName(name: string): string {
+  if (!name || name.trim() === '') return ''
+  
+  const trimmed = name.trim()
+  
+  // Check if name contains comma (LAST, FIRST format)
+  if (trimmed.includes(',')) {
+    const [lastName, firstPart] = trimmed.split(',').map(part => part.trim())
+    
+    // Capitalize properly
+    const capitalizeWord = (word: string) => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    
+    const firstNames = firstPart.split(/\s+/).map(capitalizeWord).join(' ')
+    const lastNameCap = lastName.split(/\s+/).map(capitalizeWord).join(' ')
+    
+    return `${firstNames} ${lastNameCap}`
+  }
+  
+  // Already in "First Last" format, just capitalize properly
+  return trimmed.split(/\s+/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+}
+
+/**
+ * Extract and normalize all sponsors from a bill
+ * Returns array of normalized sponsor names
+ */
+export function getSponsorNames(bill: Bill): string[] {
+  const sponsors = Array.isArray(bill.sponsors) 
+    ? bill.sponsors 
+    : bill.sponsors 
+      ? [bill.sponsors]
+      : []
+  
+  return sponsors
+    .filter(s => s && s.trim() !== '')
+    .map(normalizeSponsorName)
+}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Moon, Sun, Download, Upload, HelpCircle } from 'lucide-react'
 import type { Bill, FilterState } from './types'
-import { getBillIssue, getLatestStatus } from './utils'
+import { getBillIssue, getLatestStatus, getSponsorNames } from './utils'
 import { translations, type Language } from './i18n/translations'
 import Header from './components/Header.tsx'
 import Stats from './components/Stats.tsx'
@@ -18,6 +18,8 @@ import BillOfTheDay from './components/BillOfTheDay.tsx'
 import { ReadingProgressStats, useReadingProgress } from './components/ReadingProgress.tsx'
 import { StatsSkeleton, BillGridSkeleton } from './components/SkeletonLoaders.tsx'
 import { PWAInstall, useServiceWorker, useFavoritesCache } from './components/PWAInstall.tsx'
+import AnalyticsTabs from './components/AnalyticsTabs.tsx'
+import QuickActions from './components/QuickActions.tsx'
 import './App.css'
 
 const ITEMS_PER_PAGE = 20
@@ -246,18 +248,17 @@ function App() {
   const filteredBills = useMemo(() => {
     let result = [...bills]
 
-    // Search filter
+    // Search filter - searches bill number, caption, sponsors (normalized), and committees
     if (filters.search) {
       const searchLower = filters.search.toLowerCase()
       result = result.filter((bill) => {
-        const sponsorsStr = Array.isArray(bill.sponsors)
-          ? bill.sponsors.join(' ')
-          : bill.sponsors || ''
+        // Get normalized sponsor names for better search
+        const sponsorNames = getSponsorNames(bill).join(' ')
         const committeesStr = Array.isArray(bill.committees)
           ? bill.committees.join(' ')
           : bill.committees || ''
         const searchText =
-          `${bill.doc_number} ${bill.caption} ${sponsorsStr} ${committeesStr}`.toLowerCase()
+          `${bill.doc_number} ${bill.caption} ${sponsorNames} ${committeesStr}`.toLowerCase()
         return searchText.includes(searchLower)
       })
     }
@@ -275,14 +276,12 @@ function App() {
       })
     }
 
-    // Sponsor filter
+    // Sponsor filter - now searches normalized names
     if (filters.sponsor) {
       const sponsorLower = filters.sponsor.toLowerCase()
       result = result.filter((bill) => {
-        const sponsorsStr = Array.isArray(bill.sponsors)
-          ? bill.sponsors.join(' ')
-          : bill.sponsors || ''
-        return sponsorsStr.toLowerCase().includes(sponsorLower)
+        const sponsorNames = getSponsorNames(bill).join(' ').toLowerCase()
+        return sponsorNames.includes(sponsorLower)
       })
     }
 
@@ -582,6 +581,19 @@ function App() {
               darkMode={darkMode}
               t={t}
             />
+
+            {/* Analytics Tabs */}
+            {!loading && bills.length > 0 && (
+              <AnalyticsTabs 
+                bills={filteredBills}
+                darkMode={darkMode}
+                t={t}
+                onFilterByWord={(word) => {
+                  setFilters(prev => ({ ...prev, search: word }))
+                }}
+              />
+            )}
+
             {filteredBills.length > 0 ? (
               <BillGrid
                 bills={paginatedBills}
@@ -654,6 +666,43 @@ function App() {
             darkMode={darkMode}
           />
         </AnimatePresence>
+
+        {/* Quick Actions FAB */}
+        <QuickActions
+          darkMode={darkMode}
+          currentBill={selectedBill}
+          onExportView={() => {
+            const dataStr = JSON.stringify(filteredBills, null, 2)
+            const blob = new Blob([dataStr], { type: 'application/json' })
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.download = `georgia-bills-filtered-${new Date().toISOString().split('T')[0]}.json`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            URL.revokeObjectURL(url)
+          }}
+          onAddFavorite={() => {
+            if (selectedBill && !favorites.includes(selectedBill.doc_number)) {
+              toggleFavorite(selectedBill.doc_number)
+            }
+          }}
+          onShareBill={() => {
+            if (navigator.share) {
+              navigator.share({
+                title: selectedBill?.caption || 'Georgia Legislation',
+                url: window.location.href
+              }).catch(() => {
+                navigator.clipboard.writeText(window.location.href)
+                alert('Link copied to clipboard!')
+              })
+            } else {
+              navigator.clipboard.writeText(window.location.href)
+              alert('Link copied to clipboard!')
+            }
+          }}
+        />
 
         {/* Sidebar for Favorites */}
         <Sidebar
