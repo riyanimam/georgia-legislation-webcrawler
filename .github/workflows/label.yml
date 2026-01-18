@@ -1,0 +1,66 @@
+# This workflow will triage pull requests and apply a label based on the
+# paths that are modified in the pull request.
+#
+# Label configuration is defined below in the form of a configuration object
+# that maps labels to path patterns. For more information, see:
+# https://github.com/actions/labeler
+
+name: Labeler
+on: [pull_request_target]
+
+env:
+  # Label configuration embedded as JSON for this workflow
+  LABELER_CONFIG: |
+    frontend:
+      - changed-files:
+          - any-glob-to-any-file: 'frontend/**'
+          - any-glob-to-any-file: 'package*.json'
+          - any-glob-to-any-file: 'vitest.config.js'
+          - any-glob-to-any-file: 'tsconfig*.json'
+          - any-glob-to-any-file: 'biome.json'
+    backend:
+      - changed-files:
+          - any-glob-to-any-file: 'backend/**'
+          - any-glob-to-any-file: 'requirements.txt'
+          - any-glob-to-any-file: 'pyproject.toml'
+    tests:
+      - changed-files:
+          - any-glob-to-any-file: 'tests/**'
+          - any-glob-to-any-file: '**/*.test.*'
+          - any-glob-to-any-file: '.pre-commit-config.yaml'
+    documentation:
+      - changed-files:
+          - any-glob-to-any-file: 'docs/**'
+          - any-glob-to-any-file: 'README.md'
+          - any-glob-to-any-file: '*.md'
+    ci:
+      - changed-files:
+          - any-glob-to-any-file: '.github/workflows/**'
+          - any-glob-to-any-file: '.releaserc.json'
+          - any-glob-to-any-file: 'scripts/**'
+    configuration:
+      - changed-files:
+          - any-glob-to-any-file: '.gitignore'
+          - any-glob-to-any-file: '.pre-commit-config.yaml'
+          - any-glob-to-any-file: '.yamllint'
+          - any-glob-to-any-file: '.ruff_cache/**'
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      # Create the labeler.yml configuration file from env variable
+      - name: Create labeler configuration
+        run: |
+          mkdir -p .github
+          echo "${{ env.LABELER_CONFIG }}" > .github/labeler.yml
+
+      # Run the labeler action
+      - uses: actions/labeler@v4
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          configuration-path: '.github/labeler.yml'
