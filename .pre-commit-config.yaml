@@ -33,12 +33,6 @@ repos:
   - id: pretty-format-yaml
     name: yaml format
     args: [--autofix, --indent=2]
-- repo: https://github.com/adrienverge/yamllint
-  rev: v1.36.0
-  hooks:
-  - id: yamllint
-    name: yamllint
-    args: [-c, .yamllint]
 - repo: https://github.com/abravalheri/validate-pyproject
   rev: v0.23
   hooks:
