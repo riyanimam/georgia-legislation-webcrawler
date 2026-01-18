@@ -548,7 +548,7 @@ class GALegislationScraper:
                             if total_pages is None or page_num < total_pages:
                                 next_page_num = page_num + 1
                                 try:
-                                    print(f"  Clicking page {next_page_num}...")
+                                    print(f"  Navigating to page {next_page_num}...")
                                     # Get current bill count to detect when new content loads
                                     old_content = await page.content()
 
@@ -558,18 +558,82 @@ class GALegislationScraper:
                                     )
                                     await asyncio.sleep(0.5)
 
-                                    # Click the next page button using playwright's :text selector
+                                    # Strategy 1: Try clicking the visible page number link first
+                                    clicked = False
                                     try:
                                         await page.click(
-                                            f'a:text("{next_page_num}")', timeout=10000, force=True
+                                            f'a:text-is("{next_page_num}")',
+                                            timeout=5000,
+                                            force=True,
                                         )
+                                        clicked = True
+                                        print(f"    Clicked page {next_page_num} link directly")
                                     except Exception:
-                                        # If force-click doesn't work, try a gentler approach
-                                        await page.locator(
-                                            f'a:text("{next_page_num}")'
-                                        ).scroll_into_view_if_needed()
-                                        await asyncio.sleep(0.5)
-                                        await page.locator(f'a:text("{next_page_num}")').click()
+                                        pass
+
+                                    # Strategy 2: If page number not visible, try "Next" button or navigation arrow
+                                    if not clicked:
+                                        try:
+                                            # Try common "Next" button selectors
+                                            next_selectors = [
+                                                'a:has-text("Next")',
+                                                'a:has-text("›")',
+                                                'a:has-text("»")',
+                                                'button:has-text("Next")',
+                                                'a[aria-label*="Next"]',
+                                                'button[aria-label*="Next"]',
+                                                ".pagination a.next",
+                                                ".pagination-next",
+                                                'a[rel="next"]',
+                                            ]
+
+                                            for selector in next_selectors:
+                                                try:
+                                                    await page.click(selector, timeout=2000)
+                                                    clicked = True
+                                                    print(
+                                                        f"    Clicked next page using selector: {selector}"
+                                                    )
+                                                    break
+                                                except Exception:
+                                                    continue
+                                        except Exception as e:
+                                            print(f"    Next button strategies failed: {e}")
+
+                                    # Strategy 3: If still not clicked, check if page number is in visible pagination
+                                    if not clicked:
+                                        try:
+                                            # Get all visible page links
+                                            page_links = await page.locator('a[href*="page"]').all()
+                                            if not page_links:
+                                                page_links = await page.locator(
+                                                    ".pagination a"
+                                                ).all()
+
+                                            # Find the highest visible page number and click it if it's < next_page_num
+                                            highest_visible = 0
+                                            for link in page_links:
+                                                text = await link.inner_text()
+                                                if text.strip().isdigit():
+                                                    num = int(text.strip())
+                                                    if num > highest_visible:
+                                                        highest_visible = num
+
+                                            if highest_visible > page_num:
+                                                await page.click(
+                                                    f'a:text-is("{highest_visible}")', timeout=5000
+                                                )
+                                                clicked = True
+                                                print(
+                                                    f"    Clicked highest visible page: {highest_visible}"
+                                                )
+                                        except Exception as e:
+                                            print(f"    Fallback pagination strategy failed: {e}")
+
+                                    if not clicked:
+                                        raise Exception(
+                                            f"Could not navigate to page {next_page_num}"
+                                        )
 
                                     # Wait for content to change
                                     for attempt in range(15):
