@@ -40,11 +40,15 @@ jobs:
         node-version: '20'
         cache: npm
 
+    - name: Install npm dependencies
+      if: always()
+      run: npm install
+
     - name: Validate npm dependencies
       if: always()
       run: |
         npm audit --audit-level=moderate || true
-        npm list
+        npm list || true
 
     - name: Set up Python
       if: always()
@@ -53,9 +57,14 @@ jobs:
         python-version: '3.11'
         cache: pip
 
-    - name: Validate Python dependencies
+    - name: Install Python dependencies
       if: always()
       run: |
         pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Validate Python dependencies
+      if: always()
+      run: |
         pip install safety
         safety check --json || true
