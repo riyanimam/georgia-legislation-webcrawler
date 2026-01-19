@@ -60,22 +60,23 @@ jobs:
 
     # Step 6: Run the scraper
     # - Respectfully scrapes with configurable delays to respect server
-    # - Uses environment variables to control request rate
+    # - Uses environment variables to control request rate and concurrency
     # - continue-on-error: true allows workflow to continue if server blocks IPs
     # - Outputs ga_legislation.json to repository root
     - name: Run scraper
       continue-on-error: true
       env:
-        SCRAPER_DELAY: '2'
-        SCRAPER_CONCURRENCY: '2'
+        SCRAPER_DELAY: '0.5'
+        SCRAPER_CONCURRENCY: '10'
+        SCRAPER_PAGE_POOL: '5'
       run: |
         if [ -n "${{ github.event.inputs.max_pages }}" ]; then
           echo "Scraping maximum ${{ github.event.inputs.max_pages }} pages..."
-          echo "Using respectful settings: 2s delay, 2 concurrent requests"
+          echo "Using settings: 0.5s delay, 10 concurrent requests, 5 browser pages"
           python backend/scraper.py ${{ github.event.inputs.max_pages }}
         else
           echo "Scraping all available pages..."
-          echo "Using respectful settings: 2s delay, 2 concurrent requests"
+          echo "Using settings: 0.5s delay, 10 concurrent requests, 5 browser pages"
           python backend/scraper.py
         fi
 

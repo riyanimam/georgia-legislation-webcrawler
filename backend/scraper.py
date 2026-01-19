@@ -29,16 +29,23 @@ class ValidationError(Exception):
 
 
 class GALegislationScraper:
-    def __init__(self, max_concurrent: int = 5, request_delay: float = 0.1):
+    def __init__(
+        self,
+        max_concurrent: int = 20,
+        request_delay: float = 0.1,
+        page_pool_size: int = 10,
+    ):
         """Initialize scraper with async support and caching.
 
         Args:
-            max_concurrent (int): Maximum concurrent requests. Default 5 (respectful).
+            max_concurrent (int): Maximum concurrent requests. Default 20.
             request_delay (float): Delay between requests in seconds. Default 0.1.
+            page_pool_size (int): Number of Playwright browser pages to pool. Default 10.
         """
         self.base_url = "https://www.legis.ga.gov"
         self.max_concurrent = max_concurrent
         self.request_delay = request_delay
+        self.page_pool_size = page_pool_size
         self.cache_file = Path("bill_details_cache.json")
         self.cache = self._load_cache()
         self.session = requests.Session()
@@ -71,6 +78,8 @@ class GALegislationScraper:
             "fetched": 0,
             "cached": 0,
             "failed": 0,
+            "total_bills": 0,
+            "pages_processed": 0,
         }
 
     def _load_cache(self) -> dict[str, dict[str, Any]]:
@@ -143,6 +152,39 @@ class GALegislationScraper:
                     raise ValidationError(
                         "Status history items must have 'date' and 'status' fields"
                     )
+
+    async def _fetch_with_semaphore(
+        self,
+        semaphore: asyncio.Semaphore,
+        session: aiohttp.ClientSession,
+        bill_data: dict,
+        pages: list,
+    ) -> dict:
+        """Fetch bill detail with semaphore control for concurrency.
+
+        Args:
+            semaphore: Semaphore to control concurrent requests.
+            session: aiohttp session.
+            bill_data: Bill dictionary with detail_url.
+            pages: Pool of Playwright pages to use.
+
+        Returns:
+            Updated bill_data dictionary with details.
+        """
+        async with semaphore:
+            # Get a page from the pool (round-robin)
+            page_idx = hash(bill_data["doc_number"]) % len(pages)
+            page = pages[page_idx]
+
+            detail_url = bill_data.get("detail_url", "")
+            if isinstance(detail_url, str) and detail_url:
+                details = await self.fetch_bill_detail_async(session, detail_url, page)
+                bill_data.update(details)
+
+                # Small delay to be respectful
+                await asyncio.sleep(self.request_delay)
+
+            return bill_data
 
     async def fetch_bill_detail_async(self, session: aiohttp.ClientSession, url: str, page) -> dict:
         """Fetch bill details with caching and concurrent requests.
@@ -360,8 +402,9 @@ class GALegislationScraper:
         if len(legislation_data) > len(unique_legislation):
             duplicates_removed = len(legislation_data) - len(unique_legislation)
             print(f"  Removed {duplicates_removed} duplicate entries")
+        print(f"  Pages processed: {self.stats['pages_processed']}")
         print(
-            f"  Stats: {self.stats['fetched']} fetched, {self.stats['cached']} cached, {self.stats['failed']} failed"
+            f"  Details: {self.stats['fetched']} fetched, {self.stats['cached']} cached, {self.stats['failed']} failed"
         )
 
         return legislation_data
@@ -387,7 +430,7 @@ class GALegislationScraper:
         all_legislation = []
 
         connector = aiohttp.TCPConnector(
-            limit=self.max_concurrent, limit_per_host=2, ttl_dns_cache=300
+            limit=self.max_concurrent, limit_per_host=10, ttl_dns_cache=300
         )
         timeout = aiohttp.ClientTimeout(total=60)
 
@@ -398,9 +441,15 @@ class GALegislationScraper:
                 context = await browser.new_context(
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
                 )
+
+                # Create page pool for concurrent detail fetching
+                print(
+                    f"Creating pool of {self.page_pool_size} browser pages for concurrent fetching..."
+                )
+                detail_pages = [await context.new_page() for _ in range(self.page_pool_size)]
+
+                # Use a single page for main navigation
                 page = await context.new_page()
-                # Separate page for detail fetching to avoid losing pagination context
-                detail_page = await context.new_page()
 
                 try:
                     page_num = 1
@@ -521,28 +570,50 @@ class GALegislationScraper:
 
                             # Fetch details concurrently with rate limiting
                             print(
-                                f"  Fetching details for {len(page_bills)} bills (with caching)..."
+                                f"  Fetching details for {len(page_bills)} bills concurrently (max {self.max_concurrent})..."
                             )
-                            for bill_data in page_bills:
-                                detail_url_val = bill_data.get("detail_url", "")
-                                if isinstance(detail_url_val, str):
-                                    details = await self.fetch_bill_detail_async(
-                                        session, detail_url_val, detail_page
+
+                            # Create semaphore for concurrency control
+                            semaphore = asyncio.Semaphore(self.max_concurrent)
+
+                            # Create tasks for concurrent fetching
+                            tasks = [
+                                self._fetch_with_semaphore(
+                                    semaphore, session, bill_data, detail_pages
+                                )
+                                for bill_data in page_bills
+                            ]
+
+                            # Execute all tasks concurrently and gather results
+                            completed_bills = await asyncio.gather(*tasks, return_exceptions=True)
+
+                            # Process results and validate
+                            for idx, result in enumerate(completed_bills):
+                                if isinstance(result, Exception):
+                                    print(
+                                        f"    Error fetching {page_bills[idx]['doc_number']}: {result}"
                                     )
-                                    bill_data.update(details)
+                                    self.stats["failed"] += 1
+                                    continue
+
+                                # Type guard: result is now known to be dict
+                                if not isinstance(result, dict):
+                                    continue
 
                                 # Validate bill data before adding
                                 try:
-                                    self.validate_bill_data(bill_data)
-                                    all_legislation.append(bill_data)
+                                    self.validate_bill_data(result)
+                                    all_legislation.append(result)
+                                    self.stats["total_bills"] += 1
                                 except ValidationError as e:
-                                    print(
-                                        f"    Validation error for {bill_data['doc_number']}: {e}"
-                                    )
+                                    print(f"    Validation error for {result['doc_number']}: {e}")
+                                    self.stats["failed"] += 1
                                     continue
 
-                                # Respectful delay between requests
-                                await asyncio.sleep(self.request_delay)
+                            self.stats["pages_processed"] += 1
+                            print(
+                                f"  ✓ Page {page_num} complete: {len(completed_bills)} bills processed"
+                            )
 
                             # Click next page if not at last page
                             if total_pages is None or page_num < total_pages:
@@ -662,7 +733,9 @@ class GALegislationScraper:
                             await asyncio.sleep(5)
 
                 finally:
-                    await detail_page.close()
+                    # Close all pages in the pool
+                    for detail_page in detail_pages:
+                        await detail_page.close()
                     await page.close()
                     await context.close()
                     await browser.close()
@@ -675,14 +748,21 @@ if __name__ == "__main__":
     import os
 
     # Read environment variables for CI/CD configuration
-    max_concurrent = int(os.getenv("SCRAPER_CONCURRENCY", "5"))
+    max_concurrent = int(os.getenv("SCRAPER_CONCURRENCY", "20"))
     request_delay = float(os.getenv("SCRAPER_DELAY", "0.1"))
+    page_pool_size = int(os.getenv("SCRAPER_PAGE_POOL", "10"))
 
     # Allow command line argument for max pages (useful for testing)
     max_pages = int(sys.argv[1]) if len(sys.argv) > 1 else None
 
-    print(f"Starting scraper with concurrency={max_concurrent}, delay={request_delay}s")
-    scraper = GALegislationScraper(max_concurrent=max_concurrent, request_delay=request_delay)
+    print(
+        f"Starting scraper with concurrency={max_concurrent}, delay={request_delay}s, page_pool={page_pool_size}"
+    )
+    scraper = GALegislationScraper(
+        max_concurrent=max_concurrent,
+        request_delay=request_delay,
+        page_pool_size=page_pool_size,
+    )
     data = scraper.scrape_and_save("ga_legislation.json", max_pages=max_pages)
 
     # Print summary

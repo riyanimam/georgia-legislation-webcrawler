@@ -245,17 +245,27 @@ The scraper uses Playwright to handle JavaScript rendering and extract data from
 
 ### Performance Expectations
 
-| Scope        | Time            | Notes                           |
-| ------------ | --------------- | ------------------------------- |
-| Single page  | 3-4 min         | ~20-25 bills per page           |
-| Full session | 30 min - 2+ hrs | Depends on bill count per year  |
-| Per bill     | ~8-10 sec       | Includes navigation & rendering |
+| Scope        | Time      | Notes                              |
+| ------------ | --------- | ---------------------------------- |
+| Single page  | 1-2 min   | ~20-25 bills per page (concurrent) |
+| Full session | 10-30 min | Depends on bill count per year     |
+| Per bill     | ~2-3 sec  | With concurrent fetching & caching |
 
 **Key optimizations:**
 
-- 0.5-1 second delays between requests
-- 2-3 second delays between pages
-- Intelligent retry logic for transient failures
+- **Concurrent detail fetching**: Up to 20 bills simultaneously with semaphore control
+- **Browser page pooling**: 10 reusable Playwright pages for parallel scraping
+- **Intelligent caching**: Disk-based cache for previously fetched bill details
+- **Connection pooling**: Persistent HTTP connections with configurable limits
+- **Retry logic**: Exponential backoff for transient failures
+
+**Configuration via environment variables:**
+
+```bash
+SCRAPER_CONCURRENCY=20    # Max concurrent requests (default: 20)
+SCRAPER_DELAY=0.1         # Delay between requests in seconds (default: 0.1)
+SCRAPER_PAGE_POOL=10      # Browser page pool size (default: 10)
+```
 
 ## Code Quality
 
