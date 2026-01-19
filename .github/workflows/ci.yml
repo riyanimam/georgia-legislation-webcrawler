@@ -188,18 +188,18 @@ jobs:
     # Step 13: Auto-approve and merge the PR
     # Uses hmarr/auto-approve-action to approve the PR created by the bot,
     # then enables auto-merge with squash strategy.
-    # Uses GitHub App token which has separate identity from github-actions[bot]
+    # Uses the default GITHUB_TOKEN for approval since app cannot approve its own PR
     - name: Auto-approve and merge PR
       if: steps.create_pr.outputs.pr-number != ''
       uses: hmarr/auto-approve-action@v4
       with:
-        github-token: ${{ steps.app-token.outputs.token }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         pull-request-number: ${{ steps.create_pr.outputs.pr-number }}
 
     - name: Enable auto-merge
       if: steps.create_pr.outputs.pr-number != ''
       env:
-        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         gh pr merge ${{ steps.create_pr.outputs.pr-number }} --auto --squash
         echo "PR #${{ steps.create_pr.outputs.pr-number }} approved and set to auto-merge"
