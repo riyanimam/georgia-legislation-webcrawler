@@ -612,11 +612,12 @@ class GALegislationScraper:
 
                             # Fetch details concurrently with rate limiting
                             print(
-                                f"  Fetching details for {len(page_bills)} bills in batches of {self.max_concurrent}..."
+                                f"  Fetching details for {len(page_bills)} bills in small batches (2-3 concurrent)..."
                             )
 
-                            # Process bills in small batches to avoid overwhelming the server
-                            batch_size = self.max_concurrent
+                            # Process bills in very small batches to avoid overwhelming the server
+                            # Use smaller batch size than max_concurrent for more conservative rate limiting
+                            batch_size = min(2, self.max_concurrent)
                             completed_bills = []
 
                             for batch_start in range(0, len(page_bills), batch_size):
@@ -644,7 +645,7 @@ class GALegislationScraper:
 
                                 # Add delay between batches to avoid overwhelming server
                                 if batch_end < len(page_bills):
-                                    await asyncio.sleep(1.0)
+                                    await asyncio.sleep(1.5)
 
                             # Process results and validate
                             for idx, result in enumerate(completed_bills):
