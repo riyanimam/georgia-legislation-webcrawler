@@ -1,5 +1,5 @@
-const CACHE_NAME = 'ga-legislation-v1'
-const RUNTIME_CACHE = 'ga-legislation-runtime'
+const CACHE_NAME = 'ga-legislation-v2'
+const RUNTIME_CACHE = 'ga-legislation-runtime-v2'
 
 // Assets to cache on install
 const PRECACHE_URLS = [
