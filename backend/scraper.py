@@ -612,22 +612,39 @@ class GALegislationScraper:
 
                             # Fetch details concurrently with rate limiting
                             print(
-                                f"  Fetching details for {len(page_bills)} bills concurrently (max {self.max_concurrent})..."
+                                f"  Fetching details for {len(page_bills)} bills in batches of {self.max_concurrent}..."
                             )
 
-                            # Create semaphore for concurrency control
-                            semaphore = asyncio.Semaphore(self.max_concurrent)
+                            # Process bills in small batches to avoid overwhelming the server
+                            batch_size = self.max_concurrent
+                            completed_bills = []
 
-                            # Create tasks for concurrent fetching
-                            tasks = [
-                                self._fetch_with_semaphore(
-                                    semaphore, session, bill_data, detail_pages
+                            for batch_start in range(0, len(page_bills), batch_size):
+                                batch_end = min(batch_start + batch_size, len(page_bills))
+                                batch = page_bills[batch_start:batch_end]
+
+                                print(
+                                    f"    Processing batch {batch_start//batch_size + 1} ({len(batch)} bills)..."
                                 )
-                                for bill_data in page_bills
-                            ]
 
-                            # Execute all tasks concurrently and gather results
-                            completed_bills = await asyncio.gather(*tasks, return_exceptions=True)
+                                # Create semaphore for this batch
+                                semaphore = asyncio.Semaphore(batch_size)
+
+                                # Create tasks for this batch only
+                                tasks = [
+                                    self._fetch_with_semaphore(
+                                        semaphore, session, bill_data, detail_pages
+                                    )
+                                    for bill_data in batch
+                                ]
+
+                                # Execute batch concurrently
+                                batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+                                completed_bills.extend(batch_results)
+
+                                # Add delay between batches to avoid overwhelming server
+                                if batch_end < len(page_bills):
+                                    await asyncio.sleep(1.0)
 
                             # Process results and validate
                             for idx, result in enumerate(completed_bills):
