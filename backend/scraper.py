@@ -625,7 +625,7 @@ class GALegislationScraper:
                                 batch = page_bills[batch_start:batch_end]
 
                                 print(
-                                    f"    Processing batch {batch_start//batch_size + 1} ({len(batch)} bills)..."
+                                    f"    Processing batch {batch_start // batch_size + 1} ({len(batch)} bills)..."
                                 )
 
                                 # Create semaphore for this batch
