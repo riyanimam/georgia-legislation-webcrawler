@@ -115,16 +115,4 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting()
   }
-  
-  if (event.data && event.data.type === 'CACHE_FAVORITES') {
-    const favorites = event.data.favorites
-    caches.open(RUNTIME_CACHE).then((cache) => {
-      cache.put(
-        '/favorites',
-        new Response(JSON.stringify(favorites), {
-          headers: { 'Content-Type': 'application/json' }
-        })
-      )
-    })
-  }
 })

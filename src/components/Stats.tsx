@@ -26,13 +26,13 @@ export default function Stats({ bills, filteredBills, darkMode, t }: StatsProps)
     },
     {
       icon: TrendingUp,
-      label: 'House Bills',
+      label: t.houseBills,
       value: bills.filter((b) => b.doc_number.startsWith('HB')).length,
       color: '#f59e0b',
     },
     {
       icon: Clock,
-      label: 'Senate Bills',
+      label: t.senateBills,
       value: bills.filter((b) => b.doc_number.startsWith('SB')).length,
       color: '#ef4444',
     },

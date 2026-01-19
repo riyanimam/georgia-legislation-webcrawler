@@ -68,6 +68,8 @@ export interface Translation {
   totalBills: string
   activeBills: string
   favoritesBadge: string
+  houseBills: string
+  senateBills: string
   
   // Common
   loading: string
@@ -149,6 +151,8 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     totalBills: 'Total Bills',
     activeBills: 'Active Bills',
     favoritesBadge: 'Favorites',
+    houseBills: 'House Bills',
+    senateBills: 'Senate Bills',
     
     // Common
     loading: 'Loading...',
@@ -229,6 +233,8 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     totalBills: 'Total de Proyectos',
     activeBills: 'Proyectos Activos',
     favoritesBadge: 'Favoritos',
+    houseBills: 'Proyectos de la Cámara',
+    senateBills: 'Proyectos del Senado',
     
     // Common
     loading: 'Cargando...',
@@ -309,6 +315,8 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     totalBills: 'Total des Projets',
     activeBills: 'Projets Actifs',
     favoritesBadge: 'Favoris',
+    houseBills: 'Projets de la Chambre',
+    senateBills: 'Projets du Sénat',
     
     // Common
     loading: 'Chargement...',
@@ -389,6 +397,8 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     totalBills: '法案总数',
     activeBills: '活跃法案',
     favoritesBadge: '收藏',
+    houseBills: '众议院法案',
+    senateBills: '参议院法案',
     
     // Common
     loading: '加载中...',
@@ -469,6 +479,8 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     totalBills: '法案総数',
     activeBills: 'アクティブな法案',
     favoritesBadge: 'お気に入り',
+    houseBills: '下院法案',
+    senateBills: '上院法案',
     
     // Common
     loading: '読み込み中...',
@@ -549,6 +561,8 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     totalBills: '총 법안 수',
     activeBills: '활성 법안',
     favoritesBadge: '즐겨찾기',
+    houseBills: '하원 법안',
+    senateBills: '상원 법안',
     
     // Common
     loading: '로딩 중...',
@@ -629,6 +643,8 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     totalBills: 'कुल बिल',
     activeBills: 'सक्रिय बिल',
     favoritesBadge: 'पसंदीदा',
+    houseBills: 'लोकसभा बिल',
+    senateBills: 'सीनेट बिल',
     
     // Common
     loading: 'लोड हो रहा है...',
@@ -709,10 +725,12 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     totalBills: 'کل بل',
     activeBills: 'فعال بل',
     favoritesBadge: 'پسندیدہ',
+    houseBills: 'ایوان کے بل',
+    senateBills: 'سینیٹ کے بل',
     
     // Common
     loading: 'لوڈ ہو رہا ہے...',
-    noBills: 'کوئی بل نہیںملا',
+    noBills: 'کوئی بل نہیں ملا',
     noBillsMessage: 'اپنے فلٹرز یا تلاش کے معیار کو ایڈجسٹ کرنے کی کوشش کریں',
     darkMode: 'ڈارک موڈ ٹوگل کریں',
     lightMode: 'لائٹ موڈ ٹوگل کریں',
@@ -789,6 +807,8 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     totalBills: 'إجمالي مشاريع القوانين',
     activeBills: 'مشاريع القوانين النشطة',
     favoritesBadge: 'المفضلة',
+    houseBills: 'مشاريع قوانين مجلس النواب',
+    senateBills: 'مشاريع قوانين مجلس الشيوخ',
     
     // Common
     loading: 'جاري التحميل...',
@@ -869,6 +889,8 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     totalBills: 'Tổng Số Dự Luật',
     activeBills: 'Dự Luật Đang Hoạt Động',
     favoritesBadge: 'Yêu Thích',
+    houseBills: 'Dự Luật Hạ Viện',
+    senateBills: 'Dự Luật Thượng Viện',
     
     // Common
     loading: 'Đang tải...',
@@ -949,6 +971,8 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     totalBills: 'Kabuuang Panukalang Batas',
     activeBills: 'Aktibong Panukalang Batas',
     favoritesBadge: 'Mga Paborito',
+    houseBills: 'Panukalang Batas ng Kapulungan',
+    senateBills: 'Panukalang Batas ng Senado',
     
     // Common
     loading: 'Naglo-load...',
@@ -1029,6 +1053,8 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     totalBills: 'Всего законопроектов',
     activeBills: 'Активные законопроекты',
     favoritesBadge: 'Избранное',
+    houseBills: 'Законопроекты Палаты представителей',
+    senateBills: 'Законопроекты Сената',
     
     // Common
     loading: 'Загрузка...',
@@ -1109,6 +1135,8 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     totalBills: 'Total de Projetos',
     activeBills: 'Projetos Ativos',
     favoritesBadge: 'Favoritos',
+    houseBills: 'Projetos da Câmara',
+    senateBills: 'Projetos do Senado',
     
     // Common
     loading: 'Carregando...',
@@ -1189,6 +1217,8 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     totalBills: 'Gesamtzahl der Gesetzesentwürfe',
     activeBills: 'Aktive Gesetzesentwürfe',
     favoritesBadge: 'Favoriten',
+    houseBills: 'Gesetzesentwürfe des Repräsentantenhauses',
+    senateBills: 'Gesetzesentwürfe des Senats',
     
     // Common
     loading: 'Wird geladen...',
