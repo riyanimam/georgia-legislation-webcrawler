@@ -9,8 +9,6 @@ on:
     types: [opened, edited, synchronize]
     # Skip validation when only documentation or config files change
     paths-ignore:
-    - docs/**
-    - '*.md'
     - LICENSE
     - .gitignore
 
