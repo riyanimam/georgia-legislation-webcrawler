@@ -4,6 +4,7 @@ import re
 import sys
 from pathlib import Path
 from typing import Any
+from urllib.robotparser import RobotFileParser
 
 import aiohttp
 import requests
@@ -84,6 +85,35 @@ class GALegislationScraper:
 
         # Page locks for preventing concurrent navigation
         self.page_locks: list[asyncio.Lock] = []
+
+    def check_robots_txt(self) -> bool:
+        """Check if scraping is allowed per robots.txt.
+
+        Returns:
+            bool: True if allowed, False otherwise.
+        """
+        try:
+            rp = RobotFileParser()
+            rp.set_url(f"{self.base_url}/robots.txt")
+            rp.read()
+
+            # Check if our user agent can fetch the legislation pages
+            user_agent = str(self.session.headers.get("User-Agent", "*"))
+            can_fetch_legislation = rp.can_fetch(user_agent, f"{self.base_url}/legislation/")
+            can_fetch_all = rp.can_fetch(user_agent, f"{self.base_url}/legislation/all")
+
+            if not can_fetch_legislation or not can_fetch_all:
+                print("⚠️  robots.txt disallows scraping /legislation/ pages")
+                return False
+
+            print("✓ robots.txt check passed (no restrictions found)")
+            return True
+
+        except Exception as e:
+            # If robots.txt doesn't exist or can't be parsed, assume allowed
+            print(f"✓ No robots.txt found or error reading it: {e}")
+            print("  Proceeding with scraping (no explicit restrictions)")
+            return True
 
     def _load_cache(self) -> dict[str, dict[str, Any]]:
         """Load cached bill details from file."""
@@ -377,6 +407,15 @@ class GALegislationScraper:
             print("3. Network connectivity issues")
             print("\nTry running this script from your local machine instead.")
             sys.exit(1)
+
+        # Check robots.txt compliance
+        print("\nChecking robots.txt compliance...")
+        if not self.check_robots_txt():
+            print("\n⚠️  WARNING: robots.txt indicates scraping may not be allowed.")
+            print("Consider reaching out to the website administrators for permission.")
+            print("Public government data is typically accessible, but it's good to verify.")
+            # Don't exit - allow user to proceed, but warn them
+            input("Press Enter to continue or Ctrl+C to cancel...")
 
         print("\nStarting to scrape Georgia legislation...")
         print(

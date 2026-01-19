@@ -47,6 +47,7 @@ captions, committee assignments, sponsors, summaries, and legislative status his
 - **[Backend Documentation](docs/BACKEND.md)** - Scraper setup and usage
 - **[Frontend Documentation](docs/FRONTEND.md)** - UI features and deployment
 - **[Data Schema](docs/DATA_SCHEMA.md)** - JSON structure and validation rules
+- **[Scraping Compliance](docs/SCRAPING_COMPLIANCE.md)** - Legal & ethical guidelines
 - **[Contributing Guide](docs/CONTRIBUTING.md)** - How to contribute
 - **[CI/CD Documentation](docs/CI_CD.md)** - Testing and validation pipeline
 
