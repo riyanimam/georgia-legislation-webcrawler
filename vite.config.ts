@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => ({
   },
   server: {
     port: 5173,
-    open: true
+    open: true,
+    hmr: false, // Disable HMR to avoid WebSocket issues
   }
 }))
