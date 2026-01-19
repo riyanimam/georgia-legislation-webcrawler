@@ -60,22 +60,23 @@ jobs:
 
     # Step 6: Run the scraper
     # - Respectfully scrapes with configurable delays to respect server
-    # - Uses environment variables to control request rate
+    # - Uses environment variables to control request rate and concurrency
     # - continue-on-error: true allows workflow to continue if server blocks IPs
     # - Outputs ga_legislation.json to repository root
     - name: Run scraper
       continue-on-error: true
       env:
-        SCRAPER_DELAY: '2'
-        SCRAPER_CONCURRENCY: '2'
+        SCRAPER_DELAY: '0.5'
+        SCRAPER_CONCURRENCY: '5'
+        SCRAPER_PAGE_POOL: '3'
       run: |
         if [ -n "${{ github.event.inputs.max_pages }}" ]; then
           echo "Scraping maximum ${{ github.event.inputs.max_pages }} pages..."
-          echo "Using respectful settings: 2s delay, 2 concurrent requests"
+          echo "Using settings: 0.5s delay, 5 concurrent requests, 3 browser pages"
           python backend/scraper.py ${{ github.event.inputs.max_pages }}
         else
           echo "Scraping all available pages..."
-          echo "Using respectful settings: 2s delay, 2 concurrent requests"
+          echo "Using settings: 0.5s delay, 5 concurrent requests, 3 browser pages"
           python backend/scraper.py
         fi
 
@@ -117,11 +118,14 @@ jobs:
     # - Can be downloaded from the Actions tab in GitHub
     - name: Upload JSON as artifact
       if: steps.check_file.outputs.exists == 'true'
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v4
       with:
-        name: ga-legislation
-        path: ga_legislation.json
+        name: ga-legislation-${{ github.run_number }}
+        path: |
+          ga_legislation.json
+          bill_details_cache.json
         retention-days: 7
+        if-no-files-found: warn
 
     # Step 11: Create GitHub App token for bypass branch protection
     # Uses the GitHub App credentials to get a token that can bypass
@@ -188,18 +192,18 @@ jobs:
     # Step 13: Auto-approve and merge the PR
     # Uses hmarr/auto-approve-action to approve the PR created by the bot,
     # then enables auto-merge with squash strategy.
-    # Uses GitHub App token which has separate identity from github-actions[bot]
+    # Uses the default GITHUB_TOKEN for approval since app cannot approve its own PR
     - name: Auto-approve and merge PR
       if: steps.create_pr.outputs.pr-number != ''
       uses: hmarr/auto-approve-action@v4
       with:
-        github-token: ${{ steps.app-token.outputs.token }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         pull-request-number: ${{ steps.create_pr.outputs.pr-number }}
 
     - name: Enable auto-merge
       if: steps.create_pr.outputs.pr-number != ''
       env:
-        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         gh pr merge ${{ steps.create_pr.outputs.pr-number }} --auto --squash
         echo "PR #${{ steps.create_pr.outputs.pr-number }} approved and set to auto-merge"

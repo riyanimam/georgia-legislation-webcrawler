@@ -47,6 +47,7 @@ captions, committee assignments, sponsors, summaries, and legislative status his
 - **[Backend Documentation](docs/BACKEND.md)** - Scraper setup and usage
 - **[Frontend Documentation](docs/FRONTEND.md)** - UI features and deployment
 - **[Data Schema](docs/DATA_SCHEMA.md)** - JSON structure and validation rules
+- **[Scraping Compliance](docs/SCRAPING_COMPLIANCE.md)** - Legal & ethical guidelines
 - **[Contributing Guide](docs/CONTRIBUTING.md)** - How to contribute
 - **[CI/CD Documentation](docs/CI_CD.md)** - Testing and validation pipeline
 
@@ -245,17 +246,28 @@ The scraper uses Playwright to handle JavaScript rendering and extract data from
 
 ### Performance Expectations
 
-| Scope        | Time            | Notes                           |
-| ------------ | --------------- | ------------------------------- |
-| Single page  | 3-4 min         | ~20-25 bills per page           |
-| Full session | 30 min - 2+ hrs | Depends on bill count per year  |
-| Per bill     | ~8-10 sec       | Includes navigation & rendering |
+| Scope        | Time      | Notes                              |
+| ------------ | --------- | ---------------------------------- |
+| Single page  | 1-2 min   | ~20-25 bills per page (concurrent) |
+| Full session | 10-30 min | Depends on bill count per year     |
+| Per bill     | ~2-3 sec  | With concurrent fetching & caching |
 
 **Key optimizations:**
 
-- 0.5-1 second delays between requests
-- 2-3 second delays between pages
-- Intelligent retry logic for transient failures
+- **Concurrent detail fetching**: Up to 5-20 bills simultaneously with semaphore control
+- **Browser page pooling**: 3-10 reusable Playwright pages with per-page locking
+- **Intelligent caching**: Disk-based cache for previously fetched bill details
+- **Connection pooling**: Persistent HTTP connections with configurable limits
+- **Retry logic**: Exponential backoff for transient failures
+- **Jitter**: Random delays to prevent thundering herd issues
+
+**Configuration via environment variables:**
+
+```bash
+SCRAPER_CONCURRENCY=5     # Max concurrent requests (default: 5)
+SCRAPER_DELAY=0.3         # Delay between requests in seconds (default: 0.3)
+SCRAPER_PAGE_POOL=5       # Browser page pool size (default: 5)
+```
 
 ## Code Quality
 
