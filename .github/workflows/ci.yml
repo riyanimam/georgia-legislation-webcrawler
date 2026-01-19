@@ -118,11 +118,14 @@ jobs:
     # - Can be downloaded from the Actions tab in GitHub
     - name: Upload JSON as artifact
       if: steps.check_file.outputs.exists == 'true'
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v4
       with:
-        name: ga-legislation
-        path: ga_legislation.json
+        name: ga-legislation-${{ github.run_number }}
+        path: |
+          ga_legislation.json
+          bill_details_cache.json
         retention-days: 7
+        if-no-files-found: warn
 
     # Step 11: Create GitHub App token for bypass branch protection
     # Uses the GitHub App credentials to get a token that can bypass
