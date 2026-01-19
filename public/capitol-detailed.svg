@@ -1,0 +1,57 @@
+<svg width="120" height="140" viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Detailed Capitol Building -->
+  <defs>
+    <linearGradient id="domeGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="buildingGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f3f4f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d1d5db;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Base/Steps -->
+  <rect x="10" y="120" width="100" height="6" fill="#9ca3af" rx="1"/>
+  <rect x="15" y="114" width="90" height="6" fill="#b3b7bc" rx="1"/>
+  <rect x="20" y="108" width="80" height="6" fill="#cbd0d5" rx="1"/>
+  
+  <!-- Main building body -->
+  <rect x="20" y="60" width="80" height="48" fill="url(#buildingGrad)" stroke="#9ca3af" stroke-width="1.5"/>
+  
+  <!-- Columns -->
+  <rect x="25" y="60" width="6" height="48" fill="#fff" stroke="#9ca3af" stroke-width="0.5"/>
+  <rect x="41" y="60" width="6" height="48" fill="#fff" stroke="#9ca3af" stroke-width="0.5"/>
+  <rect x="57" y="60" width="6" height="48" fill="#fff" stroke="#9ca3af" stroke-width="0.5"/>
+  <rect x="73" y="60" width="6" height="48" fill="#fff" stroke="#9ca3af" stroke-width="0.5"/>
+  <rect x="89" y="60" width="6" height="48" fill="#fff" stroke="#9ca3af" stroke-width="0.5"/>
+  
+  <!-- Dome base -->
+  <rect x="35" y="40" width="50" height="20" fill="#e5e7eb" stroke="#9ca3af" stroke-width="1"/>
+  
+  <!-- Dome -->
+  <ellipse cx="60" cy="40" rx="20" ry="22" fill="url(#domeGrad)" stroke="#d97706" stroke-width="1.5"/>
+  
+  <!-- Dome details (vertical lines) -->
+  <path d="M 50 20 Q 50 40 50 60" stroke="#d97706" stroke-width="0.8" fill="none"/>
+  <path d="M 55 18 Q 55 40 55 60" stroke="#d97706" stroke-width="0.8" fill="none"/>
+  <path d="M 65 18 Q 65 40 65 60" stroke="#d97706" stroke-width="0.8" fill="none"/>
+  <path d="M 70 20 Q 70 40 70 60" stroke="#d97706" stroke-width="0.8" fill="none"/>
+  
+  <!-- Spire -->
+  <rect x="58" y="12" width="4" height="8" fill="#b45309"/>
+  <polygon points="60,4 65,12 55,12" fill="#fbbf24" stroke="#d97706" stroke-width="1"/>
+  
+  <!-- Windows on main building -->
+  <rect x="32" y="68" width="8" height="12" fill="#3b82f6" opacity="0.6"/>
+  <rect x="50" y="68" width="8" height="12" fill="#3b82f6" opacity="0.6"/>
+  <rect x="68" y="68" width="8" height="12" fill="#3b82f6" opacity="0.6"/>
+  
+  <rect x="32" y="85" width="8" height="12" fill="#3b82f6" opacity="0.6"/>
+  <rect x="50" y="85" width="8" height="12" fill="#3b82f6" opacity="0.6"/>
+  <rect x="68" y="85" width="8" height="12" fill="#3b82f6" opacity="0.6"/>
+  
+  <!-- Door -->
+  <rect x="52" y="96" width="16" height="12" fill="#7c3aed" rx="1"/>
+  <circle cx="64" cy="102" r="1" fill="#fbbf24"/>
+</svg>

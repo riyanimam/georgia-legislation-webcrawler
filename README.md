@@ -1,15 +1,22 @@
 # Georgia Legislation Web Scraper
 
-A robust Python web scraper and interactive web UI for collecting and exploring detailed information
-about Georgia state legislation from the [Georgia General Assembly](https://www.legis.ga.gov)
-website.
+[![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6.0.7-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Languages](https://img.shields.io/badge/Languages-14-blue.svg)](docs/MULTILINGUAL_SUPPORT.md)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Code Quality](https://img.shields.io/badge/Code%20Quality-Biome-60A5FA?logo=biomejs&logoColor=white)](https://biomejs.dev/)
+[![Framer Motion](https://img.shields.io/badge/Framer%20Motion-11.15-FF0055?logo=framer&logoColor=white)](https://www.framer.com/motion/)
+
+A modern React-based web application and Python scraper for exploring Georgia state legislation from
+the [Georgia General Assembly](https://www.legis.ga.gov) website.
 
 ## Overview
 
-This project automates the collection of Georgia House and Senate bills with comprehensive data
-extraction including bill numbers, captions, committee assignments, sponsors, summaries, and
-legislative status history. Includes an interactive web dashboard for searching and filtering
-results.
+This project features a stunning React interface with smooth animations and a powerful backend
+scraper that collects comprehensive Georgia House and Senate bill data including bill numbers,
+captions, committee assignments, sponsors, summaries, and legislative status history.
 
 ### What Gets Scraped
 
@@ -22,7 +29,9 @@ results.
 
 ## Features
 
-- 🎯 **JavaScript-Ready**: Playwright-based rendering for dynamic Angular.js content
+- ⚛️ **Modern React UI**: Built with React 18, TypeScript, and Framer Motion
+- 🎨 **Stunning Visuals**: Smooth animations, gradients, and interactive elements
+- 🎯 **JavaScript-Ready Backend**: Playwright-based rendering for dynamic content
 - ⚙️ **Fully Automated**: CI/CD integration via GitHub Actions with scheduled runs
 - 📊 **Comprehensive Data**: Captures both overview and detailed bill information
 - 🛡️ **Resilient**: Built-in error handling and retry logic with data validation
@@ -30,6 +39,8 @@ results.
 - 🎨 **Code Quality**: Pre-commit hooks for linting, formatting, and validation
 - 🌐 **Beautiful UI**: Interactive web dashboard to explore and search legislation
 - ♿ **Accessible**: ARIA labels and keyboard navigation support
+- 🌙 **Dark Mode**: Toggle between light and dark themes
+- ⚡ **Fast & Responsive**: Optimized with Vite for lightning-fast builds
 
 ## Documentation
 
@@ -38,16 +49,15 @@ results.
 - **[Data Schema](docs/DATA_SCHEMA.md)** - JSON structure and validation rules
 - **[Contributing Guide](docs/CONTRIBUTING.md)** - How to contribute
 - **[CI/CD Documentation](docs/CI_CD.md)** - Testing and validation pipeline
-- **[Refactoring Notes](docs/REFACTORING_NOTES.md)** - Code organization details
 
 ## Quick Start
 
 ### Prerequisites
 
-- **Python 3.11+**
-- **pip** (Python package manager)
+- **Node.js 20+**
+- **npm** (Node package manager)
+- **Python 3.11+** (for backend scraper)
 - **~500MB disk space** (for Chromium browser)
-- **Modern web browser** (for the interactive UI)
 
 ### Installation
 
@@ -56,11 +66,14 @@ results.
 git clone https://github.com/riyanimam/georgia-legislation-webcrawler.git
 cd georgia-legislation-webcrawler
 
-# Create and activate virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+# Install frontend dependencies
+npm install
 
-# Install dependencies
+# Start development server
+npm run dev
+
+# For backend scraper setup:
+cd backend
 pip install -r requirements.txt
 playwright install chromium
 
@@ -74,38 +87,73 @@ This project is organized into two main components:
 
 ```text
 georgia-legislation-webcrawler/
+├── src/                         # React application source
+│   ├── components/             # React components
+│   │   ├── __tests__/         # Component tests
+│   │   ├── AnimatedBackground.tsx  # Background animations
+│   │   ├── BillGrid.tsx       # Bill cards grid
+│   │   ├── BillModal.tsx      # Bill detail modal
+│   │   ├── FavoritesModal.tsx # Favorites management
+│   │   ├── Filters.tsx        # Search and filters
+│   │   ├── Header.tsx         # Application header
+│   │   ├── LoadingAnimation.tsx   # Loading state
+│   │   └── Stats.tsx          # Statistics dashboard
+│   ├── test/                  # Test configuration
+│   ├── App.tsx                # Main application
+│   ├── App.css                # Global styles
+│   ├── main.tsx               # Application entry
+│   ├── types.ts               # TypeScript types
+│   ├── utils.ts               # Utility functions
+│   └── vite-env.d.ts          # Vite environment types
+├── tests/                       # Test suites
+│   ├── frontend/              # Frontend tests
+│   │   ├── bill-processing.test.js  # Data processing tests
+│   │   └── sorting.test.ts    # Sorting logic tests
+│   └── backend/               # Backend tests (future)
+├── public/                      # Static assets
+│   ├── capitol.svg            # Capitol building icon
+│   ├── capitol-detailed.svg   # Detailed capitol illustration
+│   ├── georgia-state.svg      # Georgia state outline
+│   ├── peach.svg              # Georgia peach icon
+│   └── voting.svg             # Voting/democracy icon
 ├── backend/                     # Python web scraper
-│   ├── scraper.py              # Main scraping application
-│   └── README.md               # Backend documentation
-├── frontend/                    # Interactive web UI
-│   ├── index.html              # Main HTML markup
-│   ├── styles.css              # Styling and animations
-│   ├── script.js               # Application logic
-│   └── README.md               # Frontend documentation
+│   └── scraper.py             # Main scraping application
+├── docs/                        # Documentation
+│   ├── BACKEND.md             # Backend documentation
+│   ├── FRONTEND.md            # Frontend documentation
+│   ├── DATA_SCHEMA.md         # Data schema documentation
+│   ├── CI_CD.md               # CI/CD documentation
+│   └── CONTRIBUTING.md        # Contributing guide
+├── scripts/                     # Validation scripts
+│   ├── validate-schema.js     # JSON schema validation
+│   └── validate-accessibility.js  # Accessibility validation
 ├── .github/
-│   └── workflows/              # CI/CD automation
-├── requirements.txt            # Python dependencies
-├── pyproject.toml              # Project metadata
-├── README.md                   # This file
-└── ga_legislation.json         # Generated data (created by scraper)
+│   └── workflows/             # CI/CD automation
+├── index.html                   # HTML entry point
+├── package.json                 # NPM dependencies
+├── vite.config.ts               # Vite configuration
+├── vitest.config.js             # Vitest test configuration
+├── tsconfig.json                # TypeScript configuration
+├── requirements.txt             # Python dependencies
+└── ga_legislation.json          # Generated data (created by scraper)
 ```
 
 ### Backend vs Frontend
 
-| Aspect       | Backend                                | Frontend                                 |
-| ------------ | -------------------------------------- | ---------------------------------------- |
-| **Location** | `backend/`                             | `frontend/`                              |
-| **Purpose**  | Collect data from website              | Display data interactively               |
-| **Tech**     | Python, Playwright, BeautifulSoup      | HTML5, CSS3, Vanilla JS                  |
-| **Runs**     | Scheduled via GitHub Actions           | In web browser                           |
-| **Output**   | JSON file                              | User interface                           |
-| **Docs**     | [backend/README.md](backend/README.md) | [frontend/README.md](frontend/README.md) |
+| Aspect       | Backend                           | Frontend                               |
+| ------------ | --------------------------------- | -------------------------------------- |
+| **Location** | `backend/`                        | `src/`                                 |
+| **Purpose**  | Collect data from website         | Display data interactively             |
+| **Tech**     | Python, Playwright, BeautifulSoup | React, TypeScript, Framer Motion, Vite |
+| **Runs**     | Scheduled via GitHub Actions      | In web browser                         |
+| **Output**   | JSON file                         | User interface                         |
+| **Docs**     | [BACKEND.md](docs/BACKEND.md)     | [FRONTEND.md](docs/FRONTEND.md)        |
 
 See individual README files for detailed documentation on each component.
 
 ### Viewing Results with the Interactive UI
 
-The project includes a beautiful, reactive web interface to explore the scraped legislation:
+The project includes a stunning React-based interface to explore the scraped legislation:
 
 1. **Run the scraper** to generate `ga_legislation.json`:
 
@@ -113,19 +161,37 @@ The project includes a beautiful, reactive web interface to explore the scraped 
    python backend/scraper.py
    ```
 
-2. **Open the UI** in your browser:
+2. **Start the development server**:
 
-   - Serve locally: `python -m http.server 8000` then visit `http://localhost:8000/frontend/`
-   - Or use VS Code Live Server: right-click `frontend/index.html` and "Open with Live Server"
+   ```bash
+   npm run dev
+   ```
+
+3. **Open your browser** to the URL shown (typically `http://localhost:5173`)
 
 **UI Features:**
 
-- 🔍 **Search**: Find bills by number, caption, sponsor, or committee
-- 🏷️ **Filter**: Filter by bill type (House/Senate)
-- 📊 **Statistics**: View real-time counts and bill distribution
-- 🔄 **Sort**: Organize results by bill number or caption
-- 📖 **Details**: Click any bill to see full summary and status history
+- 🔍 **Advanced Search**: Find bills by number, caption, sponsor, committee, or summary
+- 🏷️ **Smart Filters**: Filter by bill type, key issues, date ranges, and status
+- 📊 **Live Statistics**: View animated real-time counts and bill distribution
+- 🔄 **Flexible Sorting**: Organize by date, bill number (ascending/descending)
+- 📖 **Interactive Details**: Click bills for modal with full information
+- ⭐ **Favorites**: Save bills to favorites for quick access
+- 📥 **Export**: Download individual bills as CSV or JSON
+- 🎨 **Beautiful Animations**: Smooth transitions powered by Framer Motion
+- 🌙 **Dark Mode**: Toggle between light and dark themes
+- 📱 **Responsive Design**: Works beautifully on all screen sizes
 - 📁 **File Upload**: Load custom JSON files directly in the browser
+
+### Building for Production
+
+```bash
+# Build the React app
+npm run build
+
+# Preview the production build
+npm run preview
+```
 
 ### Running the Scraper
 

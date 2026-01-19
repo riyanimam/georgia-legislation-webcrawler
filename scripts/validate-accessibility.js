@@ -164,4 +164,21 @@ if (result.warnings.length > 0) {
 
 console.log(`\n📖 Reference: https://www.w3.org/WAI/WCAG21/quickref/\n`);
 
+// Write accessibility report
+const report = {
+  timestamp: new Date().toISOString(),
+  status: result.isValid ? 'pass' : 'fail',
+  summary: {
+    validationsPassed: result.passes?.length || 0,
+    warnings: result.warnings.length,
+    violations: result.violations.length,
+  },
+  passes: result.passes || [],
+  warnings: result.warnings,
+  violations: result.violations,
+};
+
+fs.writeFileSync('accessibility-report.json', JSON.stringify(report, null, 2));
+console.log('📄 Accessibility report written to accessibility-report.json\n');
+
 process.exit(result.isValid ? 0 : 1);
