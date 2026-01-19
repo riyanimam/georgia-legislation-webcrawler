@@ -253,18 +253,19 @@ The scraper uses Playwright to handle JavaScript rendering and extract data from
 
 **Key optimizations:**
 
-- **Concurrent detail fetching**: Up to 20 bills simultaneously with semaphore control
-- **Browser page pooling**: 10 reusable Playwright pages for parallel scraping
+- **Concurrent detail fetching**: Up to 5-20 bills simultaneously with semaphore control
+- **Browser page pooling**: 3-10 reusable Playwright pages with per-page locking
 - **Intelligent caching**: Disk-based cache for previously fetched bill details
 - **Connection pooling**: Persistent HTTP connections with configurable limits
 - **Retry logic**: Exponential backoff for transient failures
+- **Jitter**: Random delays to prevent thundering herd issues
 
 **Configuration via environment variables:**
 
 ```bash
-SCRAPER_CONCURRENCY=20    # Max concurrent requests (default: 20)
-SCRAPER_DELAY=0.1         # Delay between requests in seconds (default: 0.1)
-SCRAPER_PAGE_POOL=10      # Browser page pool size (default: 10)
+SCRAPER_CONCURRENCY=5     # Max concurrent requests (default: 5)
+SCRAPER_DELAY=0.3         # Delay between requests in seconds (default: 0.3)
+SCRAPER_PAGE_POOL=5       # Browser page pool size (default: 5)
 ```
 
 ## Code Quality

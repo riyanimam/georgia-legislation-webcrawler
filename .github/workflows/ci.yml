@@ -67,16 +67,16 @@ jobs:
       continue-on-error: true
       env:
         SCRAPER_DELAY: '0.5'
-        SCRAPER_CONCURRENCY: '10'
-        SCRAPER_PAGE_POOL: '5'
+        SCRAPER_CONCURRENCY: '5'
+        SCRAPER_PAGE_POOL: '3'
       run: |
         if [ -n "${{ github.event.inputs.max_pages }}" ]; then
           echo "Scraping maximum ${{ github.event.inputs.max_pages }} pages..."
-          echo "Using settings: 0.5s delay, 10 concurrent requests, 5 browser pages"
+          echo "Using settings: 0.5s delay, 5 concurrent requests, 3 browser pages"
           python backend/scraper.py ${{ github.event.inputs.max_pages }}
         else
           echo "Scraping all available pages..."
-          echo "Using settings: 0.5s delay, 10 concurrent requests, 5 browser pages"
+          echo "Using settings: 0.5s delay, 5 concurrent requests, 3 browser pages"
           python backend/scraper.py
         fi
 

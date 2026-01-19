@@ -31,16 +31,16 @@ class ValidationError(Exception):
 class GALegislationScraper:
     def __init__(
         self,
-        max_concurrent: int = 20,
-        request_delay: float = 0.1,
-        page_pool_size: int = 10,
+        max_concurrent: int = 5,
+        request_delay: float = 0.3,
+        page_pool_size: int = 5,
     ):
         """Initialize scraper with async support and caching.
 
         Args:
-            max_concurrent (int): Maximum concurrent requests. Default 20.
-            request_delay (float): Delay between requests in seconds. Default 0.1.
-            page_pool_size (int): Number of Playwright browser pages to pool. Default 10.
+            max_concurrent (int): Maximum concurrent requests. Default 5.
+            request_delay (float): Delay between requests in seconds. Default 0.3.
+            page_pool_size (int): Number of Playwright browser pages to pool. Default 5.
         """
         self.base_url = "https://www.legis.ga.gov"
         self.max_concurrent = max_concurrent
@@ -81,6 +81,9 @@ class GALegislationScraper:
             "total_bills": 0,
             "pages_processed": 0,
         }
+
+        # Page locks for preventing concurrent navigation
+        self.page_locks: list[asyncio.Lock] = []
 
     def _load_cache(self) -> dict[str, dict[str, Any]]:
         """Load cached bill details from file."""
@@ -258,8 +261,8 @@ class GALegislationScraper:
             Dict: Dictionary containing first_reader_summary and status_history.
         """
         try:
-            # Navigate to detail page
-            await page.goto(url, wait_until="networkidle", timeout=60000)
+            # Navigate to detail page with shorter timeout to fail fast
+            await page.goto(url, wait_until="domcontentloaded", timeout=30000)
 
             # Wait for content to load - wait for h2 headers that contain detail sections
             try:
@@ -748,9 +751,9 @@ if __name__ == "__main__":
     import os
 
     # Read environment variables for CI/CD configuration
-    max_concurrent = int(os.getenv("SCRAPER_CONCURRENCY", "20"))
-    request_delay = float(os.getenv("SCRAPER_DELAY", "0.1"))
-    page_pool_size = int(os.getenv("SCRAPER_PAGE_POOL", "10"))
+    max_concurrent = int(os.getenv("SCRAPER_CONCURRENCY", "5"))
+    request_delay = float(os.getenv("SCRAPER_DELAY", "0.3"))
+    page_pool_size = int(os.getenv("SCRAPER_PAGE_POOL", "5"))
 
     # Allow command line argument for max pages (useful for testing)
     max_pages = int(sys.argv[1]) if len(sys.argv) > 1 else None
