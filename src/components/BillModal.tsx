@@ -210,30 +210,8 @@ export default function BillModal({
             <ShareButtons bill={bill} darkMode={darkMode} />
           </div>
 
-          {/* Similar Bills */}
-          <BillSimilarity
-            currentBill={bill}
-            allBills={allBills}
-            onSelectBill={(newBill) => {
-              onClose()
-              setTimeout(() => onSelectBill(newBill), 100)
-            }}
-            darkMode={darkMode}
-          />
-
-          {/* Related Bills */}
-          <RelatedBills
-            currentBill={bill}
-            allBills={allBills}
-            darkMode={darkMode}
-            onSelectBill={(newBill) => {
-              onClose()
-              setTimeout(() => onSelectBill(newBill), 100)
-            }}
-          />
-
-          {/* Details Grid */}
-          <div style={{ display: 'grid', gap: '24px' }}>
+          {/* Primary Bill Information */}
+          <div style={{ display: 'grid', gap: '24px', marginBottom: '32px' }}>
             <DetailSection
               icon={Users}
               title="Sponsors"
@@ -335,6 +313,34 @@ export default function BillModal({
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Related Content Section */}
+          <div style={{
+            borderTop: '1px solid var(--border-color)',
+            paddingTop: '24px',
+          }}>
+            {/* Similar Bills */}
+            <BillSimilarity
+              currentBill={bill}
+              allBills={allBills}
+              onSelectBill={(newBill) => {
+                onClose()
+                setTimeout(() => onSelectBill(newBill), 100)
+              }}
+              darkMode={darkMode}
+            />
+
+            {/* Related Bills */}
+            <RelatedBills
+              currentBill={bill}
+              allBills={allBills}
+              darkMode={darkMode}
+              onSelectBill={(newBill) => {
+                onClose()
+                setTimeout(() => onSelectBill(newBill), 100)
+              }}
+            />
           </div>
         </div>
       </motion.div>
