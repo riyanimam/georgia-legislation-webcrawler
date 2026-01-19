@@ -6,7 +6,12 @@
 # https://github.com/actions/labeler
 
 name: Labeler
-on: [pull_request_target]
+
+# Only run when PR is opened or reopened - no need to re-label on every push
+# Labels are based on files changed, which are determined at PR creation
+on:
+  pull_request_target:
+    types: [opened, reopened]
 
 env:
   # Label configuration embedded as JSON for this workflow
