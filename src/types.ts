@@ -16,6 +16,11 @@ export interface Bill {
     date: string
     url: string
   }>
+  // AI-generated summary fields
+  ai_summary?: string
+  summary_status?: 'pending' | 'generating' | 'complete' | 'failed'
+  summary_model?: string
+  summary_generated_at?: string
 }
 
 export interface FilterState {

@@ -1,40 +1,40 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Moon, Sun, Upload, HelpCircle } from 'lucide-react'
-import type { Bill, FilterState } from './types'
-import { getBillIssue, getLatestStatus, getSponsorNames } from './utils'
-import { translations, type Language } from './i18n/translations'
-import Header from './components/Header.tsx'
-import Stats from './components/Stats.tsx'
-import Filters from './components/Filters.tsx'
+import { AnimatePresence, motion } from 'framer-motion'
+import { HelpCircle, Moon, Sun, Upload } from 'lucide-react'
+import React, { useEffect, useMemo, useState } from 'react'
+import './App.css'
+import AnalyticsTabs from './components/AnalyticsTabs.tsx'
+import AnimatedBackground from './components/AnimatedBackground.tsx'
 import BillGrid from './components/BillGrid.tsx'
 import BillModal from './components/BillModal.tsx'
-import FavoritesModal from './components/FavoritesModal.tsx'
-import AnimatedBackground from './components/AnimatedBackground.tsx'
-import Sidebar from './components/Sidebar.tsx'
-import LanguageSelector from './components/LanguageSelector.tsx'
-import HelpModal from './components/HelpModal.tsx'
 import BillOfTheDay from './components/BillOfTheDay.tsx'
-import { ReadingProgressStats, useReadingProgress } from './components/ReadingProgress.tsx'
-import { StatsSkeleton, BillGridSkeleton } from './components/SkeletonLoaders.tsx'
-import { PWAInstall, useServiceWorker, useFavoritesCache } from './components/PWAInstall.tsx'
-import AnalyticsTabs from './components/AnalyticsTabs.tsx'
+import FavoritesModal from './components/FavoritesModal.tsx'
+import Filters from './components/Filters.tsx'
+import Header from './components/Header.tsx'
+import HelpModal from './components/HelpModal.tsx'
+import LanguageSelector from './components/LanguageSelector.tsx'
+import { PWAInstall, useFavoritesCache, useServiceWorker } from './components/PWAInstall.tsx'
 import QuickActions from './components/QuickActions.tsx'
+import { ReadingProgressStats, useReadingProgress } from './components/ReadingProgress.tsx'
 import RepresentativeProfile from './components/RepresentativeProfile.tsx'
-import './App.css'
+import Sidebar from './components/Sidebar.tsx'
+import { BillGridSkeleton, StatsSkeleton } from './components/SkeletonLoaders.tsx'
+import Stats from './components/Stats.tsx'
+import { translations, type Language } from './i18n/translations'
+import type { Bill, FilterState } from './types'
+import { getBillIssue, getLatestStatus, getSponsorNames } from './utils'
 
 const ITEMS_PER_PAGE = 20
 
 function App() {
   // Initialize from URL parameters for shareable links
   const urlParams = new URLSearchParams(window.location.search)
-  
+
   // Reading progress tracking
   const { markAsRead, getReadCount } = useReadingProgress()
-  
+
   // PWA service worker registration
   useServiceWorker()
-  
+
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('darkMode') === 'true'
   })
@@ -62,7 +62,7 @@ function App() {
     const stored = localStorage.getItem('georgia-bills-favorites')
     return stored ? JSON.parse(stored) : []
   })
-  
+
   // Cache favorites for offline access
   useFavoritesCache(favorites)
 
@@ -106,7 +106,7 @@ function App() {
   // Sync URL with current state
   useEffect(() => {
     const params = new URLSearchParams()
-    
+
     if (filters.search) params.set('search', filters.search)
     if (filters.type) params.set('type', filters.type)
     if (filters.issues.length > 0) params.set('issues', filters.issues.join(','))
@@ -153,7 +153,13 @@ function App() {
           return res.json()
         })
         .then((data) => {
-          setBills(data)
+          // Handle both formats: array of bills or { bills: [...] } wrapper
+          const billsData = Array.isArray(data) ? data : data.bills
+          if (Array.isArray(billsData)) {
+            setBills(billsData)
+          } else {
+            console.error('Invalid data format')
+          }
           setLoading(false)
         })
         .catch((error) => {
@@ -178,7 +184,7 @@ function App() {
     if (filters.sortBy !== 'date-desc') params.set('sortBy', filters.sortBy)
     if (currentPage !== 1) params.set('page', currentPage.toString())
     if (language !== 'en') params.set('lang', language)
-    
+
     const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname
     window.history.replaceState({}, '', newUrl)
   }, [filters, currentPage, language])
@@ -193,14 +199,14 @@ function App() {
         setShowHelp(false)
         setSidebarOpen(false)
       }
-      
+
       // Ctrl/Cmd + K - focus search (command palette style)
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault()
         const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement
         searchInput?.focus()
       }
-      
+
       // F - toggle sidebar
       if (e.key === 'f' && !e.ctrlKey && !e.metaKey && !e.altKey) {
         const activeElement = document.activeElement
@@ -208,7 +214,7 @@ function App() {
           setSidebarOpen(prev => !prev)
         }
       }
-      
+
       // ? - show help modal
       if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
         const activeElement = document.activeElement
@@ -218,7 +224,7 @@ function App() {
         }
       }
     }
-    
+
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
@@ -334,7 +340,7 @@ function App() {
           const bType = b.doc_number.match(/^[A-Z]+/)?.[0] || ''
           const aNum = parseInt(a.doc_number.match(/\d+/)?.[0] || '0')
           const bNum = parseInt(b.doc_number.match(/\d+/)?.[0] || '0')
-          
+
           if (aType !== bType) return aType.localeCompare(bType)
           return aNum - bNum
         }
@@ -344,7 +350,7 @@ function App() {
           const bType = b.doc_number.match(/^[A-Z]+/)?.[0] || ''
           const aNum = parseInt(a.doc_number.match(/\d+/)?.[0] || '0')
           const bNum = parseInt(b.doc_number.match(/\d+/)?.[0] || '0')
-          
+
           if (aType !== bType) return bType.localeCompare(aType)
           return bNum - aNum
         }
@@ -425,7 +431,7 @@ function App() {
             position: 'fixed',
             bottom: '24px',
             left: '24px',
-            background: darkMode 
+            background: darkMode
               ? 'rgba(58, 47, 45, 0.9)'
               : 'rgba(255, 255, 255, 0.9)',
             border: darkMode
@@ -457,7 +463,7 @@ function App() {
             position: 'fixed',
             bottom: '24px',
             left: '80px',
-            background: darkMode 
+            background: darkMode
               ? 'rgba(58, 47, 45, 0.9)'
               : 'rgba(255, 255, 255, 0.9)',
             border: darkMode
@@ -505,10 +511,10 @@ function App() {
           >
             <Upload size={24} />
             <span style={{ fontSize: '1.1em', fontWeight: 500 }}>
-              {bills.length > 0 
-                ? `${bills.length} bills loaded` 
-                : import.meta.env.PROD 
-                  ? 'Upload additional data (JSON)' 
+              {bills.length > 0
+                ? `${bills.length} bills loaded`
+                : import.meta.env.PROD
+                  ? 'Upload additional data (JSON)'
                   : 'Load legislation data (JSON)'}
             </span>
           </label>
@@ -556,7 +562,7 @@ function App() {
 
             {/* Analytics Tabs */}
             {!loading && bills.length > 0 && (
-              <AnalyticsTabs 
+              <AnalyticsTabs
                 bills={filteredBills}
                 darkMode={darkMode}
                 t={t}

@@ -1,0 +1,113 @@
+name: Data Pipeline
+
+on:
+  # Run daily at 4 AM UTC
+  schedule:
+    - cron: '0 3 * * *'
+
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      skip_summaries:
+        description: 'Skip AI summary generation'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '20'
+
+jobs:
+  fetch-and-summarize:
+    name: Fetch Legislation & Generate Summaries
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run data pipeline
+        env:
+          LEGISCAN_API_KEY: ${{ secrets.LEGISCAN_API_KEY }}
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+          OLLAMA_HOST: https://api.ollama.com
+          OLLAMA_MODEL: llama3.1
+        run: |
+          python -m backend.pipeline --output public/ga_legislation.json
+
+      - name: Upload legislation data artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: legislation-data
+          path: public/ga_legislation.json
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Commit and push updated data
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add public/ga_legislation.json
+          git diff --staged --quiet || git commit -m "chore: update legislation data [skip ci]"
+          git push
+
+  build-and-deploy:
+    name: Build & Deploy Site
+    needs: fetch-and-summarize
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download legislation data
+        uses: actions/download-artifact@v4
+        with:
+          name: legislation-data
+          path: public/
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build site
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
