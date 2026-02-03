@@ -9,7 +9,7 @@ API Documentation: https://legiscan.com/gaits/documentation/legiscan
 
 import os
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -43,7 +43,7 @@ class LegiscanService:
 
     BASE_URL = "https://api.legiscan.com/"
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         """
         Initialize the LegiScan service.
 
@@ -81,10 +81,12 @@ class LegiscanService:
                     raise Exception(f"API error: {response.status}")
                 data = await response.json()
                 if data.get("status") == "ERROR":
-                    raise Exception(f"API error: {data.get('alert', {}).get('message', 'Unknown error')}")
-                return data
+                    raise Exception(
+                        f"API error: {data.get('alert', {}).get('message', 'Unknown error')}"
+                    )
+                return data  # type: ignore[no-any-return]
 
-    async def get_session_list(self, state: str = GEORGIA_STATE_CODE) -> list[dict]:
+    async def get_session_list(self, state: str = GEORGIA_STATE_CODE) -> list[dict[str, Any]]:
         """
         Get list of legislative sessions for a state.
 
@@ -95,9 +97,11 @@ class LegiscanService:
             List of session objects
         """
         data = await self._make_request("getSessionList", state=state)
-        return data.get("sessions", [])
+        return data.get("sessions", [])  # type: ignore[no-any-return]
 
-    async def get_master_list(self, session_id: Optional[int] = None, state: str = GEORGIA_STATE_CODE) -> dict:
+    async def get_master_list(
+        self, session_id: int | None = None, state: str = GEORGIA_STATE_CODE
+    ) -> dict[str, Any]:
         """
         Get master list of bills for a session.
 
@@ -108,12 +112,12 @@ class LegiscanService:
         Returns:
             Dictionary of bills indexed by bill_id
         """
-        params = {"state": state}
+        params: dict[str, Any] = {"state": state}
         if session_id:
             params["id"] = session_id
 
         data = await self._make_request("getMasterList", **params)
-        return data.get("masterlist", {})
+        return data.get("masterlist", {})  # type: ignore[no-any-return]
 
     async def get_bill(self, bill_id: int) -> LegiscanBill:
         """
@@ -157,7 +161,7 @@ class LegiscanService:
             Base64-encoded document content
         """
         data = await self._make_request("getBillText", id=doc_id)
-        return data.get("text", {}).get("doc", "")
+        return data.get("text", {}).get("doc", "") or ""
 
     async def search_bills(
         self,
@@ -165,7 +169,7 @@ class LegiscanService:
         state: str = GEORGIA_STATE_CODE,
         year: int = 2,  # Current year + 1 prior
         page: int = 1,
-    ) -> list[dict]:
+    ) -> list[dict[str, Any]]:
         """
         Search for bills matching a query.
 
@@ -185,9 +189,9 @@ class LegiscanService:
             year=year,
             page=page,
         )
-        return data.get("searchresult", {}).get("results", [])
+        return data.get("searchresult", {}).get("results", [])  # type: ignore[no-any-return]
 
-    async def fetch_all_georgia_bills(self, session_id: Optional[int] = None) -> list[dict]:
+    async def fetch_all_georgia_bills(self, session_id: int | None = None) -> list[dict[str, Any]]:
         """
         Fetch all bills from Georgia for a given session.
 
@@ -202,8 +206,8 @@ class LegiscanService:
         """
         master_list = await self.get_master_list(session_id=session_id)
 
-        bills = []
-        for bill_id, bill_summary in master_list.items():
+        bills: list[dict[str, Any]] = []
+        for bill_id, _bill_summary in master_list.items():
             if bill_id == "session":  # Skip session metadata
                 continue
 
@@ -216,7 +220,7 @@ class LegiscanService:
 
         return bills
 
-    def _format_bill_for_frontend(self, bill: LegiscanBill) -> dict:
+    def _format_bill_for_frontend(self, bill: LegiscanBill) -> dict[str, Any]:
         """
         Format a LegiScan bill for the frontend application.
 
@@ -232,8 +236,7 @@ class LegiscanService:
             "sponsors": [s.get("name", "") for s in bill.sponsors],
             "committees": [],  # LegiScan uses subjects instead
             "status_history": [
-                {"date": h.get("date", ""), "status": h.get("action", "")}
-                for h in bill.history
+                {"date": h.get("date", ""), "status": h.get("action", "")} for h in bill.history
             ],
             "first_reader_summary": bill.description,
             "url": bill.url,
@@ -243,7 +246,7 @@ class LegiscanService:
 
 
 # Singleton instance
-_service_instance: Optional[LegiscanService] = None
+_service_instance: LegiscanService | None = None
 
 
 def get_legiscan_service() -> LegiscanService:

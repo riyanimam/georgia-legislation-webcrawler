@@ -3,7 +3,7 @@ name: Mark stale issues and pull requests
 on:
   # Run weekly on Sunday at 4 AM UTC
   schedule:
-    - cron: '0 3 * * 0'
+  - cron: 0 3 * * 0
 
 jobs:
   stale:

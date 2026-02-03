@@ -7,7 +7,6 @@ plain-English summaries of Georgia legislation bills.
 
 import os
 from dataclasses import dataclass
-from typing import Optional
 
 import aiohttp
 
@@ -23,9 +22,9 @@ class SummaryResult:
     """Result of a summary generation request."""
 
     success: bool
-    summary: Optional[str] = None
+    summary: str | None = None
     model: str = ""
-    error: Optional[str] = None
+    error: str | None = None
     tokens_used: int = 0
 
 
@@ -34,9 +33,9 @@ class OllamaService:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        host: Optional[str] = None,
-        model: Optional[str] = None,
+        api_key: str | None = None,
+        host: str | None = None,
+        model: str | None = None,
         temperature: float = DEFAULT_TEMPERATURE,
         max_tokens: int = DEFAULT_MAX_TOKENS,
     ):
@@ -50,9 +49,9 @@ class OllamaService:
             temperature: Sampling temperature (0.0-1.0). Lower = more consistent.
             max_tokens: Maximum tokens to generate.
         """
-        self.api_key = api_key or os.getenv("OLLAMA_API_KEY", "")
-        self.host = (host or os.getenv("OLLAMA_HOST", DEFAULT_OLLAMA_HOST)).rstrip("/")
-        self.model = model or os.getenv("OLLAMA_MODEL", DEFAULT_MODEL)
+        self.api_key: str = api_key or os.getenv("OLLAMA_API_KEY") or ""
+        self.host: str = (host or os.getenv("OLLAMA_HOST") or DEFAULT_OLLAMA_HOST).rstrip("/")
+        self.model: str = model or os.getenv("OLLAMA_MODEL") or DEFAULT_MODEL
         self.temperature = temperature
         self.max_tokens = max_tokens
 
@@ -69,9 +68,9 @@ class OllamaService:
         self,
         bill_number: str,
         caption: str,
-        first_reader_summary: Optional[str] = None,
-        sponsors: Optional[list[str]] = None,
-        committees: Optional[list[str]] = None,
+        first_reader_summary: str | None = None,
+        sponsors: list[str] | None = None,
+        committees: list[str] | None = None,
     ) -> str:
         """
         Build the prompt for generating a bill summary.
@@ -99,12 +98,10 @@ class OllamaService:
         ]
 
         if sponsors:
-            sponsor_list = sponsors if isinstance(sponsors, list) else [sponsors]
-            prompt_parts.append(f"Sponsors: {', '.join(sponsor_list)}")
+            prompt_parts.append(f"Sponsors: {', '.join(sponsors)}")
 
         if committees:
-            committee_list = committees if isinstance(committees, list) else [committees]
-            prompt_parts.append(f"Committees: {', '.join(committee_list)}")
+            prompt_parts.append(f"Committees: {', '.join(committees)}")
 
         if first_reader_summary:
             prompt_parts.append("")
@@ -120,9 +117,9 @@ class OllamaService:
         self,
         bill_number: str,
         caption: str,
-        first_reader_summary: Optional[str] = None,
-        sponsors: Optional[list[str]] = None,
-        committees: Optional[list[str]] = None,
+        first_reader_summary: str | None = None,
+        sponsors: list[str] | None = None,
+        committees: list[str] | None = None,
     ) -> SummaryResult:
         """
         Generate a plain-English summary of a bill.
@@ -218,13 +215,13 @@ class OllamaService:
                     headers=self._get_headers(),
                     timeout=aiohttp.ClientTimeout(total=10),
                 ) as response:
-                    return response.status == 200
+                    return bool(response.status == 200)
         except Exception:
             return False
 
 
 # Singleton instance for reuse
-_service_instance: Optional[OllamaService] = None
+_service_instance: OllamaService | None = None
 
 
 def get_ollama_service() -> OllamaService:

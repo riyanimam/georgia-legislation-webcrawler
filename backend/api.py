@@ -9,14 +9,14 @@ import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from .ollama_service import OllamaService, get_ollama_service
+from .ollama_service import get_ollama_service
 
 # Load environment variables from .env file
 load_dotenv()
@@ -30,9 +30,9 @@ class SummaryRequest(BaseModel):
 
     doc_number: str
     caption: str
-    first_reader_summary: Optional[str] = None
-    sponsors: Optional[list[str]] = None
-    committees: Optional[list[str]] = None
+    first_reader_summary: str | None = None
+    sponsors: list[str] | None = None
+    committees: list[str] | None = None
     force_regenerate: bool = False
 
 
@@ -40,11 +40,11 @@ class SummaryResponse(BaseModel):
     """Response body for summary generation."""
 
     doc_number: str
-    ai_summary: Optional[str] = None
+    ai_summary: str | None = None
     summary_status: str  # 'complete', 'failed', 'cached'
-    summary_model: Optional[str] = None
-    summary_generated_at: Optional[str] = None
-    error: Optional[str] = None
+    summary_model: str | None = None
+    summary_generated_at: str | None = None
+    error: str | None = None
     cached: bool = False
 
 
@@ -56,28 +56,28 @@ class HealthResponse(BaseModel):
     model: str
 
 
-def load_summary_cache() -> dict:
+def load_summary_cache() -> dict[str, Any]:
     """Load the summary cache from disk."""
     if SUMMARY_CACHE_FILE.exists():
         try:
-            with open(SUMMARY_CACHE_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (json.JSONDecodeError, IOError):
+            with open(SUMMARY_CACHE_FILE, encoding="utf-8") as f:
+                return json.load(f)  # type: ignore[no-any-return]
+        except (OSError, json.JSONDecodeError):
             return {}
     return {}
 
 
-def save_summary_cache(cache: dict) -> None:
+def save_summary_cache(cache: dict[str, Any]) -> None:
     """Save the summary cache to disk."""
     try:
         with open(SUMMARY_CACHE_FILE, "w", encoding="utf-8") as f:
             json.dump(cache, f, indent=2, ensure_ascii=False)
-    except IOError as e:
+    except OSError as e:
         print(f"Warning: Could not save summary cache: {e}")
 
 
 # Global cache
-summary_cache: dict = {}
+summary_cache: dict[str, Any] = {}
 
 
 @asynccontextmanager

@@ -124,12 +124,12 @@ georgia-legislation-webcrawler/
 
 ### Architecture Overview
 
-| Component    | Purpose                                  | Technology                     |
-| ------------ | ---------------------------------------- | ------------------------------ |
-| **Frontend** | Interactive bill exploration UI          | React, TypeScript, Framer Motion |
-| **Pipeline** | Fetch data + generate AI summaries       | Python, LegiScan API, Ollama   |
-| **CI/CD**    | Daily automated data updates             | GitHub Actions                 |
-| **Hosting**  | Static site hosting                      | GitHub Pages                   |
+| Component    | Purpose                            | Technology                       |
+| ------------ | ---------------------------------- | -------------------------------- |
+| **Frontend** | Interactive bill exploration UI    | React, TypeScript, Framer Motion |
+| **Pipeline** | Fetch data + generate AI summaries | Python, LegiScan API, Ollama     |
+| **CI/CD**    | Daily automated data updates       | GitHub Actions                   |
+| **Hosting**  | Static site hosting                | GitHub Pages                     |
 
 ## Data Pipeline
 
@@ -169,8 +169,8 @@ model. Summaries:
 
 **Example:**
 
-> **Original**: "A BILL to be entitled an Act to amend Chapter 2 of Title 20 of the Official Code
-> of Georgia Annotated, relating to elementary and secondary education..."
+> **Original**: "A BILL to be entitled an Act to amend Chapter 2 of Title 20 of the Official Code of
+> Georgia Annotated, relating to elementary and secondary education..."
 >
 > **AI Summary**: "This bill would require all Georgia public schools to offer free breakfast and
 > lunch to students, regardless of family income."
@@ -250,21 +250,21 @@ pre-commit run --all-files
 
 ### GitHub Actions Workflows
 
-| Workflow             | Purpose                                | Trigger              |
-| -------------------- | -------------------------------------- | -------------------- |
-| `data-pipeline.yml`  | Fetch data + AI summaries + deploy     | Daily at 6 AM UTC    |
-| `deploy.yml`         | Build and deploy frontend              | Push to main         |
-| `validate.yml`       | Run tests and linting                  | Pull requests        |
+| Workflow            | Purpose                            | Trigger           |
+| ------------------- | ---------------------------------- | ----------------- |
+| `data-pipeline.yml` | Fetch data + AI summaries + deploy | Daily at 6 AM UTC |
+| `deploy.yml`        | Build and deploy frontend          | Push to main      |
+| `validate.yml`      | Run tests and linting              | Pull requests     |
 
 ## Dependencies
 
-| Package         | Purpose                               |
-| --------------- | ------------------------------------- |
-| `react`         | UI framework                          |
-| `framer-motion` | Animations                            |
-| `vite`          | Build tool                            |
-| `aiohttp`       | Async HTTP client (Python)            |
-| `python-dotenv` | Environment variable management       |
+| Package         | Purpose                         |
+| --------------- | ------------------------------- |
+| `react`         | UI framework                    |
+| `framer-motion` | Animations                      |
+| `vite`          | Build tool                      |
+| `aiohttp`       | Async HTTP client (Python)      |
+| `python-dotenv` | Environment variable management |
 
 ## How to Contribute
 
@@ -281,9 +281,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Disclaimer
 
-This application is provided for educational and informational purposes. Legislative data is
-sourced from LegiScan. AI summaries are generated automatically and should not be considered
-official legal interpretations.
+This application is provided for educational and informational purposes. Legislative data is sourced
+from LegiScan. AI summaries are generated automatically and should not be considered official legal
+interpretations.
 
 ## Support & Questions
 

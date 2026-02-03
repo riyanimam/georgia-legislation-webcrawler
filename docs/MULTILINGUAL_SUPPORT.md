@@ -19,7 +19,7 @@ accessible to diverse communities across the United States and beyond.
 | 8   | Korean               | `ko` | 🇰🇷   | 한국어      | 1.1 million                |
 | 9   | Russian              | `ru` | 🇷🇺   | Русский     | 900,000                    |
 | 10  | German               | `de` | 🇩🇪   | Deutsch     | 900,000                    |
-| 11  | Hindi                | `hi` | 🇮🇳   | हिन्दी         | 650,000                    |
+| 11  | Hindi                | `hi` | 🇮🇳   | हिन्दी        | 650,000                    |
 | 12  | Portuguese           | `pt` | 🇧🇷   | Português   | 700,000                    |
 | 13  | Japanese             | `ja` | 🇯🇵   | 日本語      | 460,000                    |
 | 14  | Urdu                 | `ur` | 🇵🇰   | اردو        | 400,000                    |

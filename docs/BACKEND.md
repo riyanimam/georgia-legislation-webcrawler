@@ -1,12 +1,12 @@
 # Backend - Georgia Legislation Data Pipeline
 
-Python data pipeline for collecting Georgia state legislation data via LegiScan API with
-AI-powered plain English summaries.
+Python data pipeline for collecting Georgia state legislation data via LegiScan API with AI-powered
+plain English summaries.
 
 ## Overview
 
-This directory contains the backend code for the Georgia Legislation Tracker - an automated
-pipeline that fetches legislative data from LegiScan and generates AI summaries using Ollama.
+This directory contains the backend code for the Georgia Legislation Tracker - an automated pipeline
+that fetches legislative data from LegiScan and generates AI summaries using Ollama.
 
 ## Technology Stack
 
@@ -37,18 +37,18 @@ The pipeline runs in GitHub Actions and performs these steps:
 
 ### Pipeline Flow
 
-```
+```text
 LegiScan API → Fetch Bills → AI Summarization → JSON Output → GitHub Pages
 ```
 
 ## Environment Variables
 
-| Variable           | Required | Description                          |
-| ------------------ | -------- | ------------------------------------ |
-| `LEGISCAN_API_KEY` | Yes      | API key from legiscan.com            |
-| `OLLAMA_API_KEY`   | Yes      | API key for Ollama cloud service     |
-| `OLLAMA_MODEL`     | No       | Model to use (default: `llama3.1`)   |
-| `OLLAMA_BASE_URL`  | No       | Ollama API URL (default: cloud URL)  |
+| Variable           | Required | Description                         |
+| ------------------ | -------- | ----------------------------------- |
+| `LEGISCAN_API_KEY` | Yes      | API key from legiscan.com           |
+| `OLLAMA_API_KEY`   | Yes      | API key for Ollama cloud service    |
+| `OLLAMA_MODEL`     | No       | Model to use (default: `llama3.1`)  |
+| `OLLAMA_BASE_URL`  | No       | Ollama API URL (default: cloud URL) |
 
 ## Services
 
@@ -175,7 +175,7 @@ The pipeline includes robust error handling:
 
 The Ollama service uses a carefully crafted prompt for legal text:
 
-```
+```text
 You are a helpful assistant that explains legislative bills in plain, everyday English.
 Given the following bill information, provide a clear, concise summary that anyone can 
 understand. Avoid legal jargon. Focus on what the bill would do and who it affects.

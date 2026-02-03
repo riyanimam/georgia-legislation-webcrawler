@@ -25,6 +25,8 @@ from typing import Any
 
 from dotenv import load_dotenv
 
+from .ollama_service import SummaryResult
+
 # Load environment variables
 load_dotenv()
 
@@ -36,7 +38,7 @@ async def fetch_legislation() -> list[dict[str, Any]]:
     Returns:
         List of bill dictionaries
     """
-    from .legiscan_service import LegiscanService, GEORGIA_STATE_CODE
+    from .legiscan_service import GEORGIA_STATE_CODE, LegiscanService
 
     print("=" * 60)
     print("STEP 1: Fetching Georgia Legislation from LegiScan")
@@ -67,7 +69,8 @@ async def fetch_legislation() -> list[dict[str, Any]]:
 
     # Filter out session metadata
     bill_ids = [
-        int(bill_id) for bill_id, data in master_list.items()
+        int(bill_id)
+        for bill_id, data in master_list.items()
         if bill_id != "session" and isinstance(data, dict)
     ]
     print(f"Found {len(bill_ids)} bills")
@@ -170,12 +173,14 @@ async def generate_summaries(bills: list[dict[str, Any]]) -> list[dict[str, Any]
             if isinstance(result, Exception):
                 print(f"  Error: {bill.get('doc_number')}: {result}")
                 failed += 1
-            elif result.success:
-                bill["ai_summary"] = result.summary
-                bill["summary_model"] = result.model
-                successful += 1
             else:
-                failed += 1
+                summary_result: SummaryResult = result  # type: ignore[assignment]
+                if summary_result.success:
+                    bill["ai_summary"] = summary_result.summary
+                    bill["summary_model"] = summary_result.model
+                    successful += 1
+                else:
+                    failed += 1
 
         # Progress update
         if (batch_num + 1) % 10 == 0 or batch_num == total_batches - 1:
@@ -276,10 +281,11 @@ def main():
         description="Georgia Legislation Data Pipeline - Fetch bills and generate AI summaries"
     )
     parser.add_argument(
-        "--output", "-o",
+        "--output",
+        "-o",
         type=Path,
         default=Path("public/ga_legislation.json"),
-        help="Output JSON file path (default: public/ga_legislation.json)"
+        help="Output JSON file path (default: public/ga_legislation.json)",
     )
 
     args = parser.parse_args()

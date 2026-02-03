@@ -19,12 +19,12 @@ The JSON file contains a wrapper object with metadata:
 }
 ```
 
-| Field          | Type   | Description                                   |
-| -------------- | ------ | --------------------------------------------- |
-| `generated_at` | string | ISO 8601 timestamp of generation              |
-| `source`       | string | Data source identifier (`legiscan`)           |
-| `total_bills`  | number | Total count of bills in the array             |
-| `bills`        | array  | Array of bill objects                         |
+| Field          | Type   | Description                         |
+| -------------- | ------ | ----------------------------------- |
+| `generated_at` | string | ISO 8601 timestamp of generation    |
+| `source`       | string | Data source identifier (`legiscan`) |
+| `total_bills`  | number | Total count of bills in the array   |
+| `bills`        | array  | Array of bill objects               |
 
 ## Bill Object Schema
 
@@ -58,23 +58,23 @@ Each bill object represents a single piece of legislation:
 
 ### Required Fields
 
-| Field                  | Type   | Description                                                          |
-| ---------------------- | ------ | -------------------------------------------------------------------- |
-| `doc_number`           | string | Bill identifier (e.g., "HB 1", "SB 50"). Format: `[HB\|SB] \d+`      |
-| `caption`              | string | Official bill title/caption. 1-1000 characters.                      |
-| `sponsors`             | string | Semicolon-separated list of sponsor names.                           |
-| `committees`           | string | Semicolon-separated list of assigned committees.                     |
-| `detail_url`           | string | Full URL to bill details. Must be valid HTTP(S) URL.                 |
+| Field        | Type   | Description                                                     |
+| ------------ | ------ | --------------------------------------------------------------- |
+| `doc_number` | string | Bill identifier (e.g., "HB 1", "SB 50"). Format: `[HB\|SB] \d+` |
+| `caption`    | string | Official bill title/caption. 1-1000 characters.                 |
+| `sponsors`   | string | Semicolon-separated list of sponsor names.                      |
+| `committees` | string | Semicolon-separated list of assigned committees.                |
+| `detail_url` | string | Full URL to bill details. Must be valid HTTP(S) URL.            |
 
 ### Optional Fields
 
-| Field                  | Type   | Description                                                          |
-| ---------------------- | ------ | -------------------------------------------------------------------- |
-| `first_reader_summary` | string | Official bill description from legislature. May be empty.            |
-| `ai_summary`           | string | AI-generated plain English summary. Added by Ollama pipeline.        |
-| `summary_model`        | string | AI model used for summary (e.g., `llama3.1`).                        |
-| `summary_generated_at` | string | ISO 8601 timestamp when AI summary was generated.                    |
-| `status_history`       | array  | Array of status objects tracking bill progression. May be empty.     |
+| Field                  | Type   | Description                                                      |
+| ---------------------- | ------ | ---------------------------------------------------------------- |
+| `first_reader_summary` | string | Official bill description from legislature. May be empty.        |
+| `ai_summary`           | string | AI-generated plain English summary. Added by Ollama pipeline.    |
+| `summary_model`        | string | AI model used for summary (e.g., `llama3.1`).                    |
+| `summary_generated_at` | string | ISO 8601 timestamp when AI summary was generated.                |
+| `status_history`       | array  | Array of status objects tracking bill progression. May be empty. |
 
 ## Status History Object
 
@@ -85,10 +85,10 @@ Each bill object represents a single piece of legislation:
 }
 ```
 
-| Field    | Type   | Required | Description                                         |
-| -------- | ------ | -------- | --------------------------------------------------- |
-| `date`   | string | ✓        | Date in `YYYY-MM-DD` format                         |
-| `status` | string | ✓        | Status text (e.g., "Introduced", "Passed Committee")|
+| Field    | Type   | Required | Description                                          |
+| -------- | ------ | -------- | ---------------------------------------------------- |
+| `date`   | string | ✓        | Date in `YYYY-MM-DD` format                          |
+| `status` | string | ✓        | Status text (e.g., "Introduced", "Passed Committee") |
 
 ## AI Summary Field
 
@@ -102,12 +102,14 @@ The `ai_summary` field contains a plain English explanation of the bill:
 ### Example AI Summary
 
 **Original (first_reader_summary)**:
+
 > "A BILL to be entitled an Act to amend Chapter 2 of Title 20 of the Official Code of Georgia
 > Annotated, relating to elementary and secondary education, so as to provide for..."
 
 **AI Summary**:
-> "This bill would require all Georgia public schools to offer free breakfast and lunch to
-> students, regardless of family income. It affects all K-12 public school students statewide."
+
+> "This bill would require all Georgia public schools to offer free breakfast and lunch to students,
+> regardless of family income. It affects all K-12 public school students statewide."
 
 ## Validation Rules
 
