@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-02-03T21:21:55.272Z",
+  "status": "failure",
+  "stats": {},
+  "errors": [
+    "File not found: ga_legislation.json"
+  ]
+}

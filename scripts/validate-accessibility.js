@@ -132,7 +132,7 @@ function validateHTMLFile(filePath) {
 }
 
 // Main execution
-const filePath = process.argv[2] || 'frontend/index.html';
+const filePath = process.argv[2] || 'index.html';
 const result = validateHTMLFile(filePath);
 
 console.log(`\n♿ Accessibility Validation Report`);
@@ -150,13 +150,13 @@ if (result.checks) {
   console.log();
 }
 
-if (result.violations.length > 0) {
+if (result.violations && result.violations.length > 0) {
   console.log(`Violations Found:\n`);
   result.violations.forEach(v => console.log(v));
   console.log();
 }
 
-if (result.warnings.length > 0) {
+if (result.warnings && result.warnings.length > 0) {
   console.log(`Warnings:\n`);
   result.warnings.forEach(w => console.log(w));
   console.log();
@@ -170,12 +170,12 @@ const report = {
   status: result.isValid ? 'pass' : 'fail',
   summary: {
     validationsPassed: result.passes?.length || 0,
-    warnings: result.warnings.length,
-    violations: result.violations.length,
+    warnings: result.warnings?.length || 0,
+    violations: result.violations?.length || 0,
   },
   passes: result.passes || [],
-  warnings: result.warnings,
-  violations: result.violations,
+  warnings: result.warnings || [],
+  violations: result.violations || [],
 };
 
 fs.writeFileSync('accessibility-report.json', JSON.stringify(report, null, 2));

@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-02-03T21:21:48.711Z",
+  "status": "pass",
+  "summary": {
+    "validationsPassed": 0,
+    "warnings": 5,
+    "violations": 0
+  },
+  "passes": [],
+  "warnings": [
+    "⚠️  Limited use of aria-label attributes - may impact screen reader experience",
+    "⚠️  Missing semantic HTML elements (main, header, nav, etc.) - use semantic tags for better accessibility",
+    "⚠️  No heading elements found - headings help structure content for screen readers",
+    "⚠️  Unable to validate color contrast - ensure text has sufficient contrast ratio (4.5:1 for normal text)",
+    "⚠️  Limited keyboard interaction - ensure all interactive elements are keyboard accessible"
+  ],
+  "violations": []
+}
