@@ -22,6 +22,8 @@ env:
 jobs:
   fetch-and-summarize:
     name: Fetch Legislation & Generate Summaries
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
 
     steps:

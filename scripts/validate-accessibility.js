@@ -9,8 +9,6 @@
  */
 
 import fs from 'fs';
-import path from 'path';
-import axe from 'axe-core';
 
 /**
  * Custom HTML parser to extract and validate accessibility
