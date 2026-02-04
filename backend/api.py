@@ -7,7 +7,7 @@ Provides API endpoints for AI-generated bill summaries using Ollama.
 import json
 import os
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -155,25 +155,33 @@ async def generate_summary(request: SummaryRequest):
     service = get_ollama_service()
 
     # Convert sponsors/committees to list if needed
-    sponsors = request.sponsors
-    if isinstance(sponsors, str):
-        sponsors = [sponsors]
+    sponsors_list: list[str] | None = None
+    if request.sponsors is not None:
+        if isinstance(request.sponsors, str):
+            sponsors_list = [request.sponsors]
+        else:
+            # Ensure all items are strings
+            sponsors_list = [str(item) for item in request.sponsors]
 
-    committees = request.committees
-    if isinstance(committees, str):
-        committees = [committees]
+    committees_list: list[str] | None = None
+    if request.committees is not None:
+        if isinstance(request.committees, str):
+            committees_list = [request.committees]
+        else:
+            # Ensure all items are strings
+            committees_list = [str(item) for item in request.committees]
 
     result = await service.generate_summary(
         bill_number=request.doc_number,
         caption=request.caption,
         first_reader_summary=request.first_reader_summary,
-        sponsors=sponsors,
-        committees=committees,
+        sponsors=sponsors_list,
+        committees=committees_list,
     )
 
     if result.success:
         # Cache the result
-        generated_at = datetime.utcnow().isoformat() + "Z"
+        generated_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
         summary_cache[cache_key] = {
             "ai_summary": result.summary,
             "summary_model": result.model,

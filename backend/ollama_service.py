@@ -7,6 +7,7 @@ plain-English summaries of Georgia legislation bills.
 
 import os
 from dataclasses import dataclass
+from typing import Any
 
 import aiohttp
 
@@ -55,7 +56,7 @@ class OllamaService:
         self.temperature = temperature
         self.max_tokens = max_tokens
 
-    def _get_headers(self) -> dict:
+    def _get_headers(self) -> dict[str, str]:
         """Get HTTP headers for API requests."""
         headers = {
             "Content-Type": "application/json",
@@ -142,7 +143,7 @@ class OllamaService:
             committees=committees,
         )
 
-        payload = {
+        payload: dict[str, Any] = {
             "model": self.model,
             "prompt": prompt,
             "stream": False,

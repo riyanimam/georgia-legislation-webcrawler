@@ -19,7 +19,7 @@ import asyncio
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -77,13 +77,13 @@ async def fetch_legislation() -> list[dict[str, Any]]:
 
     # Fetch full details for each bill
     print("Fetching bill details...")
-    bills = []
+    bills: list[dict[str, Any]] = []
     failed = 0
 
     for i, bill_id in enumerate(bill_ids, 1):
         try:
             bill = await service.get_bill(bill_id)
-            formatted = service._format_bill_for_frontend(bill)
+            formatted = service.format_bill_for_frontend(bill)
             bills.append(formatted)
 
             if i % 50 == 0 or i == len(bill_ids):
@@ -145,7 +145,7 @@ async def generate_summaries(bills: list[dict[str, Any]]) -> list[dict[str, Any]
         batch = bills[start_idx:end_idx]
 
         # Create tasks for concurrent processing
-        tasks = []
+        tasks: list[Any] = []
         for bill in batch:
             sponsors = bill.get("sponsors", [])
             if isinstance(sponsors, str):
@@ -210,8 +210,8 @@ def save_output(bills: list[dict[str, Any]], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Add metadata
-    output_data = {
-        "generated_at": datetime.utcnow().isoformat() + "Z",
+    output_data: dict[str, Any] = {
+        "generated_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "source": "LegiScan API",
         "state": "GA",
         "bill_count": len(bills),
@@ -258,7 +258,7 @@ async def run_pipeline(output_path: Path) -> dict[str, Any]:
     end_time = datetime.now()
     duration = (end_time - start_time).total_seconds()
 
-    stats = {
+    stats: dict[str, Any] = {
         "started_at": start_time.isoformat(),
         "completed_at": end_time.isoformat(),
         "duration_seconds": duration,

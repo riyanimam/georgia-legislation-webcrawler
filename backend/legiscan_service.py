@@ -30,11 +30,11 @@ class LegiscanBill:
     status: str
     status_date: str
     url: str
-    sponsors: list[dict]
-    history: list[dict]
-    texts: list[dict]
-    votes: list[dict]
-    amendments: list[dict]
+    sponsors: list[dict[str, Any]]
+    history: list[dict[str, Any]]
+    texts: list[dict[str, Any]]
+    votes: list[dict[str, Any]]
+    amendments: list[dict[str, Any]]
     subjects: list[str]
 
 
@@ -57,7 +57,7 @@ class LegiscanService:
                 "Set LEGISCAN_API_KEY environment variable or pass api_key parameter."
             )
 
-    async def _make_request(self, operation: str, **params) -> dict[str, Any]:
+    async def _make_request(self, operation: str, **params: Any) -> dict[str, Any]:
         """
         Make an API request to LegiScan.
 
@@ -213,14 +213,14 @@ class LegiscanService:
 
             try:
                 bill = await self.get_bill(int(bill_id))
-                bills.append(self._format_bill_for_frontend(bill))
+                bills.append(self.format_bill_for_frontend(bill))
             except Exception as e:
                 print(f"Error fetching bill {bill_id}: {e}")
                 continue
 
         return bills
 
-    def _format_bill_for_frontend(self, bill: LegiscanBill) -> dict[str, Any]:
+    def format_bill_for_frontend(self, bill: LegiscanBill) -> dict[str, Any]:
         """
         Format a LegiScan bill for the frontend application.
 
