@@ -55,11 +55,11 @@ jobs:
 
       # Step 7: Run Ruff linting
     - name: Ruff lint
-      run: ruff check backend/scraper.py --fix --exit-zero
+      run: ruff check backend/ --fix --exit-zero
 
       # Step 8: Check Ruff formatting
     - name: Ruff format check
-      run: ruff format backend/scraper.py --line-length=100 --check
+      run: ruff format backend/ --line-length=100 --check
 
       # Step 9: Check Markdown formatting
     - name: Markdown format check

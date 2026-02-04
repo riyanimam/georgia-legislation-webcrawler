@@ -1,4 +1,4 @@
-# Contributing to Georgia Legislation Webcrawler
+# Contributing to Georgia Legislation Tracker
 
 Thank you for your interest in contributing! This document provides guidelines and instructions for
 contributing to this project.
@@ -29,12 +29,26 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 # Install Python dependencies
 pip install -r requirements.txt
 
-# Install Playwright browsers
-playwright install chromium
-
 # Install Node dependencies
 npm install
+
+# Install pre-commit hooks (recommended)
+pre-commit install
 ```
+
+### Environment Variables
+
+For backend development, you'll need:
+
+```bash
+export LEGISCAN_API_KEY="your-legiscan-api-key"
+export OLLAMA_API_KEY="your-ollama-api-key"
+```
+
+Get your API keys from:
+
+- LegiScan: [legiscan.com](https://legiscan.com)
+- Ollama: [ollama.com](https://ollama.com)
 
 ## Making Changes
 
@@ -59,7 +73,7 @@ Follow semantic commit format:
 feat: Add bill export to CSV feature
 fix: Resolve modal close button misalignment
 docs: Update API schema documentation
-refactor: Split script.js into modules
+refactor: Split pipeline into modules
 ```
 
 ### Code Style
@@ -70,7 +84,7 @@ refactor: Split script.js into modules
 - Run `ruff format` to format (100 character line limit)
 - All code must pass pre-commit checks
 
-**JavaScript:**
+**TypeScript/JavaScript:**
 
 - Use `biome check` for linting
 - Use `biome format` for formatting
@@ -88,8 +102,8 @@ refactor: Split script.js into modules
 **Backend:**
 
 ```bash
-# Test with limited pages
-MAX_PAGES=1 python backend/scraper.py
+# Run the pipeline locally
+python -m backend.pipeline
 
 # Validate output JSON
 python -m json.tool ga_legislation.json > /dev/null
@@ -97,11 +111,16 @@ python -m json.tool ga_legislation.json > /dev/null
 
 **Frontend:**
 
-1. Open `frontend/index.html` in browser
-2. Test with `frontend/test-data.json`
-3. Check console for errors (F12)
-4. Test all filter combinations
-5. Test keyboard navigation (ESC to close modal)
+```bash
+# Start dev server
+npm run dev
+
+# Run tests
+npm test
+
+# Build and check for errors
+npm run build
+```
 
 ### Running Validation
 
@@ -112,7 +131,7 @@ ruff check backend/
 # Python formatting
 ruff format backend/ --check
 
-# JavaScript/CSS validation
+# TypeScript/JavaScript validation
 npm run biome -- check
 
 # Markdown linting
@@ -125,7 +144,7 @@ markdownlint README.md docs/
 2. **Run validation tools** (ruff, biome, markdownlint)
 3. **Test your changes** thoroughly
 4. **Check for console errors** in browser DevTools
-5. **Validate JSON output** from scraper
+5. **Validate JSON output** if modifying pipeline
 
 ## PR Guidelines
 
@@ -164,28 +183,41 @@ Use appropriate labels:
 
 ```text
 georgia-legislation-webcrawler/
-├── backend/              # Python scraper
-├── frontend/             # HTML/CSS/JS UI
+├── backend/              # Python data pipeline
+│   ├── pipeline.py       # Main pipeline orchestration
+│   ├── legiscan_service.py   # LegiScan API client
+│   └── ollama_service.py     # Ollama AI client
+├── src/                  # React frontend
+│   ├── components/       # React components
+│   ├── hooks/            # Custom hooks
+│   └── i18n/             # Translations
 ├── docs/                 # Documentation
-├── .github/workflows/    # CI/CD
-└── config/               # Configuration files
+├── archived/             # Archived code (old scraper)
+├── .github/workflows/    # CI/CD automation
+└── tests/                # Test suites
 ```
 
 ## Common Tasks
 
 ### Add a new filter to frontend
 
-1. Add keyword mapping to `issueKeywords` in `script.js`
-2. Add checkbox to HTML with unique ID
-3. Ensure filtering logic includes the new category
-4. Test with sample data
+1. Add filter logic to `Filters.tsx`
+2. Update state in `App.tsx`
+3. Test with sample data
+4. Ensure accessibility (ARIA labels, keyboard nav)
 
-### Add a new data field from scraper
+### Add a new data field from LegiScan
 
-1. Update `scraper.py` extraction logic
-2. Update `validate_bill_data()` if required field
+1. Update `legiscan_service.py` to extract the field
+2. Update `types.ts` TypeScript interface
 3. Update frontend to display the field
-4. Update test data schema
+4. Update `DATA_SCHEMA.md` documentation
+
+### Modify AI summary generation
+
+1. Update prompt in `ollama_service.py`
+2. Test with sample bills locally
+3. Check output quality before committing
 
 ### Update documentation
 
@@ -199,7 +231,6 @@ georgia-legislation-webcrawler/
 - Check existing issues/PRs
 - Review documentation in `docs/`
 - See code comments for implementation details
-- Test with `frontend/debug-upload.html` for frontend debugging
 
 ## Recognition
 

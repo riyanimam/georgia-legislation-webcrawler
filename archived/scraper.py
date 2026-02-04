@@ -1,3 +1,20 @@
+"""
+Archived Georgia Legislation Scraper
+
+This module is archived and not actively maintained. It has been replaced by
+the LegiScan API integration (see backend/legiscan_service.py).
+
+Optional Dependencies (not installed by default):
+    - beautifulsoup4: HTML parsing
+    - playwright: Browser automation
+    - types-beautifulsoup4: Type stubs for bs4
+    - types-playwright: Type stubs for playwright
+
+To use this scraper, install the dependencies:
+    pip install beautifulsoup4 playwright types-beautifulsoup4 types-playwright
+    playwright install
+"""
+
 import asyncio
 import json
 import re
@@ -8,17 +25,17 @@ from urllib.robotparser import RobotFileParser
 
 import aiohttp
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup  # type: ignore[import-untyped]
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 # Try to import playwright, with fallback to requests-only mode
 try:
-    from playwright.async_api import async_playwright
+    from playwright.async_api import async_playwright  # type: ignore[import-untyped]
 
-    PLAYWRIGHT_AVAILABLE = True
+    playwright_available = True
 except ImportError:
-    PLAYWRIGHT_AVAILABLE = False
+    playwright_available = False
     print("Warning: Playwright not installed. Install with: pip install playwright")
     print("Then run: playwright install")
 
@@ -133,7 +150,7 @@ class GALegislationScraper:
         except Exception as e:
             print(f"Warning: Could not save cache: {e}")
 
-    def validate_bill_data(self, bill: dict) -> None:
+    def validate_bill_data(self, bill: dict[str, Any]) -> None:
         """Validate that bill data contains required fields and valid types.
 
         Args:
@@ -190,9 +207,9 @@ class GALegislationScraper:
         self,
         semaphore: asyncio.Semaphore,
         session: aiohttp.ClientSession,
-        bill_data: dict,
-        pages: list,
-    ) -> dict:
+        bill_data: dict[str, Any],
+        pages: list[Any],
+    ) -> dict[str, Any]:
         """Fetch bill detail with semaphore control for concurrency.
 
         Args:
@@ -219,7 +236,9 @@ class GALegislationScraper:
 
             return bill_data
 
-    async def fetch_bill_detail_async(self, session: aiohttp.ClientSession, url: str, page) -> dict:
+    async def fetch_bill_detail_async(
+        self, session: aiohttp.ClientSession, url: str, page: Any
+    ) -> dict[str, Any]:
         """Fetch bill details with caching and concurrent requests.
 
         Args:
@@ -246,8 +265,8 @@ class GALegislationScraper:
         return details
 
     async def _fetch_with_retry(
-        self, session: aiohttp.ClientSession, url: str, page, max_retries: int = 3
-    ) -> dict:
+        self, session: aiohttp.ClientSession, url: str, page: Any, max_retries: int = 3
+    ) -> dict[str, Any]:
         """Fetch bill detail with exponential backoff retry.
 
         Args:
@@ -280,7 +299,7 @@ class GALegislationScraper:
         self.stats["failed"] += 1
         return {"first_reader_summary": "", "status_history": []}
 
-    async def _get_legislation_details_async(self, page, url: str) -> dict:
+    async def _get_legislation_details_async(self, page: Any, url: str) -> dict[str, Any]:
         """Async wrapper for getting legislation details using Playwright.
 
         Args:
@@ -307,7 +326,7 @@ class GALegislationScraper:
 
             soup = BeautifulSoup(html_content, "html.parser")
 
-            details = {"first_reader_summary": "", "status_history": []}
+            details: dict[str, Any] = {"first_reader_summary": "", "status_history": []}
 
             # Get First Reader Summary - find h2, then get next div sibling
             summary_section = soup.find("h2", string=lambda x: x and "First Reader Summary" in x)
@@ -382,7 +401,7 @@ class GALegislationScraper:
 
     def scrape_and_save(
         self, output_file: str = "ga_legislation.json", max_pages: int | None = None
-    ) -> list[dict]:
+    ) -> list[dict[str, Any]]:
         """Main method to scrape all legislation and save to JSON.
 
         Orchestrates the entire scraping process: tests connection, scrapes pages,
@@ -426,8 +445,8 @@ class GALegislationScraper:
         legislation_data = asyncio.run(self.get_all_pages(max_pages))
 
         # Deduplicate by doc_number (pagination may create duplicates)
-        seen_doc_numbers = set()
-        unique_legislation = []
+        seen_doc_numbers: set[str] = set()
+        unique_legislation: list[dict[str, Any]] = []
         for bill in legislation_data:
             doc_num = bill.get("doc_number")
             if doc_num and doc_num not in seen_doc_numbers:
@@ -451,7 +470,7 @@ class GALegislationScraper:
 
         return legislation_data
 
-    async def get_all_pages(self, max_pages: int | None = None) -> list[dict]:
+    async def get_all_pages(self, max_pages: int | None = None) -> list[dict[str, Any]]:
         """Scrape all pages of legislation using JavaScript pagination clicks.
 
         Uses Playwright to click pagination buttons to navigate through all pages,
@@ -463,7 +482,7 @@ class GALegislationScraper:
         Returns:
             List[Dict]: List of legislation records.
         """
-        if not PLAYWRIGHT_AVAILABLE:
+        if not playwright_available:
             print("Error: Playwright is required to scrape this website (it uses JavaScript).")
             print("Install it with: pip install playwright")
             print("Then run: playwright install")
@@ -752,7 +771,8 @@ class GALegislationScraper:
 
                                             if highest_visible > page_num:
                                                 await page.click(
-                                                    f'a:text-is("{highest_visible}")', timeout=5000
+                                                    f'a:text-is("{highest_visible}")',
+                                                    timeout=5000,
                                                 )
                                                 clicked = True
                                                 print(

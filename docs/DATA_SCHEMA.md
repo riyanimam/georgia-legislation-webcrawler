@@ -2,9 +2,33 @@
 
 This document describes the JSON schema for bill data used throughout the project.
 
+## Data Source
+
+Data is fetched from the **LegiScan API** and enriched with AI-generated summaries via **Ollama**.
+
+## Root Object Schema
+
+The JSON file contains a wrapper object with metadata:
+
+```json
+{
+  "generated_at": "2025-02-03T06:00:00Z",
+  "source": "legiscan",
+  "total_bills": 150,
+  "bills": [...]
+}
+```
+
+| Field          | Type   | Description                         |
+| -------------- | ------ | ----------------------------------- |
+| `generated_at` | string | ISO 8601 timestamp of generation    |
+| `source`       | string | Data source identifier (`legiscan`) |
+| `total_bills`  | number | Total count of bills in the array   |
+| `bills`        | array  | Array of bill objects               |
+
 ## Bill Object Schema
 
-Each bill object represents a single piece of legislation with the following structure:
+Each bill object represents a single piece of legislation:
 
 ```json
 {
@@ -13,6 +37,9 @@ Each bill object represents a single piece of legislation with the following str
   "sponsors": "Rep. John Smith; Rep. Jane Doe",
   "committees": "Education Committee; Ways and Means Committee",
   "first_reader_summary": "This bill establishes comprehensive education standards...",
+  "ai_summary": "This bill would change how schools teach students by...",
+  "summary_model": "llama3.1",
+  "summary_generated_at": "2025-02-03T06:00:00Z",
   "status_history": [
     {
       "date": "2024-01-15",
@@ -23,21 +50,31 @@ Each bill object represents a single piece of legislation with the following str
       "status": "Assigned to Committee"
     }
   ],
-  "detail_url": "https://www.legis.ga.gov/legislation/69281"
+  "detail_url": "https://legiscan.com/GA/bill/HB1/2025"
 }
 ```
 
 ## Field Specifications
 
-| Field                  | Type   | Required | Description                                                                              |
-| ---------------------- | ------ | -------- | ---------------------------------------------------------------------------------------- |
-| `doc_number`           | string | ✓        | Bill identifier (e.g., "HB 1", "SB 50"). Format: `[HB\|SB] \d+`                          |
-| `caption`              | string | ✓        | Official bill title/caption. 1-1000 characters.                                          |
-| `sponsors`             | string | ✓        | Comma/semicolon-separated list of sponsor names.                                         |
-| `committees`           | string | ✓        | Semicolon-separated list of assigned committees.                                         |
-| `detail_url`           | string | ✓        | Full URL to bill details on Georgia General Assembly website. Must be valid HTTP(S) URL. |
-| `first_reader_summary` | string | ✗        | Full bill description. May be empty string if not available.                             |
-| `status_history`       | array  | ✗        | Array of status objects tracking bill progression. May be empty array.                   |
+### Required Fields
+
+| Field        | Type   | Description                                                     |
+| ------------ | ------ | --------------------------------------------------------------- |
+| `doc_number` | string | Bill identifier (e.g., "HB 1", "SB 50"). Format: `[HB\|SB] \d+` |
+| `caption`    | string | Official bill title/caption. 1-1000 characters.                 |
+| `sponsors`   | string | Semicolon-separated list of sponsor names.                      |
+| `committees` | string | Semicolon-separated list of assigned committees.                |
+| `detail_url` | string | Full URL to bill details. Must be valid HTTP(S) URL.            |
+
+### Optional Fields
+
+| Field                  | Type   | Description                                                      |
+| ---------------------- | ------ | ---------------------------------------------------------------- |
+| `first_reader_summary` | string | Official bill description from legislature. May be empty.        |
+| `ai_summary`           | string | AI-generated plain English summary. Added by Ollama pipeline.    |
+| `summary_model`        | string | AI model used for summary (e.g., `llama3.1`).                    |
+| `summary_generated_at` | string | ISO 8601 timestamp when AI summary was generated.                |
+| `status_history`       | array  | Array of status objects tracking bill progression. May be empty. |
 
 ## Status History Object
 
@@ -48,10 +85,31 @@ Each bill object represents a single piece of legislation with the following str
 }
 ```
 
-| Field    | Type   | Required | Description                                                       |
-| -------- | ------ | -------- | ----------------------------------------------------------------- |
-| `date`   | string | ✓        | Date in `YYYY-MM-DD` format                                       |
-| `status` | string | ✓        | Status text (e.g., "Introduced", "Passed Committee", "Voted Out") |
+| Field    | Type   | Required | Description                                          |
+| -------- | ------ | -------- | ---------------------------------------------------- |
+| `date`   | string | ✓        | Date in `YYYY-MM-DD` format                          |
+| `status` | string | ✓        | Status text (e.g., "Introduced", "Passed Committee") |
+
+## AI Summary Field
+
+The `ai_summary` field contains a plain English explanation of the bill:
+
+- **Purpose**: Make legislative text accessible to everyday citizens
+- **Generation**: Created by Ollama API using `llama3.1` model
+- **Content**: Explains what the bill does and who it affects
+- **Style**: Avoids legal jargon, uses simple language
+
+### Example AI Summary
+
+**Original (first_reader_summary)**:
+
+> "A BILL to be entitled an Act to amend Chapter 2 of Title 20 of the Official Code of Georgia
+> Annotated, relating to elementary and secondary education, so as to provide for..."
+
+**AI Summary**:
+
+> "This bill would require all Georgia public schools to offer free breakfast and lunch to students,
+> regardless of family income. It affects all K-12 public school students statewide."
 
 ## Validation Rules
 
@@ -71,7 +129,10 @@ The following validation is enforced:
   "caption": "Healthcare Access Expansion Act",
   "sponsors": "Rep. Michael Chen; Rep. Patricia Lopez",
   "committees": "Health and Human Services; Appropriations",
-  "first_reader_summary": "Expands healthcare access to underserved communities through Medicaid expansion and subsidized insurance programs.",
+  "first_reader_summary": "Expands healthcare access to underserved communities...",
+  "ai_summary": "This bill would expand Medicaid coverage to more Georgia residents...",
+  "summary_model": "llama3.1",
+  "summary_generated_at": "2025-02-03T06:00:00Z",
   "status_history": [
     {
       "date": "2024-01-10",
@@ -80,81 +141,55 @@ The following validation is enforced:
     {
       "date": "2024-02-05",
       "status": "Referred to Health Committee"
-    },
-    {
-      "date": "2024-02-20",
-      "status": "Committee Hearing Scheduled"
     }
   ],
-  "detail_url": "https://www.legis.ga.gov/legislation/69300"
-}
-```
-
-## Example Minimal Bill (Valid)
-
-```json
-{
-  "doc_number": "SB 10",
-  "caption": "Tax Credits for Small Businesses",
-  "sponsors": "Sen. Robert Wilson",
-  "committees": "Ways and Means",
-  "status_history": [],
-  "detail_url": "https://www.legis.ga.gov/legislation/69250"
+  "detail_url": "https://legiscan.com/GA/bill/HB42/2024"
 }
 ```
 
 ## Data Generation
 
-This schema is generated by `backend/scraper.py`:
+This data is generated by the backend pipeline:
 
-1. **Data Source**: Georgia General Assembly website (legis.ga.gov)
-2. **Extraction**: Playwright + BeautifulSoup parse HTML/JavaScript
-3. **Validation**: All bills validated against this schema before export
-4. **Output Format**: Valid JSON array of bill objects
+1. **Data Source**: LegiScan API (legiscan.com)
+2. **AI Enhancement**: Ollama API generates plain English summaries
+3. **Automation**: GitHub Actions runs daily at 6 AM UTC
+4. **Output**: JSON file deployed to GitHub Pages
 
 ## Frontend Expectations
 
-The frontend (`frontend/script.js`) expects:
+The frontend (`src/App.tsx`) expects:
 
-- Root level: JSON array `[ {...}, {...}, ... ]`
+- Root level: Object with `bills` array OR plain array for backwards compatibility
 - Each item: Valid bill object
 - No null/undefined values in required fields
-- Status history: Chronological order (oldest to newest) for "latest status" feature
+- AI summary: Optional, displayed when present
 
 ## Schema Versioning
 
-Current schema version: **1.0**
+Current schema version: **2.0**
 
-### Changes Planned
+### Changes from v1.0
 
-- [ ] Add legislative session information
-- [ ] Add vote data
-- [ ] Add amendment tracking
-- [ ] Add fiscal impact summaries
-
-## Updating This Schema
-
-If changes are made to bill data structure:
-
-1. Update this document
-2. Update validation in `backend/scraper.py`
-3. Update frontend to handle new fields
-4. Update test data examples
-5. Document backwards compatibility considerations
+- Added `ai_summary` field for plain English explanations
+- Added `summary_model` field to track AI model used
+- Added `summary_generated_at` timestamp
+- Changed data source from web scraping to LegiScan API
+- Added root wrapper object with metadata
 
 ## Troubleshooting
 
 **Issue**: "Expected an array of bills"
 
-- **Cause**: JSON root is not an array
-- **Solution**: Ensure JSON starts with `[` and ends with `]`
+- **Cause**: Old code expecting array root, new format uses object wrapper
+- **Solution**: Frontend handles both formats via `Array.isArray()` check
+
+**Issue**: "AI summary missing"
+
+- **Cause**: Summary generation may have failed or timed out
+- **Solution**: Check pipeline logs; bill displays without summary gracefully
 
 **Issue**: "Missing required field"
 
-- **Cause**: Bill object missing required field
-- **Solution**: Check all required fields are present and non-empty
-
-**Issue**: Frontend displays partial data
-
-- **Cause**: Optional field missing or malformed
-- **Solution**: Ensure optional fields are correct type (array, string)
+- **Cause**: Bill object missing required field from LegiScan
+- **Solution**: Check LegiScan API response; validate data before processing

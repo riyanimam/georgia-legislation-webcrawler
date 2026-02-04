@@ -2,7 +2,7 @@ export interface Translation {
   // Header
   headerTitle: string
   headerSubtitle: string
-  
+
   // Filters
   filtersTitle: string
   searchPlaceholder: string
@@ -21,7 +21,7 @@ export interface Translation {
   summaryPlaceholder: string
   sortBy: string
   resetFilters: string
-  
+
   // Sort options
   sortDateDesc: string
   sortDateAsc: string
@@ -29,14 +29,14 @@ export interface Translation {
   sortTitleDesc: string
   sortSponsorAsc: string
   sortSponsorDesc: string
-  
+
   // Status options
   statusIntroduced: string
   statusCommittee: string
   statusPassed: string
   statusSigned: string
   statusVetoed: string
-  
+
   // Bill Grid
   billsShowing: string
   billsOf: string
@@ -49,28 +49,35 @@ export interface Translation {
   pageText: string
   ofText: string
   goButton: string
-  
+
   // Bill Modal
   closeModal: string
   latestStatus: string
   history: string
   modalSummary: string
   tags: string
-  
+
+  // AI Summary
+  aiSummary: string
+  generateSummary: string
+  regenerate: string
+  generatingSummary: string
+  aiSummaryDescription: string
+
   // Favorites
   favoritesTitle: string
   noFavorites: string
   noFavoritesMessage: string
   exportAll: string
   exportJSON: string
-  
+
   // Stats
   totalBills: string
   activeBills: string
   favoritesBadge: string
   houseBills: string
   senateBills: string
-  
+
   // Common
   loading: string
   noBills: string
@@ -85,7 +92,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     // Header
     headerTitle: 'Georgia Legislation Tracker',
     headerSubtitle: 'Track and explore bills from the Georgia General Assembly',
-    
+
     // Filters
     filtersTitle: 'Filter Bills',
     searchPlaceholder: 'Search bill numbers or titles...',
@@ -104,7 +111,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     summaryPlaceholder: 'Search within bill summaries...',
     sortBy: 'Sort By',
     resetFilters: 'Reset Filters',
-    
+
     // Sort options
     sortDateDesc: 'Date (Newest First)',
     sortDateAsc: 'Date (Oldest First)',
@@ -112,14 +119,14 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     sortTitleDesc: 'Title (Z-A)',
     sortSponsorAsc: 'Sponsor (A-Z)',
     sortSponsorDesc: 'Sponsor (Z-A)',
-    
+
     // Status options
     statusIntroduced: 'Introduced',
     statusCommittee: 'In Committee',
     statusPassed: 'Passed',
     statusSigned: 'Signed into Law',
     statusVetoed: 'Vetoed',
-    
+
     // Bill Grid
     billsShowing: 'Showing',
     billsOf: 'of',
@@ -132,28 +139,35 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     pageText: 'Page',
     ofText: 'of',
     goButton: 'Go',
-    
+
     // Bill Modal
     closeModal: 'Close',
     latestStatus: 'Latest Status',
     history: 'History',
     modalSummary: 'Summary',
     tags: 'Tags',
-    
+
+    // AI Summary
+    aiSummary: 'AI Summary',
+    generateSummary: 'Generate Summary',
+    regenerate: 'Regenerate',
+    generatingSummary: 'Generating plain English summary...',
+    aiSummaryDescription: 'Get a plain English explanation of this bill using AI.',
+
     // Favorites
     favoritesTitle: 'Favorites',
     noFavorites: 'No favorites yet',
     noFavoritesMessage: 'Click the heart icon on any bill to add it to your favorites',
     exportAll: 'Export All',
     exportJSON: 'Export (JSON)',
-    
+
     // Stats
     totalBills: 'Total Bills',
     activeBills: 'Active Bills',
     favoritesBadge: 'Favorites',
     houseBills: 'House Bills',
     senateBills: 'Senate Bills',
-    
+
     // Common
     loading: 'Loading...',
     noBills: 'No bills found',
@@ -162,12 +176,12 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     lightMode: 'Toggle light mode',
     language: 'Language',
   },
-  
+
   es: {
     // Header
     headerTitle: 'Rastreador de Legislación de Georgia',
     headerSubtitle: 'Rastree y explore proyectos de ley de la Asamblea General de Georgia',
-    
+
     // Filters
     filtersTitle: 'Filtrar Proyectos',
     searchPlaceholder: 'Buscar números o títulos de proyectos...',
@@ -186,7 +200,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     summaryPlaceholder: 'Buscar en resúmenes de proyectos...',
     sortBy: 'Ordenar Por',
     resetFilters: 'Restablecer Filtros',
-    
+
     // Sort options
     sortDateDesc: 'Fecha (Más Reciente Primero)',
     sortDateAsc: 'Fecha (Más Antiguo Primero)',
@@ -194,14 +208,14 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     sortTitleDesc: 'Título (Z-A)',
     sortSponsorAsc: 'Patrocinador (A-Z)',
     sortSponsorDesc: 'Patrocinador (Z-A)',
-    
+
     // Status options
     statusIntroduced: 'Presentado',
     statusCommittee: 'En Comité',
     statusPassed: 'Aprobado',
     statusSigned: 'Firmado como Ley',
     statusVetoed: 'Vetado',
-    
+
     // Bill Grid
     billsShowing: 'Mostrando',
     billsOf: 'de',
@@ -214,28 +228,35 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     pageText: 'Página',
     ofText: 'de',
     goButton: 'Ir',
-    
+
     // Bill Modal
     closeModal: 'Cerrar',
     latestStatus: 'Estado Actual',
     history: 'Historial',
     modalSummary: 'Resumen',
     tags: 'Etiquetas',
-    
+
+    // AI Summary
+    aiSummary: 'Resumen IA',
+    generateSummary: 'Generar Resumen',
+    regenerate: 'Regenerar',
+    generatingSummary: 'Generando resumen en lenguaje sencillo...',
+    aiSummaryDescription: 'Obtén una explicación en lenguaje sencillo de este proyecto de ley usando IA.',
+
     // Favorites
     favoritesTitle: 'Favoritos',
     noFavorites: 'No hay favoritos aún',
     noFavoritesMessage: 'Haga clic en el ícono del corazón en cualquier proyecto para agregarlo a sus favoritos',
     exportAll: 'Exportar Todo',
     exportJSON: 'Exportar (JSON)',
-    
+
     // Stats
     totalBills: 'Total de Proyectos',
     activeBills: 'Proyectos Activos',
     favoritesBadge: 'Favoritos',
     houseBills: 'Proyectos de la Cámara',
     senateBills: 'Proyectos del Senado',
-    
+
     // Common
     loading: 'Cargando...',
     noBills: 'No se encontraron proyectos',
@@ -244,12 +265,12 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     lightMode: 'Alternar modo claro',
     language: 'Idioma',
   },
-  
+
   fr: {
     // Header
     headerTitle: 'Suivi de la Législation de Géorgie',
     headerSubtitle: 'Suivez et explorez les projets de loi de l\'Assemblée générale de Géorgie',
-    
+
     // Filters
     filtersTitle: 'Filtrer les Projets',
     searchPlaceholder: 'Rechercher des numéros ou titres de projets...',
@@ -268,7 +289,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     summaryPlaceholder: 'Rechercher dans les résumés de projets...',
     sortBy: 'Trier Par',
     resetFilters: 'Réinitialiser les Filtres',
-    
+
     // Sort options
     sortDateDesc: 'Date (Plus Récent d\'Abord)',
     sortDateAsc: 'Date (Plus Ancien d\'Abord)',
@@ -276,14 +297,14 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     sortTitleDesc: 'Titre (Z-A)',
     sortSponsorAsc: 'Parrain (A-Z)',
     sortSponsorDesc: 'Parrain (Z-A)',
-    
+
     // Status options
     statusIntroduced: 'Introduit',
     statusCommittee: 'En Comité',
     statusPassed: 'Adopté',
     statusSigned: 'Signé en Loi',
     statusVetoed: 'Opposé son Veto',
-    
+
     // Bill Grid
     billsShowing: 'Affichage',
     billsOf: 'de',
@@ -296,28 +317,35 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     pageText: 'Page',
     ofText: 'de',
     goButton: 'Aller',
-    
+
     // Bill Modal
     closeModal: 'Fermer',
     latestStatus: 'Statut Actuel',
     history: 'Historique',
     modalSummary: 'Résumé',
     tags: 'Étiquettes',
-    
+
+    // AI Summary
+    aiSummary: 'Résumé IA',
+    generateSummary: 'Générer le Résumé',
+    regenerate: 'Régénérer',
+    generatingSummary: 'Génération du résumé en langage simple...',
+    aiSummaryDescription: 'Obtenez une explication en langage simple de ce projet de loi grâce à l\'IA.',
+
     // Favorites
     favoritesTitle: 'Favoris',
     noFavorites: 'Pas encore de favoris',
     noFavoritesMessage: 'Cliquez sur l\'icône du cœur sur n\'importe quel projet pour l\'ajouter à vos favoris',
     exportAll: 'Tout Exporter',
     exportJSON: 'Exporter (JSON)',
-    
+
     // Stats
     totalBills: 'Total des Projets',
     activeBills: 'Projets Actifs',
     favoritesBadge: 'Favoris',
     houseBills: 'Projets de la Chambre',
     senateBills: 'Projets du Sénat',
-    
+
     // Common
     loading: 'Chargement...',
     noBills: 'Aucun projet trouvé',
@@ -326,12 +354,12 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     lightMode: 'Basculer en mode clair',
     language: 'Langue',
   },
-  
+
   zh: {
     // Header
     headerTitle: '佐治亚州立法追踪器',
     headerSubtitle: '追踪和探索佐治亚州议会的法案',
-    
+
     // Filters
     filtersTitle: '筛选法案',
     searchPlaceholder: '搜索法案编号或标题...',
@@ -350,7 +378,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     summaryPlaceholder: '在法案摘要中搜索...',
     sortBy: '排序方式',
     resetFilters: '重置筛选',
-    
+
     // Sort options
     sortDateDesc: '日期（最新优先）',
     sortDateAsc: '日期（最旧优先）',
@@ -358,14 +386,14 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     sortTitleDesc: '标题（Z-A）',
     sortSponsorAsc: '提案人（A-Z）',
     sortSponsorDesc: '提案人（Z-A）',
-    
+
     // Status options
     statusIntroduced: '已提出',
     statusCommittee: '委员会审议中',
     statusPassed: '已通过',
     statusSigned: '已签署成为法律',
     statusVetoed: '已否决',
-    
+
     // Bill Grid
     billsShowing: '显示',
     billsOf: '共',
@@ -378,28 +406,35 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     pageText: '页',
     ofText: '共',
     goButton: '前往',
-    
+
     // Bill Modal
     closeModal: '关闭',
     latestStatus: '最新状态',
     history: '历史记录',
     modalSummary: '摘要',
     tags: '标签',
-    
+
+    // AI Summary
+    aiSummary: 'AI 摘要',
+    generateSummary: '生成摘要',
+    regenerate: '重新生成',
+    generatingSummary: '正在生成通俗易懂的摘要...',
+    aiSummaryDescription: '使用 AI 获取这项法案的通俗解释。',
+
     // Favorites
     favoritesTitle: '收藏',
     noFavorites: '暂无收藏',
     noFavoritesMessage: '点击任何法案上的心形图标将其添加到收藏',
     exportAll: '全部导出',
     exportJSON: '导出（JSON）',
-    
+
     // Stats
     totalBills: '法案总数',
     activeBills: '活跃法案',
     favoritesBadge: '收藏',
     houseBills: '众议院法案',
     senateBills: '参议院法案',
-    
+
     // Common
     loading: '加载中...',
     noBills: '未找到法案',
@@ -408,12 +443,12 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     lightMode: '切换亮色模式',
     language: '语言',
   },
-  
+
   ja: {
     // Header
     headerTitle: 'ジョージア州法案追跡システム',
     headerSubtitle: 'ジョージア州議会の法案を追跡・探索',
-    
+
     // Filters
     filtersTitle: '法案を絞り込む',
     searchPlaceholder: '法案番号またはタイトルを検索...',
@@ -432,7 +467,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     summaryPlaceholder: '法案の要約内を検索...',
     sortBy: '並び替え',
     resetFilters: 'フィルタをリセット',
-    
+
     // Sort options
     sortDateDesc: '日付（新しい順）',
     sortDateAsc: '日付（古い順）',
@@ -440,14 +475,14 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     sortTitleDesc: 'タイトル（Z-A）',
     sortSponsorAsc: '提案者（A-Z）',
     sortSponsorDesc: '提案者（Z-A）',
-    
+
     // Status options
     statusIntroduced: '提出済み',
     statusCommittee: '委員会審議中',
     statusPassed: '可決',
     statusSigned: '法律として署名済み',
     statusVetoed: '拒否',
-    
+
     // Bill Grid
     billsShowing: '表示中',
     billsOf: '件中',
@@ -460,28 +495,35 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     pageText: 'ページ',
     ofText: '/',
     goButton: '移動',
-    
+
     // Bill Modal
     closeModal: '閉じる',
     latestStatus: '最新ステータス',
     history: '履歴',
     modalSummary: '要約',
     tags: 'タグ',
-    
+
+    // AI Summary
+    aiSummary: 'AI 要約',
+    generateSummary: '要約を生成',
+    regenerate: '再生成',
+    generatingSummary: 'わかりやすい要約を生成中...',
+    aiSummaryDescription: 'AIを使ってこの法案の分かりやすい説明を取得します。',
+
     // Favorites
     favoritesTitle: 'お気に入り',
     noFavorites: 'お気に入りはまだありません',
     noFavoritesMessage: 'ハートアイコンをクリックして法案をお気に入りに追加できます',
     exportAll: 'すべてエクスポート',
     exportJSON: 'エクスポート（JSON）',
-    
+
     // Stats
     totalBills: '法案総数',
     activeBills: 'アクティブな法案',
     favoritesBadge: 'お気に入り',
     houseBills: '下院法案',
     senateBills: '上院法案',
-    
+
     // Common
     loading: '読み込み中...',
     noBills: '法案が見つかりません',
@@ -490,12 +532,12 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     lightMode: 'ライトモードに切り替え',
     language: '言語',
   },
-  
+
   ko: {
     // Header
     headerTitle: '조지아주 법안 추적기',
     headerSubtitle: '조지아 주의회 법안 추적 및 탐색',
-    
+
     // Filters
     filtersTitle: '법안 필터링',
     searchPlaceholder: '법안 번호 또는 제목 검색...',
@@ -514,7 +556,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     summaryPlaceholder: '법안 요약 내 검색...',
     sortBy: '정렬 기준',
     resetFilters: '필터 초기화',
-    
+
     // Sort options
     sortDateDesc: '날짜 (최신순)',
     sortDateAsc: '날짜 (오래된순)',
@@ -522,14 +564,14 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     sortTitleDesc: '제목 (Z-A)',
     sortSponsorAsc: '발의자 (A-Z)',
     sortSponsorDesc: '발의자 (Z-A)',
-    
+
     // Status options
     statusIntroduced: '발의됨',
     statusCommittee: '위원회 심사 중',
     statusPassed: '통과됨',
     statusSigned: '법률로 서명됨',
     statusVetoed: '거부됨',
-    
+
     // Bill Grid
     billsShowing: '표시 중',
     billsOf: '중',
@@ -542,28 +584,35 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     pageText: '페이지',
     ofText: '/',
     goButton: '이동',
-    
+
     // Bill Modal
     closeModal: '닫기',
     latestStatus: '최신 상태',
     history: '기록',
     modalSummary: '요약',
     tags: '태그',
-    
+
+    // AI Summary
+    aiSummary: 'AI 요약',
+    generateSummary: '요약 생성',
+    regenerate: '재생성',
+    generatingSummary: '알기 쉬운 요약을 생성 중...',
+    aiSummaryDescription: 'AI를 사용하여 이 법안의 쉬운 설명을 받아보세요.',
+
     // Favorites
     favoritesTitle: '즐겨찾기',
     noFavorites: '아직 즐겨찾기가 없습니다',
     noFavoritesMessage: '하트 아이콘을 클릭하여 법안을 즐겨찾기에 추가하세요',
     exportAll: '모두 내보내기',
     exportJSON: '내보내기 (JSON)',
-    
+
     // Stats
     totalBills: '총 법안 수',
     activeBills: '활성 법안',
     favoritesBadge: '즐겨찾기',
     houseBills: '하원 법안',
     senateBills: '상원 법안',
-    
+
     // Common
     loading: '로딩 중...',
     noBills: '법안을 찾을 수 없습니다',
@@ -572,12 +621,12 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     lightMode: '라이트 모드 전환',
     language: '언어',
   },
-  
+
   hi: {
     // Header
     headerTitle: 'जॉर्जिया विधायी ट्रैकर',
     headerSubtitle: 'जॉर्जिया महासभा के बिलों को ट्रैक और एक्सप्लोर करें',
-    
+
     // Filters
     filtersTitle: 'बिल फ़िल्टर करें',
     searchPlaceholder: 'बिल नंबर या शीर्षक खोजें...',
@@ -596,7 +645,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     summaryPlaceholder: 'बिल सारांश में खोजें...',
     sortBy: 'इसके अनुसार क्रमबद्ध करें',
     resetFilters: 'फ़िल्टर रीसेट करें',
-    
+
     // Sort options
     sortDateDesc: 'तिथि (नवीनतम पहले)',
     sortDateAsc: 'तिथि (पुरानी पहले)',
@@ -604,14 +653,14 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     sortTitleDesc: 'शीर्षक (Z-A)',
     sortSponsorAsc: 'प्रायोजक (A-Z)',
     sortSponsorDesc: 'प्रायोजक (Z-A)',
-    
+
     // Status options
     statusIntroduced: 'प्रस्तुत',
     statusCommittee: 'समिति में',
     statusPassed: 'पारित',
     statusSigned: 'कानून में हस्ताक्षरित',
     statusVetoed: 'वीटो किया गया',
-    
+
     // Bill Grid
     billsShowing: 'दिखा रहे हैं',
     billsOf: 'में से',
@@ -624,28 +673,35 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     pageText: 'पृष्ठ',
     ofText: 'का',
     goButton: 'जाएं',
-    
+
     // Bill Modal
     closeModal: 'बंद करें',
     latestStatus: 'नवीनतम स्थिति',
     history: 'इतिहास',
     modalSummary: 'सारांश',
     tags: 'टैग',
-    
+
+    // AI Summary
+    aiSummary: 'AI सारांश',
+    generateSummary: 'सारांश उत्पन्न करें',
+    regenerate: 'पुनः उत्पन्न करें',
+    generatingSummary: 'सरल भाषा में सारांश बना रहे हैं...',
+    aiSummaryDescription: 'AI का उपयोग करके इस बिल की सरल व्याख्या प्राप्त करें।',
+
     // Favorites
     favoritesTitle: 'पसंदीदा',
     noFavorites: 'अभी तक कोई पसंदीदा नहीं',
     noFavoritesMessage: 'किसी भी बिल को पसंदीदा में जोड़ने के लिए दिल आइकन पर क्लिक करें',
     exportAll: 'सभी निर्यात करें',
     exportJSON: 'निर्यात (JSON)',
-    
+
     // Stats
     totalBills: 'कुल बिल',
     activeBills: 'सक्रिय बिल',
     favoritesBadge: 'पसंदीदा',
     houseBills: 'लोकसभा बिल',
     senateBills: 'सीनेट बिल',
-    
+
     // Common
     loading: 'लोड हो रहा है...',
     noBills: 'कोई बिल नहीं मिला',
@@ -654,12 +710,12 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     lightMode: 'लाइट मोड टॉगल करें',
     language: 'भाषा',
   },
-  
+
   ur: {
     // Header
     headerTitle: 'جارجیا قانون سازی ٹریکر',
     headerSubtitle: 'جارجیا جنرل اسمبلی کے بلوں کو ٹریک اور دریافت کریں',
-    
+
     // Filters
     filtersTitle: 'بل فلٹر کریں',
     searchPlaceholder: 'بل نمبر یا عنوان تلاش کریں...',
@@ -678,7 +734,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     summaryPlaceholder: 'بل کے خلاصے میں تلاش کریں...',
     sortBy: 'ترتیب دیں',
     resetFilters: 'فلٹرز دوبارہ ترتیب دیں',
-    
+
     // Sort options
     sortDateDesc: 'تاریخ (تازہ ترین پہلے)',
     sortDateAsc: 'تاریخ (پرانے پہلے)',
@@ -686,14 +742,14 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     sortTitleDesc: 'عنوان (Z-A)',
     sortSponsorAsc: 'سپانسر (A-Z)',
     sortSponsorDesc: 'سپانسر (Z-A)',
-    
+
     // Status options
     statusIntroduced: 'متعارف کرایا گیا',
     statusCommittee: 'کمیٹی میں',
     statusPassed: 'منظور',
     statusSigned: 'قانون میں دستخط شدہ',
     statusVetoed: 'ویٹو کیا گیا',
-    
+
     // Bill Grid
     billsShowing: 'دکھا رہے ہیں',
     billsOf: 'میں سے',
@@ -706,28 +762,35 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     pageText: 'صفحہ',
     ofText: 'کا',
     goButton: 'جائیں',
-    
+
     // Bill Modal
     closeModal: 'بند کریں',
     latestStatus: 'تازہ ترین حیثیت',
     history: 'تاریخ',
     modalSummary: 'خلاصہ',
     tags: 'ٹیگز',
-    
+
+    // AI Summary
+    aiSummary: 'AI خلاصہ',
+    generateSummary: 'خلاصہ بنائیں',
+    regenerate: 'دوبارہ بنائیں',
+    generatingSummary: 'آسان زبان میں خلاصہ بنا رہے ہیں...',
+    aiSummaryDescription: 'AI کا استعمال کرتے ہوئے اس بل کی آسان وضاحت حاصل کریں۔',
+
     // Favorites
     favoritesTitle: 'پسندیدہ',
     noFavorites: 'ابھی تک کوئی پسندیدہ نہیں',
     noFavoritesMessage: 'کسی بھی بل کو پسندیدہ میں شامل کرنے کے لیے دل کے آئیکن پر کلک کریں',
     exportAll: 'تمام برآمد کریں',
     exportJSON: 'برآمد (JSON)',
-    
+
     // Stats
     totalBills: 'کل بل',
     activeBills: 'فعال بل',
     favoritesBadge: 'پسندیدہ',
     houseBills: 'ایوان کے بل',
     senateBills: 'سینیٹ کے بل',
-    
+
     // Common
     loading: 'لوڈ ہو رہا ہے...',
     noBills: 'کوئی بل نہیں ملا',
@@ -736,12 +799,12 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     lightMode: 'لائٹ موڈ ٹوگل کریں',
     language: 'زبان',
   },
-  
+
   ar: {
     // Header
     headerTitle: 'متتبع تشريعات جورجيا',
     headerSubtitle: 'تتبع واستكشاف مشاريع القوانين من الجمعية العامة لجورجيا',
-    
+
     // Filters
     filtersTitle: 'تصفية مشاريع القوانين',
     searchPlaceholder: 'البحث عن أرقام أو عناوين مشاريع القوانين...',
@@ -760,7 +823,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     summaryPlaceholder: 'البحث في ملخصات مشاريع القوانين...',
     sortBy: 'ترتيب حسب',
     resetFilters: 'إعادة تعيين المرشحات',
-    
+
     // Sort options
     sortDateDesc: 'التاريخ (الأحدث أولاً)',
     sortDateAsc: 'التاريخ (الأقدم أولاً)',
@@ -768,14 +831,14 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     sortTitleDesc: 'العنوان (ي-أ)',
     sortSponsorAsc: 'الراعي (أ-ي)',
     sortSponsorDesc: 'الراعي (ي-أ)',
-    
+
     // Status options
     statusIntroduced: 'مقدم',
     statusCommittee: 'في اللجنة',
     statusPassed: 'تم التمرير',
     statusSigned: 'موقع كقانون',
     statusVetoed: 'تم الاعتراض',
-    
+
     // Bill Grid
     billsShowing: 'عرض',
     billsOf: 'من',
@@ -788,28 +851,35 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     pageText: 'صفحة',
     ofText: 'من',
     goButton: 'انتقال',
-    
+
     // Bill Modal
     closeModal: 'إغلاق',
     latestStatus: 'أحدث حالة',
     history: 'التاريخ',
     modalSummary: 'الملخص',
     tags: 'الوسوم',
-    
+
+    // AI Summary
+    aiSummary: 'ملخص الذكاء الاصطناعي',
+    generateSummary: 'إنشاء الملخص',
+    regenerate: 'إعادة الإنشاء',
+    generatingSummary: 'جاري إنشاء ملخص بلغة بسيطة...',
+    aiSummaryDescription: 'احصل على شرح بسيط لهذا القانون باستخدام الذكاء الاصطناعي.',
+
     // Favorites
     favoritesTitle: 'المفضلة',
     noFavorites: 'لا توجد مفضلة بعد',
     noFavoritesMessage: 'انقر على رمز القلب في أي مشروع قانون لإضافته إلى المفضلة',
     exportAll: 'تصدير الكل',
     exportJSON: 'تصدير (JSON)',
-    
+
     // Stats
     totalBills: 'إجمالي مشاريع القوانين',
     activeBills: 'مشاريع القوانين النشطة',
     favoritesBadge: 'المفضلة',
     houseBills: 'مشاريع قوانين مجلس النواب',
     senateBills: 'مشاريع قوانين مجلس الشيوخ',
-    
+
     // Common
     loading: 'جاري التحميل...',
     noBills: 'لم يتم العثور على مشاريع قوانين',
@@ -818,12 +888,12 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     lightMode: 'تبديل الوضع الفاتح',
     language: 'اللغة',
   },
-  
+
   vi: {
     // Header
     headerTitle: 'Theo Dõi Luật Georgia',
     headerSubtitle: 'Theo dõi và khám phá các dự luật từ Đại hội đồng Georgia',
-    
+
     // Filters
     filtersTitle: 'Lọc Dự Luật',
     searchPlaceholder: 'Tìm kiếm số hoặc tiêu đề dự luật...',
@@ -842,7 +912,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     summaryPlaceholder: 'Tìm trong tóm tắt dự luật...',
     sortBy: 'Sắp Xếp Theo',
     resetFilters: 'Đặt Lại Bộ Lọc',
-    
+
     // Sort options
     sortDateDesc: 'Ngày (Mới Nhất Trước)',
     sortDateAsc: 'Ngày (Cũ Nhất Trước)',
@@ -850,14 +920,14 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     sortTitleDesc: 'Tiêu Đề (Z-A)',
     sortSponsorAsc: 'Nhà Tài Trợ (A-Z)',
     sortSponsorDesc: 'Nhà Tài Trợ (Z-A)',
-    
+
     // Status options
     statusIntroduced: 'Đã Giới Thiệu',
     statusCommittee: 'Trong Ủy Ban',
     statusPassed: 'Đã Thông Qua',
     statusSigned: 'Đã Ký Thành Luật',
     statusVetoed: 'Đã Phủ Quyết',
-    
+
     // Bill Grid
     billsShowing: 'Hiển Thị',
     billsOf: 'của',
@@ -870,28 +940,35 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     pageText: 'Trang',
     ofText: 'của',
     goButton: 'Đi',
-    
+
     // Bill Modal
     closeModal: 'Đóng',
     latestStatus: 'Trạng Thái Mới Nhất',
     history: 'Lịch Sử',
     modalSummary: 'Tóm Tắt',
     tags: 'Thẻ',
-    
+
+    // AI Summary
+    aiSummary: 'Tóm Tắt AI',
+    generateSummary: 'Tạo Tóm Tắt',
+    regenerate: 'Tạo Lại',
+    generatingSummary: 'Đang tạo tóm tắt dễ hiểu...',
+    aiSummaryDescription: 'Nhận giải thích dễ hiểu về dự luật này bằng AI.',
+
     // Favorites
     favoritesTitle: 'Yêu Thích',
     noFavorites: 'Chưa có yêu thích',
     noFavoritesMessage: 'Nhấp vào biểu tượng trái tim trên bất kỳ dự luật nào để thêm vào yêu thích',
     exportAll: 'Xuất Tất Cả',
     exportJSON: 'Xuất (JSON)',
-    
+
     // Stats
     totalBills: 'Tổng Số Dự Luật',
     activeBills: 'Dự Luật Đang Hoạt Động',
     favoritesBadge: 'Yêu Thích',
     houseBills: 'Dự Luật Hạ Viện',
     senateBills: 'Dự Luật Thượng Viện',
-    
+
     // Common
     loading: 'Đang tải...',
     noBills: 'Không tìm thấy dự luật',
@@ -900,12 +977,12 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     lightMode: 'Chuyển chế độ sáng',
     language: 'Ngôn Ngữ',
   },
-  
+
   tl: {
     // Header
     headerTitle: 'Georgia Legislation Tracker',
     headerSubtitle: 'Subaybayan at tuklasin ang mga panukalang batas mula sa Georgia General Assembly',
-    
+
     // Filters
     filtersTitle: 'I-filter ang mga Panukalang Batas',
     searchPlaceholder: 'Maghanap ng numero o pamagat ng panukalang batas...',
@@ -924,7 +1001,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     summaryPlaceholder: 'Maghanap sa loob ng mga buod ng panukalang batas...',
     sortBy: 'Ayusin Ayon sa',
     resetFilters: 'I-reset ang mga Filter',
-    
+
     // Sort options
     sortDateDesc: 'Petsa (Pinakabago Una)',
     sortDateAsc: 'Petsa (Pinakadati Una)',
@@ -932,14 +1009,14 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     sortTitleDesc: 'Pamagat (Z-A)',
     sortSponsorAsc: 'Sponsor (A-Z)',
     sortSponsorDesc: 'Sponsor (Z-A)',
-    
+
     // Status options
     statusIntroduced: 'Ipinakilala',
     statusCommittee: 'Sa Komite',
     statusPassed: 'Naipasa',
     statusSigned: 'Nilagdaan Bilang Batas',
     statusVetoed: 'Na-veto',
-    
+
     // Bill Grid
     billsShowing: 'Ipinapakita',
     billsOf: 'ng',
@@ -952,28 +1029,35 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     pageText: 'Pahina',
     ofText: 'ng',
     goButton: 'Pumunta',
-    
+
     // Bill Modal
     closeModal: 'Isara',
     latestStatus: 'Pinakabagong Katayuan',
     history: 'Kasaysayan',
     modalSummary: 'Buod',
     tags: 'Mga Tag',
-    
+
+    // AI Summary
+    aiSummary: 'Buod ng AI',
+    generateSummary: 'Gumawa ng Buod',
+    regenerate: 'Gumawa Muli',
+    generatingSummary: 'Gumagawa ng madaling maintindihang buod...',
+    aiSummaryDescription: 'Kumuha ng madaling maintindihang paliwanag ng batas na ito gamit ang AI.',
+
     // Favorites
     favoritesTitle: 'Mga Paborito',
     noFavorites: 'Walang mga paborito pa',
     noFavoritesMessage: 'I-click ang icon ng puso sa anumang panukalang batas upang idagdag ito sa iyong mga paborito',
     exportAll: 'I-export Lahat',
     exportJSON: 'I-export (JSON)',
-    
+
     // Stats
     totalBills: 'Kabuuang Panukalang Batas',
     activeBills: 'Aktibong Panukalang Batas',
     favoritesBadge: 'Mga Paborito',
     houseBills: 'Panukalang Batas ng Kapulungan',
     senateBills: 'Panukalang Batas ng Senado',
-    
+
     // Common
     loading: 'Naglo-load...',
     noBills: 'Walang nahanap na panukalang batas',
@@ -982,12 +1066,12 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     lightMode: 'I-toggle ang light mode',
     language: 'Wika',
   },
-  
+
   ru: {
     // Header
     headerTitle: 'Трекер законодательства Джорджии',
     headerSubtitle: 'Отслеживайте и изучайте законопроекты Генеральной Ассамблеи Джорджии',
-    
+
     // Filters
     filtersTitle: 'Фильтр законопроектов',
     searchPlaceholder: 'Поиск по номеру или названию законопроекта...',
@@ -1006,7 +1090,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     summaryPlaceholder: 'Поиск в резюме законопроектов...',
     sortBy: 'Сортировать по',
     resetFilters: 'Сбросить фильтры',
-    
+
     // Sort options
     sortDateDesc: 'Дата (сначала новые)',
     sortDateAsc: 'Дата (сначала старые)',
@@ -1014,14 +1098,14 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     sortTitleDesc: 'Название (Я-А)',
     sortSponsorAsc: 'Спонсор (А-Я)',
     sortSponsorDesc: 'Спонсор (Я-А)',
-    
+
     // Status options
     statusIntroduced: 'Внесён',
     statusCommittee: 'В комитете',
     statusPassed: 'Принят',
     statusSigned: 'Подписан как закон',
     statusVetoed: 'Наложено вето',
-    
+
     // Bill Grid
     billsShowing: 'Показано',
     billsOf: 'из',
@@ -1034,28 +1118,35 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     pageText: 'Страница',
     ofText: 'из',
     goButton: 'Перейти',
-    
+
     // Bill Modal
     closeModal: 'Закрыть',
     latestStatus: 'Последний статус',
     history: 'История',
     modalSummary: 'Резюме',
     tags: 'Теги',
-    
+
+    // AI Summary
+    aiSummary: 'ИИ Резюме',
+    generateSummary: 'Создать резюме',
+    regenerate: 'Создать заново',
+    generatingSummary: 'Создаём понятное резюме...',
+    aiSummaryDescription: 'Получите понятное объяснение этого законопроекта с помощью ИИ.',
+
     // Favorites
     favoritesTitle: 'Избранное',
     noFavorites: 'Пока нет избранного',
     noFavoritesMessage: 'Нажмите на значок сердца на любом законопроекте, чтобы добавить его в избранное',
     exportAll: 'Экспортировать всё',
     exportJSON: 'Экспорт (JSON)',
-    
+
     // Stats
     totalBills: 'Всего законопроектов',
     activeBills: 'Активные законопроекты',
     favoritesBadge: 'Избранное',
     houseBills: 'Законопроекты Палаты представителей',
     senateBills: 'Законопроекты Сената',
-    
+
     // Common
     loading: 'Загрузка...',
     noBills: 'Законопроекты не найдены',
@@ -1064,12 +1155,12 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     lightMode: 'Переключить светлый режим',
     language: 'Язык',
   },
-  
+
   pt: {
     // Header
     headerTitle: 'Rastreador de Legislação da Geórgia',
     headerSubtitle: 'Rastreie e explore projetos de lei da Assembleia Geral da Geórgia',
-    
+
     // Filters
     filtersTitle: 'Filtrar Projetos',
     searchPlaceholder: 'Pesquisar números ou títulos de projetos...',
@@ -1088,7 +1179,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     summaryPlaceholder: 'Pesquisar em resumos de projetos...',
     sortBy: 'Ordenar Por',
     resetFilters: 'Redefinir Filtros',
-    
+
     // Sort options
     sortDateDesc: 'Data (Mais Recente Primeiro)',
     sortDateAsc: 'Data (Mais Antigo Primeiro)',
@@ -1096,14 +1187,14 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     sortTitleDesc: 'Título (Z-A)',
     sortSponsorAsc: 'Patrocinador (A-Z)',
     sortSponsorDesc: 'Patrocinador (Z-A)',
-    
+
     // Status options
     statusIntroduced: 'Apresentado',
     statusCommittee: 'Em Comitê',
     statusPassed: 'Aprovado',
     statusSigned: 'Assinado como Lei',
     statusVetoed: 'Vetado',
-    
+
     // Bill Grid
     billsShowing: 'Mostrando',
     billsOf: 'de',
@@ -1116,28 +1207,35 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     pageText: 'Página',
     ofText: 'de',
     goButton: 'Ir',
-    
+
     // Bill Modal
     closeModal: 'Fechar',
     latestStatus: 'Status Mais Recente',
     history: 'Histórico',
     modalSummary: 'Resumo',
     tags: 'Etiquetas',
-    
+
+    // AI Summary
+    aiSummary: 'Resumo IA',
+    generateSummary: 'Gerar Resumo',
+    regenerate: 'Regenerar',
+    generatingSummary: 'Gerando resumo em linguagem simples...',
+    aiSummaryDescription: 'Obtenha uma explicação simples deste projeto de lei usando IA.',
+
     // Favorites
     favoritesTitle: 'Favoritos',
     noFavorites: 'Ainda não há favoritos',
     noFavoritesMessage: 'Clique no ícone do coração em qualquer projeto para adicioná-lo aos seus favoritos',
     exportAll: 'Exportar Tudo',
     exportJSON: 'Exportar (JSON)',
-    
+
     // Stats
     totalBills: 'Total de Projetos',
     activeBills: 'Projetos Ativos',
     favoritesBadge: 'Favoritos',
     houseBills: 'Projetos da Câmara',
     senateBills: 'Projetos do Senado',
-    
+
     // Common
     loading: 'Carregando...',
     noBills: 'Nenhum projeto encontrado',
@@ -1146,12 +1244,12 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     lightMode: 'Alternar modo claro',
     language: 'Idioma',
   },
-  
+
   de: {
     // Header
     headerTitle: 'Georgia Gesetzgebungs-Tracker',
     headerSubtitle: 'Verfolgen und erkunden Sie Gesetzesentwürfe der Generalversammlung von Georgia',
-    
+
     // Filters
     filtersTitle: 'Gesetzesentwürfe filtern',
     searchPlaceholder: 'Gesetznummer oder Titel suchen...',
@@ -1170,7 +1268,7 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     summaryPlaceholder: 'In Gesetzesentwürfen suchen...',
     sortBy: 'Sortieren nach',
     resetFilters: 'Filter zurücksetzen',
-    
+
     // Sort options
     sortDateDesc: 'Datum (Neueste zuerst)',
     sortDateAsc: 'Datum (Älteste zuerst)',
@@ -1178,14 +1276,14 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     sortTitleDesc: 'Titel (Z-A)',
     sortSponsorAsc: 'Sponsor (A-Z)',
     sortSponsorDesc: 'Sponsor (Z-A)',
-    
+
     // Status options
     statusIntroduced: 'Eingebracht',
     statusCommittee: 'Im Ausschuss',
     statusPassed: 'Verabschiedet',
     statusSigned: 'Als Gesetz unterzeichnet',
     statusVetoed: 'Veto eingelegt',
-    
+
     // Bill Grid
     billsShowing: 'Zeige',
     billsOf: 'von',
@@ -1198,28 +1296,35 @@ export const translations: Record<'en' | 'es' | 'fr' | 'zh' | 'ja' | 'ko' | 'hi'
     pageText: 'Seite',
     ofText: 'von',
     goButton: 'Los',
-    
+
     // Bill Modal
     closeModal: 'Schließen',
     latestStatus: 'Neuester Status',
     history: 'Verlauf',
     modalSummary: 'Zusammenfassung',
     tags: 'Tags',
-    
+
+    // AI Summary
+    aiSummary: 'KI-Zusammenfassung',
+    generateSummary: 'Zusammenfassung erstellen',
+    regenerate: 'Neu erstellen',
+    generatingSummary: 'Erstelle verständliche Zusammenfassung...',
+    aiSummaryDescription: 'Erhalten Sie eine einfache Erklärung dieses Gesetzesentwurfs mithilfe von KI.',
+
     // Favorites
     favoritesTitle: 'Favoriten',
     noFavorites: 'Noch keine Favoriten',
     noFavoritesMessage: 'Klicken Sie auf das Herzsymbol bei einem Gesetzesentwurf, um ihn zu Ihren Favoriten hinzuzufügen',
     exportAll: 'Alle exportieren',
     exportJSON: 'Exportieren (JSON)',
-    
+
     // Stats
     totalBills: 'Gesamtzahl der Gesetzesentwürfe',
     activeBills: 'Aktive Gesetzesentwürfe',
     favoritesBadge: 'Favoriten',
     houseBills: 'Gesetzesentwürfe des Repräsentantenhauses',
     senateBills: 'Gesetzesentwürfe des Senats',
-    
+
     // Common
     loading: 'Wird geladen...',
     noBills: 'Keine Gesetzesentwürfe gefunden',

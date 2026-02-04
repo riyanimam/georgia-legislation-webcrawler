@@ -3,6 +3,7 @@
 __version__ = "1.0.0"
 __author__ = "Riyani Imam"
 
-from backend.scraper import GALegislationScraper
+# Scraper has been archived and replaced with LegiScan API integration
+# See backend.legiscan_service for the current implementation
 
-__all__ = ["GALegislationScraper"]
+__all__: list[str] = []

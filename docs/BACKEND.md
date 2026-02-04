@@ -1,160 +1,102 @@
-# Backend - Georgia Legislation Web Scraper
+# Backend - Georgia Legislation Data Pipeline
 
-Python web scraper for collecting detailed information about Georgia state legislation.
+Python data pipeline for collecting Georgia state legislation data via LegiScan API with AI-powered
+plain English summaries.
 
 ## Overview
 
-This directory contains all backend code for the Georgia Legislation Web Scraper - a robust,
-automated tool for extracting legislative data from the Georgia General Assembly website.
+This directory contains the backend code for the Georgia Legislation Tracker - an automated pipeline
+that fetches legislative data from LegiScan and generates AI summaries using Ollama.
 
 ## Technology Stack
 
 - **Python 3.11+**: Core language
-- **Playwright**: Browser automation for JavaScript-rendered pages
-- **BeautifulSoup4**: HTML parsing and data extraction
-- **Requests**: HTTP client for web requests
+- **aiohttp**: Async HTTP client for API requests
+- **LegiScan API**: Official legislative data source
+- **Ollama API**: AI model for generating plain English summaries
 
 ## File Structure
 
 ```text
 backend/
-├── scraper.py       # Main scraping application
-└── README.md        # This file
+├── __init__.py           # Package initialization
+├── pipeline.py           # Main data pipeline (fetch + summarize)
+├── legiscan_service.py   # LegiScan API integration
+├── ollama_service.py     # Ollama AI summary generation
+└── api.py                # FastAPI server (optional local use)
 ```
 
-## What Gets Scraped
+## Data Pipeline
 
-The scraper collects comprehensive information about each bill:
+The pipeline runs in GitHub Actions and performs these steps:
 
-- **Identifiers**: House Bill (HB) or Senate Bill (SB) numbers
-- **Metadata**: Bill titles, captions, and descriptions
-- **Committees**: Assigned committee information
-- **Sponsors**: Primary sponsors and co-sponsors
-- **Summaries**: First reader summaries from detail pages
-- **Status**: Complete legislative status history with dates
-- **URLs**: Links to original bill pages for verification
+1. **Fetch Legislation**: Query LegiScan API for all Georgia bills
+2. **Generate Summaries**: Use Ollama AI to create plain English summaries
+3. **Save Output**: Generate JSON artifact with all bill data
+4. **Deploy**: Upload to GitHub Pages
 
-## Features
+### Pipeline Flow
 
-- ✅ **JavaScript Support**: Playwright renders Angular.js content properly
-- ✅ **Pagination**: Automatically iterates through all legislation pages
-- ✅ **Error Handling**: Retry logic with exponential backoff
-- ✅ **Detail Extraction**: Fetches additional info from individual bill pages
-- ✅ **Connection Validation**: Pre-flight test to ensure website connectivity
-- ✅ **Formatted Output**: Clean JSON with proper indentation
-- ✅ **Flexible Execution**: Optional page limit for testing
-- ✅ **Code Quality**: Enforced 100-character line limit via ruff
-
-## How It Works
-
-### Main Components
-
-```python
-scraper.py
-├── test_connection()          # Verify website accessibility
-├── get_all_pages()            # Iterate through paginated bills
-├── extract_bill_data()        # Parse bill overview info
-├── get_legislation_details()  # Fetch detail page info
-├── scrape_and_save()          # Orchestrate everything
-└── if __name__ == "__main__"  # CLI entry point
+```text
+LegiScan API → Fetch Bills → AI Summarization → JSON Output → GitHub Pages
 ```
 
-### Scraping Flow
+## Environment Variables
 
-1. **Connection Test**: Verify the Georgia General Assembly website is reachable
-2. **Page Iteration**: Start at the first page of legislation
-3. **Bill Extraction**: Parse each bill from the page
-4. **Detail Fetching**: For each bill, fetch its detail page
-5. **Data Consolidation**: Combine overview and detail data
-6. **JSON Export**: Save results to `ga_legislation.json`
-7. **Error Handling**: Retry failed requests with backoff
+| Variable           | Required | Description                         |
+| ------------------ | -------- | ----------------------------------- |
+| `LEGISCAN_API_KEY` | Yes      | API key from legiscan.com           |
+| `OLLAMA_API_KEY`   | Yes      | API key for Ollama cloud service    |
+| `OLLAMA_MODEL`     | No       | Model to use (default: `llama3.1`)  |
+| `OLLAMA_BASE_URL`  | No       | Ollama API URL (default: cloud URL) |
 
-### Key Functions
+## Services
 
-#### test_connection()
+### LegiScan Service (`legiscan_service.py`)
 
-Validates that the website is accessible before scraping starts.
+Handles all interactions with the LegiScan API:
 
-```python
-def test_connection():
-    """Test if we can connect to the website"""
-    try:
-        response = requests.head(BASE_URL, timeout=10)
-        return response.status_code == 200
-    except requests.RequestException:
-        return False
-```
+- `get_session_list()`: Get available legislative sessions
+- `get_master_list()`: Get list of all bills in a session
+- `get_bill()`: Get detailed bill information
+- `search_bills()`: Search for bills by keyword
+- `fetch_all_georgia_bills()`: Main method to fetch all Georgia legislation
 
-#### get_all_pages(max_pages)
+### Ollama Service (`ollama_service.py`)
 
-Iterates through paginated bill listings, optionally limited to a number of pages.
+Handles AI summary generation:
 
-```python
-def get_all_pages(max_pages=None):
-    """Iterate through all legislation pages"""
-    page_num = 1
-    all_bills = []
-    while max_pages is None or page_num <= max_pages:
-        # Fetch and parse page...
-        page_num += 1
-    return all_bills
-```
+- `generate_summary()`: Generate plain English summary for a bill
+- `check_health()`: Verify API connectivity
 
-#### extract_bill_data(bill_element)
+**Model**: Uses `llama3.1` by default - recommended for legal/legislative text due to its strong
+reasoning capabilities and context handling.
 
-Extracts bill information from the page HTML.
+### Pipeline (`pipeline.py`)
+
+Orchestrates the entire data flow:
 
 ```python
-def extract_bill_data(bill_element):
-    """Extract bill information from an HTML element"""
-    return {
-        "doc_number": "HB 123",
-        "caption": "Bill title",
-        "sponsors": "Rep. Name",
-        "committees": "Committee Name",
-        "detail_url": "https://..."
-    }
-```
-
-#### get_legislation_details(page, url)
-
-Fetches and parses additional data from a bill's detail page.
-
-```python
-def get_legislation_details(page, url):
-    """Get detailed information from bill's detail page"""
-    return {
-        "first_reader_summary": "Summary text",
-        "status_history": [
-            {"date": "2024-01-15", "status": "Status text"}
-        ]
-    }
-```
-
-#### scrape_and_save()
-
-Orchestrates the entire scraping workflow and saves results.
-
-```python
-def scrape_and_save():
-    """Main scraping workflow"""
-    if not test_connection():
-        print("Cannot connect to website")
-        return
+async def run_pipeline():
+    # 1. Fetch all bills from LegiScan
+    bills = await legiscan.fetch_all_georgia_bills()
     
-    bills = get_all_pages()
+    # 2. Generate AI summaries for each bill
     for bill in bills:
-        bill.update(get_legislation_details(bill["detail_url"]))
+        summary = await ollama.generate_summary(bill)
+        bill['ai_summary'] = summary
     
+    # 3. Save output
     save_to_json(bills)
 ```
 
-## Installation
+## Running Locally
 
 ### Prerequisites
 
-- Python 3.11 or higher
-- pip package manager
+- Python 3.11+
+- LegiScan API key (get one at [legiscan.com](https://legiscan.com))
+- Ollama API key
 
 ### Setup
 
@@ -166,178 +108,98 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# This will download Playwright's Chromium browser (~500MB)
-playwright install chromium
+# Set environment variables
+export LEGISCAN_API_KEY="your-key"
+export OLLAMA_API_KEY="your-key"
 ```
 
-## Usage
-
-### Run Locally
+### Run Pipeline
 
 ```bash
-# From project root
-python backend/scraper.py
-
-# Or with page limit (for testing)
-MAX_PAGES=3 python backend/scraper.py
+python -m backend.pipeline
 ```
-
-### Environment Variables
-
-- `MAX_PAGES`: Limit to N pages for testing (default: all pages)
 
 ### Output
 
-The scraper generates `ga_legislation.json` in the project root with format:
+The pipeline generates `ga_legislation.json` with structure:
 
 ```json
-[
-  {
-    "doc_number": "HB 1",
-    "caption": "Bill title",
-    "sponsors": "Sponsor names",
-    "committees": "Committee assignments",
-    "first_reader_summary": "Summary",
-    "status_history": [
-      {"date": "2024-01-15", "status": "Introduced"}
-    ],
-    "detail_url": "https://..."
-  }
-]
+{
+  "generated_at": "2025-02-03T06:00:00Z",
+  "source": "legiscan",
+  "total_bills": 150,
+  "bills": [
+    {
+      "doc_number": "HB 1",
+      "caption": "Bill title",
+      "sponsors": "Rep. Name",
+      "committees": "Committee Name",
+      "first_reader_summary": "Original summary text...",
+      "ai_summary": "Plain English: This bill would...",
+      "summary_model": "llama3.1",
+      "status_history": [
+        {"date": "2025-01-15", "status": "Introduced"}
+      ],
+      "detail_url": "https://..."
+    }
+  ]
+}
 ```
 
-## Automation via CI/CD
+## Automation via GitHub Actions
 
-The scraper is automated via GitHub Actions:
+The pipeline runs automatically via GitHub Actions:
 
-- **Workflow**: `.github/workflows/ci.yml`
-- **Trigger**: Manual dispatch or scheduled (configurable)
-- **Artifacts**: JSON file stored as GitHub artifact
-- **Retention**: 90 days
+- **Workflow**: `.github/workflows/data-pipeline.yml`
+- **Schedule**: Daily at 6 AM UTC
+- **Manual Trigger**: Workflow dispatch available
+- **Artifacts**: JSON data expires after 1 day (overwritten daily)
 
-### GitHub Actions Dispatch
+### Secrets Required
 
-Manually trigger from Actions tab with optional `max_pages` parameter.
+Configure these in GitHub repository settings:
+
+- `LEGISCAN_API_KEY`: Your LegiScan API key
+- `OLLAMA_API_KEY`: Your Ollama API key
 
 ## Error Handling
 
-The scraper includes robust error handling:
+The pipeline includes robust error handling:
 
-- **Retry Logic**: Automatically retries failed requests with exponential backoff
-- **Connection Validation**: Pre-flight test before scraping starts
-- **Graceful Degradation**: Continues even if individual bill details fail
-- **Timeout Protection**: Requests timeout after 30 seconds
-- **Page Navigation**: Detects end of pagination automatically
+- **API Retry Logic**: Automatic retries with exponential backoff
+- **Rate Limiting**: Respects API rate limits
+- **Graceful Degradation**: Continues if individual bill summaries fail
+- **Timeout Protection**: Configurable request timeouts
 
-### Common Issues
+## AI Summary Prompt
 
-| Issue              | Cause                   | Solution                          |
-| ------------------ | ----------------------- | --------------------------------- |
-| Connection timeout | Website unreachable     | Check internet connection         |
-| Empty results      | Selector mismatch       | Update CSS selectors in code      |
-| Playwright errors  | Browser download failed | Run `playwright install chromium` |
-| Memory errors      | Too many pages          | Use `MAX_PAGES` to limit          |
+The Ollama service uses a carefully crafted prompt for legal text:
 
-## Development
-
-### Code Quality
-
-All Python code follows these standards:
-
-- **Linting**: Checked by ruff
-- **Formatting**: Enforced by ruff (100-char line limit)
-- **Pre-commit**: Hooks validate on commit
-
-### Testing
-
-Currently manual testing. Future improvements could include:
-
-```bash
-# Run with small page limit for quick validation
-MAX_PAGES=1 python backend/scraper.py
-
-# Validate output JSON
-python -m json.tool ga_legislation.json > /dev/null && echo "Valid JSON"
+```text
+You are a helpful assistant that explains legislative bills in plain, everyday English.
+Given the following bill information, provide a clear, concise summary that anyone can 
+understand. Avoid legal jargon. Focus on what the bill would do and who it affects.
 ```
-
-### Extending the Scraper
-
-To add new fields:
-
-1. **Locate Data**: Find where it appears in the HTML
-2. **Add Selector**: Create a CSS or XPath selector
-3. **Parse It**: Add extraction code to relevant function
-4. **Validate**: Test with a single page (`MAX_PAGES=1`)
-5. **Document**: Update README and docstrings
 
 ## Performance
 
-- **Speed**: ~5-10 seconds per page (includes Playwright rendering)
-- **Memory**: ~50MB base + ~1MB per 100 bills
-- **Network**: ~2-5MB per complete scrape
-- **Storage**: ~100-200KB per 100 bills in JSON
+- **Full Pipeline**: ~5-15 minutes depending on bill count
+- **API Calls**: Batched and rate-limited appropriately
+- **Memory**: Minimal - processes bills sequentially
 
-## Security Considerations
+## Archived Code
 
-- No authentication required (public website)
-- No rate limiting implemented (be respectful)
-- No sensitive data collected
-- All data is public legislative information
-
-## Troubleshooting
-
-### Playwright Installation Issues
-
-```bash
-# Reinstall Playwright browsers
-playwright install chromium
-
-# On Linux, may need system dependencies
-apt-get install libxss1 libnss3  # Ubuntu/Debian
-```
-
-### Network Issues
-
-```bash
-# Test website connectivity
-python -c "import requests; print(requests.get('https://www.legis.ga.gov').status_code)"
-
-# Test Playwright
-python -m playwright install --with-deps chromium
-```
-
-### Memory Issues
-
-```bash
-# Process in batches with page limit
-MAX_PAGES=10 python backend/scraper.py
-```
-
-## Integration with Frontend
-
-The backend generates `ga_legislation.json` that the frontend (`frontend/`) consumes:
-
-1. Backend scraper runs and creates JSON
-2. Frontend loads it (auto-loads or via file picker)
-3. Users explore and filter results interactively
-
-See [FRONTEND.md](FRONTEND.md) for frontend information.
+The original web scraper has been archived to `archived/scraper.py`. See the README in that
+directory for reactivation instructions if needed.
 
 ## Future Enhancements
 
-- [ ] Database integration for persistent storage
-- [ ] Incremental scraping (delta updates)
-- [ ] Change detection and notifications
-- [ ] Vote data extraction
-- [ ] Amendment tracking
-- [ ] Historical comparisons
-- [ ] API endpoint for frontend data
-- [ ] Caching layer for repeated requests
+- [ ] Incremental updates (only process new/changed bills)
+- [ ] Bill change detection and notifications
+- [ ] Multiple state support via LegiScan
+- [ ] Summary caching to reduce API calls
+- [ ] Vote data and amendment tracking
 
 ## License
 
 Same as parent project - see [../LICENSE](../LICENSE)
-
-## Contributing
-
-See [../README.md](../README.md) for contribution guidelines.
