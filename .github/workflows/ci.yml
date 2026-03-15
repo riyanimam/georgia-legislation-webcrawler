@@ -13,10 +13,10 @@ on:
       max_pages:
         description: Maximum pages to scrape (leave empty for all pages)
         required: false
-        default: ''
-  # Scheduled trigger
-  schedule:
-  - cron: 0 4 * * *
+  #       default: ''
+  # # Scheduled trigger
+  # schedule:
+  # - cron: 0 4 * * *
 
 jobs:
   scrape:
