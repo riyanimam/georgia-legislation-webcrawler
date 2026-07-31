@@ -38,12 +38,12 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@types/react-tagcloud": "^2.3.2",
-    "@vitejs/plugin-react": "^4.3.4",
-    "@vitest/coverage-v8": "^4.0.17",
+    "@vitejs/plugin-react": "^6.0.5",
+    "@vitest/coverage-v8": "^4.1.10",
     "axe-core": "^4.10.2",
     "jsdom": "^25.0.1",
     "typescript": "^5.7.2",
-    "vite": "^6.0.7",
-    "vitest": "^4.0.17"
+    "vite": "^8.2.0",
+    "vitest": "^4.1.10"
   }
 }
